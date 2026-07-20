@@ -5,5 +5,13 @@ class AgentCommunication:
         return {
             "from": sender,
             "to": receiver,
+            "message": message,
+            "secure": True
+        }
+
+    def broadcast(self, sender, agents, message):
+        return {
+            "from": sender,
+            "targets": agents,
             "message": message
         }
