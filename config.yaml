@@ -1,0 +1,27 @@
+ant:
+  name: ANT AI
+  version: 0.1
+  mode: personal
+
+models:
+  default: ollama
+  fallback: openrouter
+
+ollama:
+  url: http://localhost:11434
+
+openrouter:
+  enabled: true
+  api_key: ${OPENROUTER_API_KEY}
+
+security:
+  encryption: enabled
+  audit_ledger: enabled
+  rate_limit: enabled
+
+swarm:
+  enabled: true
+  agents:
+    - research_ant
+    - coding_ant
+    - security_ant
