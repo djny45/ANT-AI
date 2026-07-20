@@ -9,3 +9,6 @@ class EventBus:
 
     def get_events(self):
         return self.events
+
+    def clear(self):
+        self.events = []
