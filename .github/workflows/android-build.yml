@@ -19,14 +19,23 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Build APK
-        run: |
-          echo "Run Android build when Gradle project is available"
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.x'
 
-      - name: Security gate
+      - name: Build APK (assembleDebug)
+        working-directory: android_app
         run: |
-          echo "Security validation required before release"
+          # Prefer the Gradle wrapper if present, otherwise use the Gradle action's CLI
+          if [ -x ./gradlew ]; then
+            ./gradlew assembleDebug --no-daemon
+          else
+            gradle assembleDebug --no-daemon
+          fi
 
-      - name: Release preparation
-        run: |
-          echo "APK artifact ready for signing and publishing"
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ANT-AI-debug-apk
+          path: android_app/app/build/outputs/apk/debug/*.apk
