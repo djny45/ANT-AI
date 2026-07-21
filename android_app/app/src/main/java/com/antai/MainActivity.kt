@@ -3,6 +3,7 @@ package com.antai
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import com.antai.ui.ANTApp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -11,8 +12,4 @@ class MainActivity : ComponentActivity() {
             ANTApp()
         }
     }
-}
-
-fun ANTApp() {
-    // ANT AI Compose UI entry point
 }
