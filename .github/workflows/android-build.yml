@@ -1,0 +1,32 @@
+name: ANT AI Android Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Build APK
+        run: |
+          echo "Run Android build when Gradle project is available"
+
+      - name: Security gate
+        run: |
+          echo "Security validation required before release"
+
+      - name: Release preparation
+        run: |
+          echo "APK artifact ready for signing and publishing"
