@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ANTAI"
+rootProject.name = "ANT-AI"
 include(":app")
