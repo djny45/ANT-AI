@@ -5,37 +5,49 @@ on:
   push:
     branches: [ main ]
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+steps:
+  - name: Checkout
+    uses: actions/checkout@v4
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  - name: Setup Java
+    uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: '17'
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
+  - name: Install utilities
+    run: |
+      sudo apt-get update
+      sudo apt-get install -y curl unzip
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.x'
+  - name: Download Gradle CLI
+    run: |
+      GRADLE_VERSION=8.5.2
+      curl -sSL https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -o gradle.zip
+      sudo unzip -q gradle.zip -d /opt/
+      echo "GRADLE_HOME=/opt/gradle-${GRADLE_VERSION}" >> $GITHUB_ENV
+      echo "PATH=/opt/gradle-${GRADLE_VERSION}/bin:$PATH" >> $GITHUB_ENV
 
-      - name: Build APK (assembleDebug)
-        working-directory: android_app
-        run: |
-          # Prefer the Gradle wrapper if present, otherwise use the Gradle action's CLI
-          if [ -x ./gradlew ]; then
-            ./gradlew assembleDebug --no-daemon
-          else
-            gradle assembleDebug --no-daemon
-          fi
+  - name: Generate Gradle wrapper (if missing)
+    run: |
+      set -e
+      cd android_app
+      if [ ! -f ./gradlew ]; then
+        gradle wrapper --gradle-version 8.5.2 --distribution-type bin
+      fi
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: ANT-AI-debug-apk
-          path: android_app/app/build/outputs/apk/debug/*.apk
+  - name: Ensure gradlew is executable
+    run: |
+      chmod +x android_app/gradlew || true
+
+  - name: Build APK
+    working-directory: android_app
+    run: |
+      ./gradlew assembleDebug --no-daemon
+
+  - name: Upload APK artifact
+    uses: actions/upload-artifact@v4
+    with:
+      name: ANT-AI-debug-apk
+      path: android_app/app/build/outputs/apk/debug/*.apk
+  
