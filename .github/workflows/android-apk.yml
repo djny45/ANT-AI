@@ -20,25 +20,22 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Prepare Gradle wrapper
-        working-directory: android_app
-        run: |
-          if [ ! -f "./gradlew" ]; then
-            echo "Gradle wrapper missing, generating..."
-            gradle wrapper --gradle-version 8.5.2
-          fi
-          chmod +x ./gradlew
-
       - name: Build APK
-        working-directory: android_app
-        run: |
-          ./gradlew assembleDebug --no-daemon
+        run: flutter build apk --debug
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: ANT-AI-debug-apk
-          path: android_app/app/build/outputs/apk/debug/*.apk
+          path: build/app/outputs/flutter-apk/*.apk
