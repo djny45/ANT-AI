@@ -1,3 +1,4 @@
+
 name: Build ANT AI APK
 
 on:
@@ -26,16 +27,18 @@ jobs:
           channel: stable
 
       - name: Get Flutter dependencies
+        working-directory: android_app
         run: flutter pub get
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build APK
+        working-directory: android_app
         run: flutter build apk --debug
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: ANT-AI-debug-apk
-          path: build/app/outputs/flutter-apk/*.apk
+          path: android_app/build/app/outputs/flutter-apk/*.apk
