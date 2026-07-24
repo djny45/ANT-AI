@@ -9,15 +9,15 @@ ANT AI is designed as a personal AI operating system where specialized agents co
 ## Architecture
 
 ```text
-                ANT COMMANDER
-                      |
-       --------------------------------
-       |              |               |
-    Swarm Agents  Knowledge Hive  Security
-       |              |               |
- Research Ant    Vector Memory   Audit Ledger
- Coding Ant      Graph Memory    Encryption
- Security Ant
+                 ANT COMMANDER
+                       |
+        --------------------------------
+        |              |               |
+     Swarm Agents  Knowledge Hive  Security
+        |              |               |
+  Research Ant   Vector Memory   Audit Ledger
+  Coding Ant     Graph Memory    Encryption
+  Security Ant
 ```
 
 ## Main Systems
@@ -47,10 +47,18 @@ ANT AI is designed as a personal AI operating system where specialized agents co
 - Encrypted memory
 - Hash-chain audit logs
 
-### Evolution Framework
-- Improvement proposals
-- Code generation workflow
-- Testing before updates
+## APK Releases
+
+Production Android releases are built through the signed release pipeline.
+
+Release requirements:
+- Signed APK
+- Security verification
+- SHA256 checksum
+
+Download information:
+
+See `ANT_AI_Download_Link.md` and GitHub Releases.
 
 ## Development Status
 
