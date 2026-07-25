@@ -1,0 +1,52 @@
+{
+  "systemSetup": [
+    {
+      "name": "Install SDKMAN",
+      "command": "curl -s \"https://get.sdkman.io\" | bash"
+    },
+    {
+      "name": "Install Java",
+      "command": "bash -lc 'source \"$HOME/.sdkman/bin/sdkman-init.sh\" && sdk install java 21.0.4-tem'"
+    },
+    {
+      "name": "Install Gradle",
+      "command": "bash -lc 'source \"$HOME/.sdkman/bin/sdkman-init.sh\" && sdk install gradle 8.9'"
+    }
+  ],
+  "templateName": "custom",
+  "projectDependencies": [
+    {
+      "name": "Install Dependencies",
+      "command": "gradle -p android_app dependencies"
+    }
+  ],
+  "codeChecks": [
+    {
+      "name": "Run Lint",
+      "command": "gradle -p android_app lint"
+    }
+  ],
+  "buildSteps": [
+    {
+      "name": "Build Project",
+      "command": "gradle -p android_app assembleDebug"
+    }
+  ],
+  "runStep": [],
+  "deploySteps": [],
+  "cleanupFiles": [
+    ".env",
+    ".ideavo/config",
+    ".ideavo/template",
+    "android_app/.gradle",
+    "android_app/build",
+    "android_app/app/build"
+  ],
+  "packageManager": "gradle",
+  "envPaths": [
+    {
+      "name": "default",
+      "path": ".env"
+    }
+  ]
+}
