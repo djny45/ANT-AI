@@ -1,8 +1,8 @@
 {
   "systemSetup": [
     {
-      "name": "Install Java Gradle",
-      "command": "curl -s \"https://get.sdkman.io\" | bash && bash -lc \"source \\\"$HOME/.sdkman/bin/sdkman-init.sh\\\" && sdk install java 17.0.12-tem && sdk install gradle\""
+      "name": "Install Java",
+      "command": "curl -s \"https://get.sdkman.io\" | bash && bash -lc \"source \\\"$HOME/.sdkman/bin/sdkman-init.sh\\\" && sdk install java 17.0.12-tem\""
     },
     {
       "name": "Install Android SDK",
@@ -13,26 +13,26 @@
   "projectDependencies": [
     {
       "name": "Resolve Dependencies",
-      "command": "bash -lc \"source \\\"$HOME/.sdkman/bin/sdkman-init.sh\\\" && gradle --no-daemon dependencies\""
+      "command": "bash -lc \"source \\\"$HOME/.sdkman/bin/sdkman-init.sh\\\" && cd android_app && ./gradlew --no-daemon dependencies\""
     }
   ],
   "codeChecks": [
     {
       "name": "Run Checks",
-      "command": "bash -lc \"source \\\"$HOME/.sdkman/bin/sdkman-init.sh\\\" && gradle --no-daemon check\""
+      "command": "bash -lc \"source \\\"$HOME/.sdkman/bin/sdkman-init.sh\\\" && cd android_app && ./gradlew --no-daemon check\""
     }
   ],
   "buildSteps": [
     {
       "name": "Build Debug APK",
-      "command": "bash -lc \"source \\\"$HOME/.sdkman/bin/sdkman-init.sh\\\" && gradle --no-daemon assembleDebug\""
+      "command": "bash -lc \"source \\\"$HOME/.sdkman/bin/sdkman-init.sh\\\" && cd android_app && ./gradlew --no-daemon assembleDebug\""
     }
   ],
   "runStep": [],
   "deploySteps": [
     {
       "name": "Build Release APK",
-      "command": "bash -lc \"source \\\"$HOME/.sdkman/bin/sdkman-init.sh\\\" && gradle --no-daemon assembleRelease\""
+      "command": "bash -lc \"source \\\"$HOME/.sdkman/bin/sdkman-init.sh\\\" && cd android_app && ./gradlew --no-daemon assembleRelease\""
     }
   ],
   "cleanupFiles": [
