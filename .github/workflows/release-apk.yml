@@ -30,13 +30,8 @@ jobs:
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
-          echo "$KEYSTORE_BASE64" | base64 --decode > android_app/release.keystore
-
-      - name: Create Gradle wrapper
-        working-directory: android_app
-        run: |
-          gradle wrapper --gradle-version 8.7
-          chmod +x gradlew
+          echo "$KEYSTORE_BASE64" | base64 --decode > release.keystore
+          ls -lh release.keystore
 
       - name: Build signed release APK
         working-directory: android_app
@@ -45,9 +40,14 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
         run: |
+          chmod +x ./gradlew
           ./gradlew assembleRelease --no-daemon --stacktrace
 
-      - name: Generate SHA256 checksum
+      - name: Verify APK
+        run: |
+          find android_app -path "*outputs/apk/release/*.apk"
+
+      - name: Prepare release assets
         run: |
           mkdir -p release
           cp android_app/app/build/outputs/apk/release/*.apk release/ANT-AI-${{ inputs.tag }}.apk
