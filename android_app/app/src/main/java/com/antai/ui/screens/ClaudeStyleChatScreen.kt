@@ -7,12 +7,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.antai.ai.OllamaStreamService
 import com.antai.ui.components.AntThinkingAnimation
+import com.antai.ui.components.MarkdownRenderer
 import kotlinx.coroutines.launch
 
-private data class ChatItem(
-    val text: String,
-    val user: Boolean
-)
+private data class ChatItem(val text: String, val user: Boolean)
 
 @Composable
 fun ClaudeStyleChatScreen() {
@@ -22,22 +20,19 @@ fun ClaudeStyleChatScreen() {
     val scope = rememberCoroutineScope()
     val ollama = remember { OllamaStreamService() }
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(20.dp)
-    ) {
+    Column(Modifier.fillMaxSize().padding(20.dp)) {
         Text("ANT CLAW", style = MaterialTheme.typography.headlineMedium)
 
-        Column(modifier = Modifier.weight(1f)) {
-            messages.forEach {
-                Text(
-                    text = if (it.user) "You: ${it.text}" else "ANT CLAW: ${it.text}",
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
+        Column(Modifier.weight(1f)) {
+            messages.forEach { item ->
+                if (item.user) {
+                    Text("You: ${item.text}")
+                } else {
+                    MarkdownRenderer(item.text)
+                }
+                Spacer(Modifier.height(8.dp))
             }
-
-            if (typing) {
-                AntThinkingAnimation()
-            }
+            if (typing) AntThinkingAnimation()
         }
 
         OutlinedTextField(
@@ -51,20 +46,17 @@ fun ClaudeStyleChatScreen() {
                         val prompt = message
                         messages.add(ChatItem(prompt, true))
                         message = ""
-
                         scope.launch {
                             typing = true
-                            var response = ""
+                            var index = messages.size
+                            messages.add(ChatItem("", false))
                             ollama.chat(prompt).collect { token ->
-                                response += token
+                                messages[index] = ChatItem(messages[index].text + token, false)
                             }
                             typing = false
-                            messages.add(ChatItem(response, false))
                         }
                     }
-                }) {
-                    Text("➤")
-                }
+                }) { Text("➤") }
             }
         )
     }
