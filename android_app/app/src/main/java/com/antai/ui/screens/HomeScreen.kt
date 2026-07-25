@@ -16,13 +16,20 @@ fun HomeScreen(
             .padding(24.dp)
     ) {
         Text(
-            text = "Ant AI",
+            text = "ANT CLAW",
             style = MaterialTheme.typography.headlineLarge
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.weight(1f))
 
-        Text("How can I help you today?")
+        Text(
+            text = "How can I help you today?",
+            style = MaterialTheme.typography.headlineSmall
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text("Ask anything or give me a task.")
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -30,24 +37,9 @@ fun HomeScreen(
             value = "",
             onValueChange = {},
             placeholder = {
-                Text("Ask anything or give a task...")
+                Text("Message ANT CLAW...")
             },
             modifier = Modifier.fillMaxWidth()
         )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text("Quick Actions")
-        Text("🧠 Research")
-        Text("💻 Code")
-        Text("🔍 Analyze")
-        Text("🏗 Build")
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text("Agents")
-        Text("Coding Agent")
-        Text("Research Agent")
-        Text("Security Agent")
     }
 }
