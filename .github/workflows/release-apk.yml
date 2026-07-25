@@ -33,4 +33,25 @@ jobs:
       - name: Configure signing keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release-key.jks
-          cat > android/key.properties <
+          cat > android/key.properties << EOF
+          storeFile=app/release-key.jks
+          storePassword=${{ secrets.STORE_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
+
+      - name: Build signed release APK
+        run: flutter build apk --release
+
+      - name: Generate SHA256 checksum
+        run: |
+          sha256sum build/app/outputs/apk/release/*.apk > SHA256SUMS.txt
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/app/outputs/apk/release/*.apk
+            SHA256SUMS.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
