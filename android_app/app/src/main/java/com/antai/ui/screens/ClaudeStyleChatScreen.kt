@@ -14,22 +14,29 @@ fun ClaudeStyleChatScreen() {
             .padding(20.dp)
     ) {
         Text(
-            text = "ANT AI",
+            text = "ANT CLAW",
             style = MaterialTheme.typography.headlineMedium
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text("Hello. I am ANT AI. How can I help?")
-
         Spacer(modifier = Modifier.weight(1f))
+
+        Text(
+            text = "How can I help you today?",
+            style = MaterialTheme.typography.headlineSmall
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text("Ask anything or give me a task.")
+
+        Spacer(modifier = Modifier.height(32.dp))
 
         OutlinedTextField(
             value = "",
             onValueChange = {},
             modifier = Modifier.fillMaxWidth(),
             placeholder = {
-                Text("Message ANT AI...")
+                Text("Message ANT CLAW...")
             }
         )
     }
