@@ -1,4 +1,4 @@
- name: ANT AI Production APK Release
+name: ANT AI Production APK Release
 
 on:
   workflow_dispatch:
@@ -32,12 +32,6 @@ jobs:
         run: |
           echo "$KEYSTORE_BASE64" | base64 --decode > android_app/release.keystore
 
-      - name: Verify Gradle wrapper
-        working-directory: android_app
-        run: |
-          ls -la
-          chmod +x ./gradlew
-
       - name: Build signed release APK
         working-directory: android_app
         env:
@@ -45,11 +39,8 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
         run: |
+          chmod +x ./gradlew
           ./gradlew assembleRelease --no-daemon
-
-      - name: Locate APK
-        run: |
-          find android_app -name "*.apk"
 
       - name: Generate SHA256 checksum
         run: |
@@ -63,16 +54,12 @@ jobs:
           tag_name: ${{ inputs.tag }}
           name: ANT AI ${{ inputs.tag }} Production Release
           body: |
-            # ANT AI Production APK Release
+            ANT AI Production Android Release
 
             Version: ${{ inputs.tag }}
 
-            Features:
-            - Signed Android APK
-            - SHA256 verification
-            - Automated CI/CD release pipeline
-            - ANT AI agent framework
-
+            Signed APK
+            SHA256 verified
           files: |
             release/ANT-AI-${{ inputs.tag }}.apk
             release/SHA256SUMS.txt
