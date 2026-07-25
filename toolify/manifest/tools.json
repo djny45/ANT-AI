@@ -1,0 +1,14 @@
+{
+  "tools": [
+    {
+      "name": "memory",
+      "enabled": true,
+      "version": "1.0"
+    },
+    {
+      "name": "search",
+      "enabled": true,
+      "version": "1.0"
+    }
+  ]
+}
