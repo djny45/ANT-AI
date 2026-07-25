@@ -1,21 +1,23 @@
-name: ANT AI Production APK Release
+ name: ANT AI Production APK Release
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - "v*"
+    inputs:
+      tag:
+        description: "Release tag"
+        required: true
+        default: "v1.0.0"
 
 permissions:
   contents: write
 
 jobs:
   release:
-    name: Build and Release APK
+    name: Build Signed Release APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Java 17
@@ -24,63 +26,53 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Setup Android signing keystore
+      - name: Configure signing keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
-          if [ -z "$KEYSTORE_BASE64" ]; then
-            echo "ANDROID_KEYSTORE_BASE64 secret is missing"
-            exit 1
-          fi
-
           echo "$KEYSTORE_BASE64" | base64 --decode > android_app/release.keystore
 
-      - name: Build signed release APK
+      - name: Verify Gradle wrapper
+        working-directory: android_app
         run: |
-          cd android_app
-
+          ls -la
           chmod +x ./gradlew
 
-          ./gradlew clean assembleRelease --no-daemon --stacktrace
+      - name: Build signed release APK
+        working-directory: android_app
         env:
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
-
-      - name: Verify APK exists
         run: |
-          ls -la android_app/app/build/outputs/apk/release/
+          ./gradlew assembleRelease --no-daemon
 
-      - name: Rename APK
+      - name: Locate APK
         run: |
-          mkdir -p release-assets
-
-          cp android_app/app/build/outputs/apk/release/*.apk \
-          release-assets/ANT-AI-${{ github.ref_name }}.apk
+          find android_app -name "*.apk"
 
       - name: Generate SHA256 checksum
         run: |
-          cd release-assets
-          sha256sum *.apk > SHA256SUMS.txt
+          mkdir -p release
+          cp android_app/app/build/outputs/apk/release/app-release.apk release/ANT-AI-${{ inputs.tag }}.apk
+          sha256sum release/ANT-AI-${{ inputs.tag }}.apk > release/SHA256SUMS.txt
 
-      - name: Upload GitHub Release
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: ANT AI ${{ github.ref_name }}
+          tag_name: ${{ inputs.tag }}
+          name: ANT AI ${{ inputs.tag }} Production Release
           body: |
-            # ANT AI Production Release
+            # ANT AI Production APK Release
 
-            Version: ${{ github.ref_name }}
+            Version: ${{ inputs.tag }}
 
             Features:
-            - Android production APK
-            - Signed release build
+            - Signed Android APK
             - SHA256 verification
+            - Automated CI/CD release pipeline
+            - ANT AI agent framework
 
-            Install the APK from the assets below.
           files: |
-            release-assets/*.apk
-            release-assets/SHA256SUMS.txt
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            release/ANT-AI-${{ inputs.tag }}.apk
+            release/SHA256SUMS.txt
