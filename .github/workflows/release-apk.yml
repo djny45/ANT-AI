@@ -6,6 +6,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write   # required for softprops/action-gh-release to create/upload a release
+
 jobs:
   build-signed-release-apk:
     name: Build Signed Release APK
@@ -34,11 +37,14 @@ jobs:
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release-key.jks
           cat > android/key.properties << EOF
-          storeFile=app/release-key.jks
+          storeFile=release-key.jks
           storePassword=${{ secrets.STORE_PASSWORD }}
           keyAlias=${{ secrets.KEY_ALIAS }}
           keyPassword=${{ secrets.KEY_PASSWORD }}
           EOF
+
+      - name: Ensure gradlew is executable
+        run: chmod +x android/gradlew
 
       - name: Build signed release APK
         run: flutter build apk --release
@@ -50,6 +56,7 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('manual-{0}', github.run_number) }}
           files: |
             build/app/outputs/apk/release/*.apk
             SHA256SUMS.txt
