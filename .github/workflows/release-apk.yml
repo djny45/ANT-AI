@@ -1,0 +1,20 @@
+name: ANT AI APK Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify release requirements
+        run: |
+          echo "Checking build artifact"
+          echo "Checking signature"
+          echo "Checking checksum"
+
+      - name: Publish release placeholder
+        run: |
+          echo "Attach verified APK artifact here"
