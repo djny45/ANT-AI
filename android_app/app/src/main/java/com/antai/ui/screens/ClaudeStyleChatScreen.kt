@@ -1,9 +1,11 @@
 package com.antai.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.antai.ai.OllamaStreamService
 import com.antai.ui.components.AntThinkingAnimation
@@ -37,8 +39,14 @@ fun ClaudeStyleChatScreen() {
 
         OutlinedTextField(
             value = message,
-            onValueChange = { message = it },
+            onValueChange = { newText ->
+                message = newText
+            },
             modifier = Modifier.fillMaxWidth(),
+            singleLine = false,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Send
+            ),
             placeholder = { Text("Message ANT CLAW...") },
             trailingIcon = {
                 Button(onClick = {
@@ -48,7 +56,7 @@ fun ClaudeStyleChatScreen() {
                         message = ""
                         scope.launch {
                             typing = true
-                            var index = messages.size
+                            val index = messages.size
                             messages.add(ChatItem("", false))
                             ollama.chat(prompt).collect { token ->
                                 messages[index] = ChatItem(messages[index].text + token, false)
