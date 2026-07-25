@@ -5,7 +5,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
+import com.antai.ai.OllamaStreamService
+import com.antai.ui.components.AntThinkingAnimation
 import kotlinx.coroutines.launch
 
 private data class ChatItem(
@@ -19,6 +20,7 @@ fun ClaudeStyleChatScreen() {
     var typing by remember { mutableStateOf(false) }
     val messages = remember { mutableStateListOf<ChatItem>() }
     val scope = rememberCoroutineScope()
+    val ollama = remember { OllamaStreamService() }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(20.dp)
@@ -34,7 +36,7 @@ fun ClaudeStyleChatScreen() {
             }
 
             if (typing) {
-                Text("🐜 ANT CLAW is thinking... •••")
+                AntThinkingAnimation()
             }
         }
 
@@ -44,30 +46,24 @@ fun ClaudeStyleChatScreen() {
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text("Message ANT CLAW...") },
             trailingIcon = {
-                Row {
-                    TextButton(onClick = { /* attachment picker hook */ }) {
-                        Text("📎")
-                    }
-                    Button(onClick = {
-                        if (message.isNotBlank()) {
-                            val userMessage = message
-                            messages.add(ChatItem(userMessage, true))
-                            message = ""
-                            scope.launch {
-                                typing = true
-                                delay(1200)
-                                typing = false
-                                messages.add(
-                                    ChatItem(
-                                        "Connected to Ollama AI foundation.\n\n```\nAI response pipeline ready\n```\n\nMarkdown rendering enabled.",
-                                        false
-                                    )
-                                )
+                Button(onClick = {
+                    if (message.isNotBlank()) {
+                        val prompt = message
+                        messages.add(ChatItem(prompt, true))
+                        message = ""
+
+                        scope.launch {
+                            typing = true
+                            var response = ""
+                            ollama.chat(prompt).collect { token ->
+                                response += token
                             }
+                            typing = false
+                            messages.add(ChatItem(response, false))
                         }
-                    }) {
-                        Text("➤")
                     }
+                }) {
+                    Text("➤")
                 }
             }
         )
