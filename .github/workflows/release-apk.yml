@@ -2,15 +2,17 @@ name: ANT AI Production APK Release
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - 'v*'
+    inputs:
+      tag:
+        description: "Release tag"
+        required: true
+        default: "v1.0.0"
 
 permissions:
-  contents: write   # required for softprops/action-gh-release to create/upload a release
+  contents: write
 
 jobs:
-  build-signed-release-apk:
+  release:
     name: Build Signed Release APK
     runs-on: ubuntu-latest
 
@@ -21,42 +23,56 @@ jobs:
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: "17"
 
       - name: Configure signing keystore
-        working-directory: android_app
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/release-key.jks
-          cat > key.properties << EOF
-          storeFile=release-key.jks
-          storePassword=${{ secrets.STORE_PASSWORD }}
-          keyAlias=${{ secrets.KEY_ALIAS }}
-          keyPassword=${{ secrets.KEY_PASSWORD }}
-          EOF
+          echo "$KEYSTORE_BASE64" | base64 --decode > release.keystore
 
-      - name: Create Gradle wrapper
-        working-directory: android_app
-        run: gradle wrapper --gradle-version 8.7
-
-      - name: Ensure gradlew is executable
-        working-directory: android_app
-        run: chmod +x gradlew
+      - name: Verify Gradle wrapper location
+        run: |
+          find . -name gradlew -type f
 
       - name: Build signed release APK
-        working-directory: android_app
-        run: ./gradlew assembleRelease --no-daemon --stacktrace
-
-      - name: Generate SHA256 checksum
+        env:
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
         run: |
-          sha256sum android_app/app/build/outputs/apk/release/*.apk > SHA256SUMS.txt
+          chmod +x ./gradlew
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Find generated APK
+        run: |
+          find . -path "*outputs/apk*" -name "*.apk"
+
+      - name: Prepare release files
+        run: |
+          mkdir -p release
+
+          cp app/build/outputs/apk/release/app-release.apk \
+          release/ANT-AI-${{ inputs.tag }}.apk
+
+          sha256sum release/ANT-AI-${{ inputs.tag }}.apk \
+          > release/SHA256SUMS.txt
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('manual-{0}', github.run_number) }}
+          tag_name: ${{ inputs.tag }}
+          name: ANT AI ${{ inputs.tag }} Production Release
+          body: |
+            # ANT AI Production APK Release
+
+            Version: ${{ inputs.tag }}
+
+            ✅ Signed Android APK
+            ✅ SHA256 checksum included
+            ✅ Automated release pipeline
+
           files: |
-            android_app/app/build/outputs/apk/release/*.apk
-            SHA256SUMS.txt
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            release/ANT-AI-${{ inputs.tag }}.apk
+            release/SHA256SUMS.txt
