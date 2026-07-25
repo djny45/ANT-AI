@@ -2,17 +2,14 @@ package com.antai.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun ClaudeStyleChatScreen() {
     var message by remember { mutableStateOf("") }
+    val messages = remember { mutableStateListOf<Pair<String, Boolean>>() }
 
     Column(
         modifier = Modifier
@@ -24,18 +21,30 @@ fun ClaudeStyleChatScreen() {
             style = MaterialTheme.typography.headlineMedium
         )
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(20.dp))
 
-        Text(
-            text = "How can I help you today?",
-            style = MaterialTheme.typography.headlineSmall
-        )
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            messages.forEach { item ->
+                Text(
+                    text = if (item.second) "You: ${item.first}" else "ANT CLAW: ${item.first}",
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+        }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        if (messages.isEmpty()) {
+            Text(
+                text = "How can I help you today?",
+                style = MaterialTheme.typography.headlineSmall
+            )
 
-        Text("Ask anything or give me a task.")
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Ask anything or give me a task.")
+        }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = message,
@@ -45,7 +54,20 @@ fun ClaudeStyleChatScreen() {
                 Text("Message ANT CLAW...")
             },
             trailingIcon = {
-                Text("➤")
+                Button(
+                    onClick = {
+                        if (message.isNotBlank()) {
+                            messages.add(message to true)
+                            messages.add(
+                                "I received your task. I will help you complete it."
+                                    to false
+                            )
+                            message = ""
+                        }
+                    }
+                ) {
+                    Text("➤")
+                }
             }
         )
     }
