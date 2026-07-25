@@ -1,0 +1,49 @@
+{
+  "systemSetup": [
+    {
+      "name": "Install Java Gradle",
+      "command": "curl -s \"https://get.sdkman.io\" | bash && bash -lc \"source \\\"$HOME/.sdkman/bin/sdkman-init.sh\\\" && sdk install java 17.0.12-tem && sdk install gradle\""
+    }
+  ],
+  "templateName": "custom",
+  "projectDependencies": [
+    {
+      "name": "Resolve Dependencies",
+      "command": "bash -lc \"source \\\"$HOME/.sdkman/bin/sdkman-init.sh\\\" && gradle --no-daemon dependencies\""
+    }
+  ],
+  "codeChecks": [
+    {
+      "name": "Run Checks",
+      "command": "bash -lc \"source \\\"$HOME/.sdkman/bin/sdkman-init.sh\\\" && gradle --no-daemon check\""
+    }
+  ],
+  "buildSteps": [
+    {
+      "name": "Build Debug APK",
+      "command": "bash -lc \"source \\\"$HOME/.sdkman/bin/sdkman-init.sh\\\" && gradle --no-daemon assembleDebug\""
+    }
+  ],
+  "runStep": [],
+  "deploySteps": [
+    {
+      "name": "Build Release APK",
+      "command": "bash -lc \"source \\\"$HOME/.sdkman/bin/sdkman-init.sh\\\" && gradle --no-daemon assembleRelease\""
+    }
+  ],
+  "cleanupFiles": [
+    ".env",
+    ".ideavo/config",
+    ".ideavo/template",
+    "android_app/.gradle",
+    "android_app/build",
+    "android_app/app/build"
+  ],
+  "packageManager": "gradle",
+  "envPaths": [
+    {
+      "name": "default",
+      "path": ".env"
+    }
+  ]
+}
