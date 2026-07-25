@@ -1,27 +1,32 @@
 package memory
 
 /**
- * Shared memory manager for ANT AI agents.
+ * Shared memory storage layer for ANT AI agents.
+ * Provides persistent knowledge access between agents.
  */
 object KnowledgeHive {
-    private val memories = mutableListOf<KnowledgeMemory>()
+    private val records = mutableListOf<KnowledgeRecord>()
 
-    fun store(memory: KnowledgeMemory) {
-        memories.add(memory)
+    fun store(record: KnowledgeRecord) {
+        records.add(record)
     }
 
-    fun search(query: String): List<KnowledgeMemory> {
-        return memories.filter {
-            it.content.contains(query, ignoreCase = true) ||
-            it.category.contains(query, ignoreCase = true)
+    fun retrieveByAgent(agentId: String): List<KnowledgeRecord> {
+        return records.filter { it.agentId == agentId }
+    }
+
+    fun search(keyword: String): List<KnowledgeRecord> {
+        return records.filter { record ->
+            record.content.contains(keyword, ignoreCase = true) ||
+                record.tags.any { tag -> tag.contains(keyword, ignoreCase = true) }
         }
     }
 
-    fun all(): List<KnowledgeMemory> {
-        return memories.toList()
+    fun all(): List<KnowledgeRecord> {
+        return records.toList()
     }
 
     fun clear() {
-        memories.clear()
+        records.clear()
     }
 }
