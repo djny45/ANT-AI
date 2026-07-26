@@ -1,19 +1,19 @@
-name: ANT AI Production APK Release
+name: ANT CLAW Production APK Release
 
 on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag"
+        description: "Release tag (example: v1.1.0)"
         required: true
-        default: "v1.0.0"
+        default: "v1.1.0"
 
 permissions:
   contents: write
 
 jobs:
   release:
-    name: Build Signed Release APK
+    name: Build Signed ANT CLAW APK
     runs-on: ubuntu-latest
 
     steps:
@@ -47,25 +47,31 @@ jobs:
         run: |
           find android_app -path "*outputs/apk/release/*.apk"
 
-      - name: Prepare release assets
+      - name: Prepare ANT CLAW release assets
         run: |
           mkdir -p release
-          cp android_app/app/build/outputs/apk/release/*.apk release/ANT-AI-${{ inputs.tag }}.apk
-          sha256sum release/ANT-AI-${{ inputs.tag }}.apk > release/SHA256SUMS.txt
+          cp android_app/app/build/outputs/apk/release/*.apk release/ANT-CLAW-${{ inputs.tag }}.apk
+          sha256sum release/ANT-CLAW-${{ inputs.tag }}.apk > release/SHA256SUMS.txt
 
-      - name: Publish GitHub Release
+      - name: Publish ANT CLAW GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.tag }}
-          name: ANT AI ${{ inputs.tag }} Production Release
+          name: ANT CLAW ${{ inputs.tag }} Production Release
           body: |
-            # ANT AI Production APK Release
+            # 🐜 ANT CLAW Production APK Release
 
             Version: ${{ inputs.tag }}
 
-            ✅ Signed Android APK
-            ✅ SHA256 checksum included
-            ✅ Automated release pipeline
+            Features:
+            - Claude-style AI interface
+            - Ollama AI support
+            - Streaming response architecture
+            - Markdown and code workflows
+            - Android signed APK
+
+            Build pipeline:
+            Source → Build → Sign → Release → Download
           files: |
-            release/ANT-AI-${{ inputs.tag }}.apk
+            release/ANT-CLAW-${{ inputs.tag }}.apk
             release/SHA256SUMS.txt
