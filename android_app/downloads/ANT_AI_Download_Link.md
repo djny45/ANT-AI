@@ -1,19 +1,19 @@
-# ANT AI App Download
+# ANT AI Android APK Download
 
-## Official Android APK
+Download the latest ANT AI APK from GitHub Releases:
 
-Download link:
-
-```
 https://github.com/djny45/ANT-AI/releases/latest
-```
 
-Release requirements:
+Direct latest release page:
 
-- APK built successfully
-- Security scan passed
-- APK signed
-- SHA256 checksum generated
-- Release artifact uploaded
+https://github.com/djny45/ANT-AI/releases/tag/v1.1.0
 
-Latest release assets include the Android APK and SHA256 checksum.
+Direct APK download:
+
+https://github.com/djny45/ANT-AI/releases/download/v1.1.0/ANT-AI-v1.1.0.apk
+
+Checksum file:
+
+https://github.com/djny45/ANT-AI/releases/download/v1.1.0/SHA256SUMS.txt
+
+Install note: download the APK on your Android device, open it, and allow installation from your browser or file manager if prompted.
