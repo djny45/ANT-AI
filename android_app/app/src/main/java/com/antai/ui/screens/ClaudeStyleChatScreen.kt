@@ -144,10 +144,10 @@ fun ClaudeStyleChatScreen(routerChatService: RouterChatService) {
 }
 
 // Saver for persisting ChatItem list across process death
-private val ChatItemListSaver = listSaver<MutableList<ChatItem>, List<List<Any>>>(
+private val ChatItemListSaver = listSaver<MutableList<ChatItem>, List<Any>>(
     save = { list ->
         list.map { 
-            listOf(it.text, it.user, it.id)
+            listOf(it.text, it.user, it.id) as List<Any>
         }
     },
     restore = { savedList ->
