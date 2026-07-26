@@ -1,12 +1,16 @@
 name: ANT CLAW Production APK Release
 
 on:
+  push:
+    tags:
+      - "v*"
+
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag (example: v1.1.0)"
+        description: "Release tag (example: v1.1.1)"
         required: true
-        default: "v1.1.0"
+        default: "v1.1.1"
 
 permissions:
   contents: write
@@ -31,7 +35,6 @@ jobs:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
           echo "$KEYSTORE_BASE64" | base64 --decode > release.keystore
-          ls -lh release.keystore
 
       - name: Build signed release APK
         working-directory: android_app
@@ -43,35 +46,35 @@ jobs:
           chmod +x ./gradlew
           ./gradlew assembleRelease --no-daemon --stacktrace
 
-      - name: Verify APK
-        run: |
-          find android_app -path "*outputs/apk/release/*.apk"
-
       - name: Prepare ANT CLAW release assets
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
         run: |
+          TAG=${RELEASE_TAG}
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then TAG=${{ inputs.tag }}; fi
           mkdir -p release
-          cp android_app/app/build/outputs/apk/release/*.apk release/ANT-CLAW-${{ inputs.tag }}.apk
-          sha256sum release/ANT-CLAW-${{ inputs.tag }}.apk > release/SHA256SUMS.txt
+          cp android_app/app/build/outputs/apk/release/*.apk release/ANT-CLAW-${TAG}.apk
+          sha256sum release/ANT-CLAW-${TAG}.apk > release/SHA256SUMS.txt
 
       - name: Publish ANT CLAW GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.tag }}
-          name: ANT CLAW ${{ inputs.tag }} Production Release
+          tag_name: ${{ github.ref_name || inputs.tag }}
+          name: ANT CLAW ${{ github.ref_name || inputs.tag }} Production Release
           body: |
             # 🐜 ANT CLAW Production APK Release
 
-            Version: ${{ inputs.tag }}
+            Automated production Android build.
 
             Features:
             - Claude-style AI interface
             - Ollama AI support
             - Streaming response architecture
             - Markdown and code workflows
-            - Android signed APK
+            - Signed Android APK
 
-            Build pipeline:
+            Pipeline:
             Source → Build → Sign → Release → Download
           files: |
-            release/ANT-CLAW-${{ inputs.tag }}.apk
+            release/*.apk
             release/SHA256SUMS.txt
