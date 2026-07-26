@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.antai.ai.RouterChatService
@@ -15,8 +16,8 @@ private data class ChatItem(val text: String, val user: Boolean)
 
 @Composable
 fun ClaudeStyleChatScreen(routerChatService: RouterChatService) {
-    var message by remember { mutableStateOf("") }
-    var typing by remember { mutableStateOf(false) }
+    var message by rememberSaveable { mutableStateOf("") }
+    var typing by rememberSaveable { mutableStateOf(false) }
     val messages = remember { mutableStateListOf<ChatItem>() }
     val scope = rememberCoroutineScope()
 
