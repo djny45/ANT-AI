@@ -1,0 +1,1 @@
+d478d176f93d51f3301167f5396092dbe6a25c4abc6d546ac612bed73dbbaf27  android_app/dist/ANT-AI-working-v1.2.0-release.apk

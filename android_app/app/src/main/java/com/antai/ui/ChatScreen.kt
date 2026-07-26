@@ -8,9 +8,11 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,23 +39,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.antai.core.ANTBridge
 import kotlinx.coroutines.delay
 
 private data class ChatMessage(val author: String, val text: String, val fromUser: Boolean)
 
 @Composable
 fun ChatScreen(modifier: Modifier = Modifier) {
+    val bridge = remember { ANTBridge() }
     val messages = remember {
         mutableStateListOf(
             ChatMessage(
                 author = "ANT",
-                text = "I am ready. Describe a build, research, or automation task and I will route it through the swarm.",
+                text = "I am online as a working offline command center. Ask for APK builds, repo fixes, security checks, research, or feature work.",
                 fromUser = false
             )
         )
@@ -67,7 +72,7 @@ fun ChatScreen(modifier: Modifier = Modifier) {
             val lastTask = messages.lastOrNull { it.fromUser }?.text.orEmpty()
             messages += ChatMessage(
                 author = "ANT",
-                text = "Queued and analyzed: $lastTask\n\nSwarm plan: research, code review, security check, and APK build verification.",
+                text = bridge.executeTask(lastTask),
                 fromUser = false
             )
             isThinking = false
@@ -86,7 +91,10 @@ fun ChatScreen(modifier: Modifier = Modifier) {
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            item { ChatHero() }
+            item { ChatHero(bridge.dashboardStatus()) { quickTask ->
+                messages += ChatMessage("You", quickTask, true)
+                isThinking = true
+            } }
             items(messages) { message -> MessageBubble(message) }
             if (isThinking) {
                 item { ThinkingBubble() }
@@ -109,7 +117,8 @@ fun ChatScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ChatHero() {
+@OptIn(ExperimentalLayoutApi::class)
+private fun ChatHero(statusItems: List<String>, onQuickTask: (String) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -127,12 +136,40 @@ private fun ChatHero() {
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "A calm Claude-like workspace for focused requests, with ANT swarm feedback while you wait.",
+                text = "A real offline mobile command center: type a request, get routed output, track APK/security/build capability, and keep working without a server.",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium
             )
+            Spacer(Modifier.height(16.dp))
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf("Fix APK build", "Run security audit", "Plan GitHub release", "Create feature checklist").forEach { task ->
+                    QuickTaskChip(task, onQuickTask)
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+            statusItems.forEach { item ->
+                Text("- $item", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+            }
         }
     }
+}
+
+@Composable
+private fun QuickTaskChip(label: String, onQuickTask: (String) -> Unit) {
+    Text(
+        text = label,
+        modifier = Modifier
+            .clip(RoundedCornerShape(100.dp))
+            .background(Color(0xFF3B3329))
+            .clickable { onQuickTask(label) }
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        color = MaterialTheme.colorScheme.primary,
+        style = MaterialTheme.typography.labelMedium,
+        fontWeight = FontWeight.Bold
+    )
 }
 
 @Composable
