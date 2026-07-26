@@ -50,7 +50,7 @@ jobs:
 
             - Android APK attached
             - SHA256 checksum included
-            - Claude-like ANT chat interface
+            - Polished Ant AI command interface
             - Animated ANT waiting state
             - Mobile APK factory, agent, project, and home screens refreshed
           files: |

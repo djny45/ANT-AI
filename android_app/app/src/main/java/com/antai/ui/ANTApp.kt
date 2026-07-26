@@ -29,20 +29,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 private enum class MainTab(val title: String) {
-    Home("Home"), Chat("Chat"), Agents("Agents"), Projects("Projects"), Build("Build")
+    Home("Home"), Projects("Projects"), Agents("Agents"), Tools("Tools"), Settings("Settings")
 }
 
 @Composable
 fun ANTApp() {
     ANTTheme {
-        var selectedTab by remember { mutableStateOf(MainTab.Chat) }
+        var selectedTab by remember { mutableStateOf(MainTab.Home) }
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            listOf(Color(0xFF221B13), Color(0xFF181511), Color(0xFF10100E))
+                            listOf(Color(0xFFFFFBF6), Color(0xFFFFF4EA), Color(0xFFF7ECE1))
                         )
                     )
             ) {
@@ -53,11 +53,11 @@ fun ANTApp() {
                         .fillMaxWidth()
                 ) {
                     when (selectedTab) {
-                        MainTab.Home -> HomeScreen(Modifier.fillMaxSize())
-                        MainTab.Chat -> ChatScreen(Modifier.fillMaxSize())
+                        MainTab.Home -> ChatScreen(Modifier.fillMaxSize())
                         MainTab.Agents -> AgentScreen(Modifier.fillMaxSize())
                         MainTab.Projects -> ProjectScreen(Modifier.fillMaxSize())
-                        MainTab.Build -> BuildScreen(Modifier.fillMaxSize())
+                        MainTab.Tools -> BuildScreen(Modifier.fillMaxSize())
+                        MainTab.Settings -> SettingsPanel(Modifier.fillMaxSize())
                     }
                 }
                 BottomTabs(selectedTab = selectedTab, onSelected = { selectedTab = it })
@@ -85,7 +85,7 @@ private fun AppHeader() {
             )
             Text(
                 text = "Autonomous neural taskforce",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = Color(0xFF7D6A5E),
                 style = MaterialTheme.typography.bodySmall
             )
         }
@@ -108,7 +108,7 @@ private fun BottomTabs(selectedTab: MainTab, onSelected: (MainTab) -> Unit) {
             .fillMaxWidth()
             .padding(12.dp)
             .clip(RoundedCornerShape(24.dp))
-            .background(Color(0xCC211D18))
+                .background(Color(0xEEFFFFFF))
             .padding(6.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
@@ -118,17 +118,38 @@ private fun BottomTabs(selectedTab: MainTab, onSelected: (MainTab) -> Unit) {
                 modifier = Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(18.dp))
-                    .background(if (active) MaterialTheme.colorScheme.primary else Color.Transparent)
+                    .background(if (active) Color(0xFFFFE7D7) else Color.Transparent)
                     .clickable { onSelected(tab) }
                     .padding(vertical = 10.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = tab.title,
-                    color = if (active) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (active) MaterialTheme.colorScheme.primary else Color(0xFF7D6A5E),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = if (active) FontWeight.Bold else FontWeight.Normal
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingsPanel(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text("Settings", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        listOf("Theme: Light", "Model: ANT Router", "Download: https://github.com/djny45/ANT-AI/releases/", "Status: Offline ready").forEach { item ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.White)
+                    .padding(18.dp)
+            ) {
+                Text(item, color = MaterialTheme.colorScheme.onSurface)
             }
         }
     }

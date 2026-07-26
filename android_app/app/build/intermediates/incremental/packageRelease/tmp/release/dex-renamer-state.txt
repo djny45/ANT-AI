@@ -1,4 +1,4 @@
-#Sun Jul 26 04:18:04 UTC 2026
+#Sun Jul 26 04:45:23 UTC 2026
 base.0=/home/user/project/android_app/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 path.0=classes.dex
 renamed.0=classes.dex

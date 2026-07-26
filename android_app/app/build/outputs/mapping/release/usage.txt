@@ -2323,6 +2323,7 @@ androidx.compose.foundation.layout.Arrangement:
     private final void forEachIndexed(int[],boolean,kotlin.jvm.functions.Function2)
     public static synthetic void getBottom$annotations()
     public static synthetic void getCenter$annotations()
+    public final androidx.compose.foundation.layout.Arrangement$Horizontal getEnd()
     public static synthetic void getEnd$annotations()
     public final androidx.compose.foundation.layout.Arrangement$HorizontalOrVertical getSpaceAround()
     public static synthetic void getSpaceAround$annotations()
@@ -2823,6 +2824,7 @@ androidx.compose.foundation.lazy.LazyListBeyondBoundsState:
 androidx.compose.foundation.lazy.LazyListInterval:
     public static final int $stable
 androidx.compose.foundation.lazy.LazyListIntervalContent:
+    public void items(int,kotlin.jvm.functions.Function1,kotlin.jvm.functions.Function1,kotlin.jvm.functions.Function4)
     public void stickyHeader(java.lang.Object,java.lang.Object,kotlin.jvm.functions.Function3)
 androidx.compose.foundation.lazy.LazyListItemInfo:
     public java.lang.Object getContentType()
@@ -2869,6 +2871,7 @@ androidx.compose.foundation.lazy.LazyListScope:
     public static synthetic void access$items$jd(androidx.compose.foundation.lazy.LazyListScope,int,kotlin.jvm.functions.Function1,kotlin.jvm.functions.Function4)
     public synthetic void item(java.lang.Object,kotlin.jvm.functions.Function3)
     public static synthetic void item$default(androidx.compose.foundation.lazy.LazyListScope,java.lang.Object,kotlin.jvm.functions.Function3,int,java.lang.Object)
+    public void items(int,kotlin.jvm.functions.Function1,kotlin.jvm.functions.Function1,kotlin.jvm.functions.Function4)
     public synthetic void items(int,kotlin.jvm.functions.Function1,kotlin.jvm.functions.Function4)
     public static synthetic void items$default(androidx.compose.foundation.lazy.LazyListScope,int,kotlin.jvm.functions.Function1,kotlin.jvm.functions.Function1,kotlin.jvm.functions.Function4,int,java.lang.Object)
     public static synthetic void items$default(androidx.compose.foundation.lazy.LazyListScope,int,kotlin.jvm.functions.Function1,kotlin.jvm.functions.Function4,int,java.lang.Object)
@@ -4834,6 +4837,8 @@ androidx.compose.material3.ColorScheme:
     public final void setDefaultTopAppBarColorsCached$material3_release(androidx.compose.material3.TopAppBarColors)
 androidx.compose.material3.ColorSchemeKt:
     public static final float DisabledAlpha
+    public static final androidx.compose.material3.ColorScheme darkColorScheme-C-Xl9yA(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long)
+    public static synthetic androidx.compose.material3.ColorScheme darkColorScheme-C-Xl9yA$default(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,int,int,java.lang.Object)
     public static final synthetic androidx.compose.material3.ColorScheme darkColorScheme-G1PFc-w(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long)
     public static synthetic androidx.compose.material3.ColorScheme darkColorScheme-G1PFc-w$default(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,long,int,java.lang.Object)
     public static final androidx.compose.runtime.ProvidableCompositionLocal getLocalTonalElevationEnabled()
@@ -6150,8 +6155,8 @@ androidx.compose.material3.Typography:
     public final androidx.compose.ui.text.TextStyle getDisplayLarge()
     public final androidx.compose.ui.text.TextStyle getDisplayMedium()
     public final androidx.compose.ui.text.TextStyle getDisplaySmall()
+    public final androidx.compose.ui.text.TextStyle getHeadlineLarge()
     public final androidx.compose.ui.text.TextStyle getTitleLarge()
-    public final androidx.compose.ui.text.TextStyle getTitleMedium()
     public final androidx.compose.ui.text.TextStyle getTitleSmall()
 androidx.compose.material3.TypographyKt$WhenMappings
 androidx.compose.material3.TypographyKt:
@@ -6235,21 +6240,7 @@ androidx.compose.material3.tokens.BadgeTokens
 androidx.compose.material3.tokens.BottomAppBarTokens
 androidx.compose.material3.tokens.CheckboxTokens
 androidx.compose.material3.tokens.CircularProgressIndicatorTokens
-androidx.compose.material3.tokens.ColorDarkTokens:
-    public static final int $stable
-    public final long getOnPrimaryFixed-0d7_KjU()
-    public final long getOnPrimaryFixedVariant-0d7_KjU()
-    public final long getOnSecondaryFixed-0d7_KjU()
-    public final long getOnSecondaryFixedVariant-0d7_KjU()
-    public final long getOnTertiaryFixed-0d7_KjU()
-    public final long getOnTertiaryFixedVariant-0d7_KjU()
-    public final long getPrimaryFixed-0d7_KjU()
-    public final long getPrimaryFixedDim-0d7_KjU()
-    public final long getSecondaryFixed-0d7_KjU()
-    public final long getSecondaryFixedDim-0d7_KjU()
-    public final long getSurfaceTint-0d7_KjU()
-    public final long getTertiaryFixed-0d7_KjU()
-    public final long getTertiaryFixedDim-0d7_KjU()
+androidx.compose.material3.tokens.ColorDarkTokens
 androidx.compose.material3.tokens.ColorLightTokens:
     public static final int $stable
     public final long getOnPrimaryFixed-0d7_KjU()
@@ -6361,14 +6352,23 @@ androidx.compose.material3.tokens.PaletteTokens:
     public static final int $stable
     public final long getBlack-0d7_KjU()
     public final long getError0-0d7_KjU()
+    public final long getError20-0d7_KjU()
+    public final long getError30-0d7_KjU()
     public final long getError50-0d7_KjU()
     public final long getError60-0d7_KjU()
     public final long getError70-0d7_KjU()
+    public final long getError80-0d7_KjU()
     public final long getError95-0d7_KjU()
     public final long getError99-0d7_KjU()
+    public final long getNeutral12-0d7_KjU()
+    public final long getNeutral17-0d7_KjU()
+    public final long getNeutral22-0d7_KjU()
+    public final long getNeutral24-0d7_KjU()
     public final long getNeutral30-0d7_KjU()
+    public final long getNeutral4-0d7_KjU()
     public final long getNeutral40-0d7_KjU()
     public final long getNeutral50-0d7_KjU()
+    public final long getNeutral6-0d7_KjU()
     public final long getNeutral60-0d7_KjU()
     public final long getNeutral70-0d7_KjU()
     public final long getNeutral80-0d7_KjU()
@@ -6377,22 +6377,26 @@ androidx.compose.material3.tokens.PaletteTokens:
     public final long getNeutralVariant100-0d7_KjU()
     public final long getNeutralVariant20-0d7_KjU()
     public final long getNeutralVariant40-0d7_KjU()
+    public final long getNeutralVariant60-0d7_KjU()
     public final long getNeutralVariant70-0d7_KjU()
     public final long getNeutralVariant95-0d7_KjU()
     public final long getNeutralVariant99-0d7_KjU()
     public final long getPrimary0-0d7_KjU()
+    public final long getPrimary20-0d7_KjU()
     public final long getPrimary50-0d7_KjU()
     public final long getPrimary60-0d7_KjU()
     public final long getPrimary70-0d7_KjU()
     public final long getPrimary95-0d7_KjU()
     public final long getPrimary99-0d7_KjU()
     public final long getSecondary0-0d7_KjU()
+    public final long getSecondary20-0d7_KjU()
     public final long getSecondary50-0d7_KjU()
     public final long getSecondary60-0d7_KjU()
     public final long getSecondary70-0d7_KjU()
     public final long getSecondary95-0d7_KjU()
     public final long getSecondary99-0d7_KjU()
     public final long getTertiary0-0d7_KjU()
+    public final long getTertiary20-0d7_KjU()
     public final long getTertiary50-0d7_KjU()
     public final long getTertiary60-0d7_KjU()
     public final long getTertiary70-0d7_KjU()
@@ -14725,6 +14729,7 @@ com.antai.core.ANTBridge$TaskRoute:
     public static synthetic com.antai.core.ANTBridge$TaskRoute copy$default(com.antai.core.ANTBridge$TaskRoute,java.lang.String,java.lang.String,java.lang.String,int,java.lang.Object)
 com.antai.core.ANTBridge:
     public static final int $stable
+    public final java.util.List dashboardStatus()
 com.antai.navigation.ANTScreen$Agents
 com.antai.navigation.ANTScreen$Build
 com.antai.navigation.ANTScreen$Chat
@@ -14737,7 +14742,9 @@ com.antai.ui.ChatMessage:
     public final boolean component3()
     public final com.antai.ui.ChatMessage copy(java.lang.String,java.lang.String,boolean)
     public static synthetic com.antai.ui.ChatMessage copy$default(com.antai.ui.ChatMessage,java.lang.String,java.lang.String,boolean,int,java.lang.Object)
-com.antai.ui.ChatScreenKt$ChatScreen$2$1$1$invoke$$inlined$items$default$2
+com.antai.ui.HomeScreenKt$HomeScreen$1$1$1
+com.antai.ui.HomeScreenKt$HomeScreen$2
+com.antai.ui.HomeScreenKt
 com.google.common.util.concurrent.ListenableFuture:
     public abstract void addListener(java.lang.Runnable,java.util.concurrent.Executor)
 kotlin.ArrayIntrinsicsKt
@@ -23142,7 +23149,7 @@ androidx.compose.foundation.interaction.PressInteractionKt$collectIsPressedAsSta
 androidx.compose.foundation.interaction.PressInteractionKt$collectIsPressedAsState$1$1:
     public final java.lang.Object invoke(kotlinx.coroutines.CoroutineScope,kotlin.coroutines.Continuation)
 androidx.compose.foundation.interaction.PressInteractionKt
-androidx.compose.foundation.layout.Arrangement$HorizontalOrVertical
+androidx.compose.foundation.layout.Arrangement$End$1
 androidx.compose.foundation.layout.Arrangement$SpacedAligned:
     public final kotlin.jvm.functions.Function2 alignment
     public final boolean rtlMirror
@@ -23151,12 +23158,12 @@ androidx.compose.foundation.layout.Arrangement$spacedBy$1:
     public static java.lang.Integer invoke$1()
 androidx.compose.foundation.layout.Arrangement:
     public static final androidx.compose.foundation.layout.Arrangement$Bottom$1 Bottom
+    public static final androidx.compose.foundation.layout.Arrangement$Horizontal End
     public static final androidx.compose.foundation.layout.Arrangement INSTANCE
     public static final androidx.compose.foundation.layout.Arrangement$HorizontalOrVertical SpaceAround
     public static final androidx.compose.foundation.layout.Arrangement$HorizontalOrVertical SpaceEvenly
     public static androidx.compose.foundation.layout.Arrangement$Vertical getBottom()
     public static androidx.compose.foundation.layout.Arrangement$HorizontalOrVertical getCenter()
-    public static androidx.compose.foundation.layout.Arrangement$Horizontal getEnd()
     public static androidx.compose.foundation.layout.Arrangement$HorizontalOrVertical getSpaceBetween()
     public static androidx.compose.foundation.layout.Arrangement$Horizontal getStart()
     public static androidx.compose.foundation.layout.Arrangement$Vertical getTop()
@@ -23328,7 +23335,9 @@ androidx.compose.foundation.layout.PaddingKt$padding$3
 androidx.compose.foundation.layout.PaddingKt$padding$4$$InternalSyntheticThrowCCEIfNotNull$13$851ae7df33f045212669633b417a9d13223f826f3360faa5f2b6323337452c9b$0
 androidx.compose.foundation.layout.PaddingKt$padding$4
 androidx.compose.foundation.layout.PaddingKt:
+    public static final androidx.compose.foundation.layout.PaddingValuesImpl PaddingValues-0680j_4(float)
     public static final androidx.compose.foundation.layout.PaddingValuesImpl PaddingValues-a9UjIt4(float,float,float,float)
+    public static androidx.compose.ui.Modifier padding-VpY3zN4$default(androidx.compose.ui.Modifier,float,float,int)
 androidx.compose.foundation.layout.PaddingNode$measure$1:
     public final void invoke$4()
 androidx.compose.foundation.layout.PaddingNode:
@@ -23395,7 +23404,6 @@ androidx.compose.foundation.layout.RowColumnParentData:
     public static void setWeight()
 androidx.compose.foundation.layout.RowScope:
     public abstract androidx.compose.ui.Modifier weight(boolean)
-    public static androidx.compose.ui.Modifier weight$default()
 androidx.compose.foundation.layout.RowScopeInstance:
     public final androidx.compose.ui.Modifier weight(boolean)
 androidx.compose.foundation.layout.SizeElement:
@@ -23418,7 +23426,7 @@ androidx.compose.foundation.layout.SizeKt:
     public static final androidx.compose.foundation.layout.WrapContentElement WrapContentWidthCenter
     public static final androidx.compose.foundation.layout.WrapContentElement WrapContentWidthStart
     public static androidx.compose.ui.Modifier fillMaxSize$default(androidx.compose.ui.Modifier)
-    public static synthetic androidx.compose.ui.Modifier fillMaxWidth$default(androidx.compose.ui.Modifier)
+    public static androidx.compose.ui.Modifier fillMaxWidth$default(androidx.compose.ui.Modifier)
     public static synthetic androidx.compose.ui.Modifier heightIn-VpY3zN4$default(androidx.compose.ui.Modifier,float)
 androidx.compose.foundation.layout.SizeMode$EnumUnboxingLocalUtility
 androidx.compose.foundation.layout.SizeMode
@@ -23497,7 +23505,7 @@ androidx.compose.foundation.lazy.LazyListIntervalContent$item$1:
 androidx.compose.foundation.lazy.LazyListIntervalContent$item$2:
     public final java.lang.Object invoke$8()
 androidx.compose.foundation.lazy.LazyListIntervalContent$item$3:
-    public final void invoke$10()
+    public static void invoke$10()
 androidx.compose.foundation.lazy.LazyListIntervalContent:
     public static final int $stable
     public java.util.List _headerIndexes
@@ -23506,7 +23514,6 @@ androidx.compose.foundation.lazy.LazyListIntervalContent:
     public final androidx.compose.foundation.lazy.layout.IntervalList getIntervals()
     public static androidx.compose.foundation.lazy.layout.MutableIntervalList getIntervals()
     public final void item()
-    public final void items()
 androidx.compose.foundation.lazy.LazyListItemAnimator$ItemInfo:
     public androidx.compose.foundation.lazy.layout.LazyLayoutAnimation[] animations
     public static androidx.compose.foundation.lazy.layout.LazyLayoutAnimation[] getAnimations()
@@ -23605,7 +23612,6 @@ androidx.compose.foundation.lazy.LazyListMeasuredItem:
 androidx.compose.foundation.lazy.LazyListMeasuredItemProvider
 androidx.compose.foundation.lazy.LazyListScope:
     public abstract void item()
-    public abstract void items()
 androidx.compose.foundation.lazy.LazyListScrollPosition:
     public static final int $stable
     static void <clinit>()
@@ -23904,6 +23910,7 @@ androidx.compose.foundation.lazy.layout.Lazy_androidKt
 androidx.compose.foundation.lazy.layout.MutableIntervalList:
     public static final int $stable
     static void <clinit>()
+    public static void addInterval()
     public static boolean contains()
     public final void forEach()
     public static androidx.compose.foundation.lazy.layout.IntervalList$Interval getIntervalForIndex()
@@ -24956,6 +24963,7 @@ androidx.compose.material3.ButtonDefaults:
     public static final float ButtonVerticalPadding
     public static final androidx.compose.foundation.layout.PaddingValues ButtonWithIconContentPadding
     public static final float ButtonWithIconHorizontalStartPadding
+    public static final androidx.compose.foundation.layout.PaddingValuesImpl ContentPadding
     public static final androidx.compose.material3.ButtonDefaults INSTANCE
     public static final float IconSize
     public static final float IconSpacing
@@ -25000,7 +25008,6 @@ androidx.compose.material3.CardDefaults:
     public static final androidx.compose.material3.CardDefaults INSTANCE
     static void <clinit>()
     public static androidx.compose.material3.CardColors cardColors()
-    public static androidx.compose.material3.CardElevation cardElevation-aqJV_2Y()
     public static androidx.compose.ui.graphics.Shape getShape()
 androidx.compose.material3.CardElevation$animateElevation$1$1$1
 androidx.compose.material3.CardElevation$animateElevation$1$1
@@ -25014,7 +25021,6 @@ androidx.compose.material3.CardElevation:
 androidx.compose.material3.CardKt$Card$1:
     public final void invoke(androidx.compose.runtime.Composer,int)
 androidx.compose.material3.CardKt$Card$2:
-    public final synthetic int $$default
     public final void invoke(androidx.compose.runtime.Composer,int)
 androidx.compose.material3.ColorScheme:
     static void <clinit>()
@@ -25273,75 +25279,14 @@ androidx.compose.material3.Typography:
     public static androidx.compose.ui.text.TextStyle getBodyLarge()
     public static androidx.compose.ui.text.TextStyle getBodyMedium()
     public static androidx.compose.ui.text.TextStyle getBodySmall()
-    public static androidx.compose.ui.text.TextStyle getHeadlineLarge()
     public static androidx.compose.ui.text.TextStyle getHeadlineMedium()
     public static androidx.compose.ui.text.TextStyle getHeadlineSmall()
     public static androidx.compose.ui.text.TextStyle getLabelLarge()
     public static androidx.compose.ui.text.TextStyle getLabelMedium()
     public static androidx.compose.ui.text.TextStyle getLabelSmall()
+    public static androidx.compose.ui.text.TextStyle getTitleMedium()
 androidx.compose.material3.TypographyKt$LocalTypography$1:
     public static androidx.compose.material3.Typography invoke()
-androidx.compose.material3.tokens.ColorDarkTokens:
-    public static final long Background
-    public static final androidx.compose.material3.tokens.ColorDarkTokens INSTANCE
-    public static final long OnBackground
-    public static final long OnPrimary
-    public static final long OnPrimaryFixed
-    public static final long OnPrimaryFixedVariant
-    public static final long OnSecondary
-    public static final long OnSecondaryFixed
-    public static final long OnSecondaryFixedVariant
-    public static final long OnSurface
-    public static final long OnSurfaceVariant
-    public static final long OnTertiaryFixed
-    public static final long OnTertiaryFixedVariant
-    public static final long Primary
-    public static final long PrimaryFixed
-    public static final long PrimaryFixedDim
-    public static final long Secondary
-    public static final long SecondaryFixed
-    public static final long SecondaryFixedDim
-    public static final long Surface
-    public static final long SurfaceTint
-    public static final long SurfaceVariant
-    public static final long Tertiary
-    public static final long TertiaryFixed
-    public static final long TertiaryFixedDim
-    public static long getBackground-0d7_KjU()
-    public static long getError-0d7_KjU()
-    public static long getErrorContainer-0d7_KjU()
-    public static long getInverseOnSurface-0d7_KjU()
-    public static long getInversePrimary-0d7_KjU()
-    public static long getInverseSurface-0d7_KjU()
-    public static long getOnBackground-0d7_KjU()
-    public static long getOnError-0d7_KjU()
-    public static long getOnErrorContainer-0d7_KjU()
-    public static long getOnPrimary-0d7_KjU()
-    public static long getOnPrimaryContainer-0d7_KjU()
-    public static long getOnSecondary-0d7_KjU()
-    public static long getOnSecondaryContainer-0d7_KjU()
-    public static long getOnSurface-0d7_KjU()
-    public static long getOnSurfaceVariant-0d7_KjU()
-    public static long getOnTertiary-0d7_KjU()
-    public static long getOnTertiaryContainer-0d7_KjU()
-    public static long getOutline-0d7_KjU()
-    public static long getOutlineVariant-0d7_KjU()
-    public static long getPrimary-0d7_KjU()
-    public static long getPrimaryContainer-0d7_KjU()
-    public static long getScrim-0d7_KjU()
-    public static long getSecondary-0d7_KjU()
-    public static long getSecondaryContainer-0d7_KjU()
-    public static long getSurface-0d7_KjU()
-    public static long getSurfaceBright-0d7_KjU()
-    public static long getSurfaceContainer-0d7_KjU()
-    public static long getSurfaceContainerHigh-0d7_KjU()
-    public static long getSurfaceContainerHighest-0d7_KjU()
-    public static long getSurfaceContainerLow-0d7_KjU()
-    public static long getSurfaceContainerLowest-0d7_KjU()
-    public static long getSurfaceDim-0d7_KjU()
-    public static long getSurfaceVariant-0d7_KjU()
-    public static long getTertiary-0d7_KjU()
-    public static long getTertiaryContainer-0d7_KjU()
 androidx.compose.material3.tokens.ColorLightTokens:
     public static final androidx.compose.material3.tokens.ColorLightTokens INSTANCE
     public static final long OnPrimaryFixed
@@ -25405,6 +25350,7 @@ androidx.compose.material3.tokens.ElevationTokens:
 androidx.compose.material3.tokens.FilledButtonTokens:
     public static final int ContainerColor
     public static final float ContainerHeight
+    public static final int ContainerShape
     public static final int DisabledIconColor
     public static final int FocusIconColor
     public static final int FocusLabelTextColor
@@ -25446,15 +25392,24 @@ androidx.compose.material3.tokens.OutlinedTextFieldTokens
 androidx.compose.material3.tokens.PaletteTokens:
     public static final long Black
     public static final long Error0
+    public static final long Error20
+    public static final long Error30
     public static final long Error50
     public static final long Error60
     public static final long Error70
+    public static final long Error80
     public static final long Error95
     public static final long Error99
     public static final androidx.compose.material3.tokens.PaletteTokens INSTANCE
+    public static final long Neutral12
+    public static final long Neutral17
+    public static final long Neutral22
+    public static final long Neutral24
     public static final long Neutral30
+    public static final long Neutral4
     public static final long Neutral40
     public static final long Neutral50
+    public static final long Neutral6
     public static final long Neutral60
     public static final long Neutral70
     public static final long Neutral80
@@ -25463,11 +25418,13 @@ androidx.compose.material3.tokens.PaletteTokens:
     public static final long NeutralVariant100
     public static final long NeutralVariant20
     public static final long NeutralVariant40
+    public static final long NeutralVariant60
     public static final long NeutralVariant70
     public static final long NeutralVariant95
     public static final long NeutralVariant99
     public static final long Primary0
     public static final long Primary20
+    public static final long Primary30
     public static final long Primary50
     public static final long Primary60
     public static final long Primary70
@@ -25475,6 +25432,7 @@ androidx.compose.material3.tokens.PaletteTokens:
     public static final long Primary99
     public static final long Secondary0
     public static final long Secondary20
+    public static final long Secondary30
     public static final long Secondary50
     public static final long Secondary60
     public static final long Secondary70
@@ -25482,6 +25440,8 @@ androidx.compose.material3.tokens.PaletteTokens:
     public static final long Secondary95
     public static final long Secondary99
     public static final long Tertiary0
+    public static final long Tertiary20
+    public static final long Tertiary30
     public static final long Tertiary50
     public static final long Tertiary60
     public static final long Tertiary70
@@ -25491,21 +25451,12 @@ androidx.compose.material3.tokens.PaletteTokens:
     public static final long White
     public static long getError10-0d7_KjU()
     public static long getError100-0d7_KjU()
-    public static long getError20-0d7_KjU()
-    public static long getError30-0d7_KjU()
     public static long getError40-0d7_KjU()
-    public static long getError80-0d7_KjU()
     public static long getError90-0d7_KjU()
     public static long getNeutral0-0d7_KjU()
     public static long getNeutral10-0d7_KjU()
     public static long getNeutral100-0d7_KjU()
-    public static long getNeutral12-0d7_KjU()
-    public static long getNeutral17-0d7_KjU()
     public static long getNeutral20-0d7_KjU()
-    public static long getNeutral22-0d7_KjU()
-    public static long getNeutral24-0d7_KjU()
-    public static long getNeutral4-0d7_KjU()
-    public static long getNeutral6-0d7_KjU()
     public static long getNeutral87-0d7_KjU()
     public static long getNeutral90-0d7_KjU()
     public static long getNeutral92-0d7_KjU()
@@ -25516,26 +25467,22 @@ androidx.compose.material3.tokens.PaletteTokens:
     public static long getNeutral99-0d7_KjU()
     public static long getNeutralVariant30-0d7_KjU()
     public static long getNeutralVariant50-0d7_KjU()
-    public static long getNeutralVariant60-0d7_KjU()
     public static long getNeutralVariant80-0d7_KjU()
     public static long getNeutralVariant90-0d7_KjU()
     public static long getPrimary10-0d7_KjU()
     public static long getPrimary100-0d7_KjU()
-    public static long getPrimary20-0d7_KjU()
     public static long getPrimary30-0d7_KjU()
     public static long getPrimary40-0d7_KjU()
     public static long getPrimary80-0d7_KjU()
     public static long getPrimary90-0d7_KjU()
     public static long getSecondary10-0d7_KjU()
     public static long getSecondary100-0d7_KjU()
-    public static long getSecondary20-0d7_KjU()
     public static long getSecondary30-0d7_KjU()
     public static long getSecondary40-0d7_KjU()
     public static long getSecondary80-0d7_KjU()
     public static long getSecondary90-0d7_KjU()
     public static long getTertiary10-0d7_KjU()
     public static long getTertiary100-0d7_KjU()
-    public static long getTertiary20-0d7_KjU()
     public static long getTertiary30-0d7_KjU()
     public static long getTertiary40-0d7_KjU()
     public static long getTertiary80-0d7_KjU()
@@ -25968,7 +25915,6 @@ androidx.compose.ui.Alignment$Companion:
     public static final androidx.compose.ui.Alignment BottomEnd
     public static final androidx.compose.ui.Alignment BottomStart
     public static final androidx.compose.ui.Alignment CenterEnd
-    public static final androidx.compose.ui.BiasAlignment$Horizontal CenterHorizontally
     public static final androidx.compose.ui.Alignment CenterStart
     public static final androidx.compose.ui.Alignment$Horizontal End
     public static final androidx.compose.ui.Alignment TopCenter
@@ -26520,14 +26466,11 @@ androidx.compose.ui.graphics.Color:
     public static final long Green
     public static final long LightGray
     public static final long Magenta
-    public static final long White
     public static final long Yellow
     public static synthetic long unbox-impl()
 androidx.compose.ui.graphics.ColorFilter$Companion:
     public static androidx.compose.ui.graphics.BlendModeColorFilter tint-xETnrds()
 androidx.compose.ui.graphics.ColorFilter
-androidx.compose.ui.graphics.ColorKt:
-    public static final long Color(int)
 androidx.compose.ui.graphics.ColorProducer
 androidx.compose.ui.graphics.ColorSpaceVerificationHelper:
     public static final androidx.compose.ui.graphics.ColorSpaceVerificationHelper INSTANCE
@@ -31833,7 +31776,6 @@ com.antai.core.ANTBridge$TaskRoute:
     public static java.lang.String getResult()
 com.antai.core.ANTBridge:
     static void <clinit>()
-    public static java.util.List dashboardStatus()
     public static java.lang.String executeTask()
 com.antai.ui.ANTAppKt$ANTApp$1:
     public final void invoke(androidx.compose.runtime.Composer,int)
@@ -31842,6 +31784,9 @@ com.antai.ui.ANTAppKt$AppHeader$2:
 com.antai.ui.ANTAppKt$BottomTabs$1$1$1$1:
     public final void invoke()
 com.antai.ui.ANTAppKt$BottomTabs$2:
+    public final void invoke(androidx.compose.runtime.Composer,int)
+com.antai.ui.ANTAppKt$SettingsPanel$2:
+    public final synthetic int $$default
     public final void invoke(androidx.compose.runtime.Composer,int)
 com.antai.ui.AgentScreenKt$AgentScreen$1$1$1:
     public final void invoke$54()
@@ -31861,46 +31806,59 @@ com.antai.ui.ChatScreenKt$AnimatedAnt$1$1:
     public final void invoke$19()
 com.antai.ui.ChatScreenKt$AnimatedAnt$2:
     public final void invoke(androidx.compose.runtime.Composer,int)
-com.antai.ui.ChatScreenKt$ChatHero$1:
-    public final void invoke$54()
-com.antai.ui.ChatScreenKt$ChatHero$2:
-    public final void invoke(androidx.compose.runtime.Composer,int)
-com.antai.ui.ChatScreenKt$ChatInput$2:
-    public final void invoke(androidx.compose.runtime.Composer,int)
 com.antai.ui.ChatScreenKt$ChatScreen$1$1:
     public final java.lang.Object invoke(kotlinx.coroutines.CoroutineScope,kotlin.coroutines.Continuation)
-com.antai.ui.ChatScreenKt$ChatScreen$2$1$1$1$1$1:
-    public final void invoke$55()
-com.antai.ui.ChatScreenKt$ChatScreen$2$1$1$1:
-    public final void invoke$56()
-com.antai.ui.ChatScreenKt$ChatScreen$2$1$1$invoke$$inlined$items$default$1
-com.antai.ui.ChatScreenKt$ChatScreen$2$1$1$invoke$$inlined$items$default$3:
-    public final synthetic kotlin.jvm.functions.Function1 $contentType
-    public final java.lang.Object invoke$8()
-com.antai.ui.ChatScreenKt$ChatScreen$2$1$1$invoke$$inlined$items$default$4:
-    public final void invoke$10()
-com.antai.ui.ChatScreenKt$ChatScreen$2$1$1:
-    public static void invoke$57()
-com.antai.ui.ChatScreenKt$ChatScreen$2$2$1:
-    public final void invoke$55()
-com.antai.ui.ChatScreenKt$ChatScreen$2$3$1:
+com.antai.ui.ChatScreenKt$ChatScreen$2$1$1$1$1:
+    public static void invoke$55()
+com.antai.ui.ChatScreenKt$ChatScreen$2$1$1$2$1:
     public final void invoke()
+com.antai.ui.ChatScreenKt$ChatScreen$2$1$1:
+    public final void invoke$56()
+com.antai.ui.ChatScreenKt$ChatScreen$2$1$2$1$1$1$1:
+    public final void invoke()
+com.antai.ui.ChatScreenKt$ChatScreen$2$1$2:
+    public final void invoke$56()
+com.antai.ui.ChatScreenKt$ChatScreen$2$1$3$1:
+    public final void invoke$56()
+com.antai.ui.ChatScreenKt$ChatScreen$2$1:
+    public static void invoke$57()
 com.antai.ui.ChatScreenKt$ChatScreen$3:
     public final synthetic int $$default
     public final void invoke(androidx.compose.runtime.Composer,int)
-com.antai.ui.ChatScreenKt$MessageBubble$1$1:
-    public final void invoke$54()
-com.antai.ui.ChatScreenKt$MessageBubble$2:
+com.antai.ui.ChatScreenKt$DownloadCard$1:
     public final void invoke(androidx.compose.runtime.Composer,int)
-com.antai.ui.ChatScreenKt$QuickTaskChip$1$1:
+com.antai.ui.ChatScreenKt$FeatureCard$1:
+    public final void invoke$54()
+com.antai.ui.ChatScreenKt$FeatureCard$2:
+    public final synthetic int $$default
+    public final void invoke(androidx.compose.runtime.Composer,int)
+com.antai.ui.ChatScreenKt$FeatureGrid$2:
+    public final void invoke(androidx.compose.runtime.Composer,int)
+com.antai.ui.ChatScreenKt$HeroHeader$2:
+    public final void invoke(androidx.compose.runtime.Composer,int)
+com.antai.ui.ChatScreenKt$MessageCard$1:
+    public final void invoke$54()
+com.antai.ui.ChatScreenKt$MessageCard$2:
+    public final void invoke(androidx.compose.runtime.Composer,int)
+com.antai.ui.ChatScreenKt$PromptBox$1:
+    public final void invoke$54()
+com.antai.ui.ChatScreenKt$PromptBox$2:
+    public final void invoke(androidx.compose.runtime.Composer,int)
+com.antai.ui.ChatScreenKt$RecentChats$2:
+    public final void invoke(androidx.compose.runtime.Composer,int)
+com.antai.ui.ChatScreenKt$RoundIcon$2:
+    public final void invoke(androidx.compose.runtime.Composer,int)
+com.antai.ui.ChatScreenKt$SuggestionChip$1$1:
     public final void invoke()
-com.antai.ui.ChatScreenKt$QuickTaskChip$2:
+com.antai.ui.ChatScreenKt$SuggestionChip$2:
     public final void invoke(androidx.compose.runtime.Composer,int)
 com.antai.ui.ChatScreenKt$ThinkingBubble$1:
     public final void invoke(androidx.compose.runtime.Composer,int)
+com.antai.ui.ChatScreenKt$TopBar$2:
+    public final void invoke(androidx.compose.runtime.Composer,int)
 com.antai.ui.ChatScreenKt:
     public static final boolean ChatScreen$lambda$6(androidx.compose.runtime.MutableState)
-    public static final float access$AnimatedAnt$lambda$15(androidx.compose.animation.core.InfiniteTransition$TransitionAnimationState)
+    public static final float access$AnimatedAnt_8Feqmps$lambda$22(androidx.compose.animation.core.InfiniteTransition$TransitionAnimationState)
     public static final void access$ChatScreen$lambda$7(androidx.compose.runtime.MutableState,boolean)
 com.antai.ui.ComposableSingletons$ANTAppKt$lambda-1$1$1$1$2$1:
     public static void invoke$58()
@@ -31914,28 +31872,44 @@ com.antai.ui.ComposableSingletons$ANTAppKt:
     public static kotlin.jvm.functions.Function2 getLambda-1$app_release()
 com.antai.ui.ComposableSingletons$ChatScreenKt$lambda-1$1:
     public final void invoke$56()
-com.antai.ui.ComposableSingletons$ChatScreenKt$lambda-2$1:
+com.antai.ui.ComposableSingletons$ChatScreenKt$lambda-10$1:
     public final void invoke$54()
+com.antai.ui.ComposableSingletons$ChatScreenKt$lambda-11$1:
+    public final void invoke$54()
+com.antai.ui.ComposableSingletons$ChatScreenKt$lambda-2$1:
+    public final void invoke$56()
 com.antai.ui.ComposableSingletons$ChatScreenKt$lambda-3$1:
-    public final void invoke(androidx.compose.runtime.Composer,int)
+    public final void invoke$56()
 com.antai.ui.ComposableSingletons$ChatScreenKt$lambda-4$1:
+    public final void invoke$56()
+com.antai.ui.ComposableSingletons$ChatScreenKt$lambda-5$1:
+    public final void invoke$56()
+com.antai.ui.ComposableSingletons$ChatScreenKt$lambda-6$1:
+    public final void invoke$56()
+com.antai.ui.ComposableSingletons$ChatScreenKt$lambda-7$1:
+    public final void invoke$56()
+com.antai.ui.ComposableSingletons$ChatScreenKt$lambda-8$1:
+    public final void invoke(androidx.compose.runtime.Composer,int)
+com.antai.ui.ComposableSingletons$ChatScreenKt$lambda-9$1:
     public static void invoke$59()
 com.antai.ui.ComposableSingletons$ChatScreenKt:
     public static final com.antai.ui.ComposableSingletons$ChatScreenKt INSTANCE
     public static kotlin.jvm.functions.Function3 getLambda-1$app_release()
+    public static kotlin.jvm.functions.Function3 getLambda-10$app_release()
+    public static kotlin.jvm.functions.Function3 getLambda-11$app_release()
     public static kotlin.jvm.functions.Function3 getLambda-2$app_release()
-    public static kotlin.jvm.functions.Function2 getLambda-3$app_release()
+    public static kotlin.jvm.functions.Function3 getLambda-3$app_release()
     public static kotlin.jvm.functions.Function3 getLambda-4$app_release()
-com.antai.ui.HomeScreenKt$HomeScreen$1$1$1:
-    public final void invoke$54()
-com.antai.ui.HomeScreenKt$HomeScreen$2:
-    public final synthetic int $$default
-    public final void invoke(androidx.compose.runtime.Composer,int)
+    public static kotlin.jvm.functions.Function3 getLambda-5$app_release()
+    public static kotlin.jvm.functions.Function3 getLambda-6$app_release()
+    public static kotlin.jvm.functions.Function3 getLambda-7$app_release()
+    public static kotlin.jvm.functions.Function2 getLambda-8$app_release()
+    public static kotlin.jvm.functions.Function3 getLambda-9$app_release()
 com.antai.ui.MainTab:
     public static final enum com.antai.ui.MainTab Agents
-    public static final enum com.antai.ui.MainTab Build
-    public static final enum com.antai.ui.MainTab Home
     public static final enum com.antai.ui.MainTab Projects
+    public static final enum com.antai.ui.MainTab Settings
+    public static final enum com.antai.ui.MainTab Tools
     public static java.lang.String getTitle()
 com.antai.ui.ProjectScreenKt$ProjectScreen$1$1$1:
     public final void invoke$54()
@@ -32017,7 +31991,6 @@ kotlin.collections.CollectionsKt__CollectionsJVMKt:
     public static void terminateCollectionToArray(int,java.lang.Object[])
 kotlin.collections.CollectionsKt__CollectionsKt:
     public static java.util.List emptyList()
-    public static void throwIndexOverflow()
 kotlin.collections.CollectionsKt__MutableCollectionsKt:
     public static final java.util.Collection convertToListIfNotCollection(java.lang.Iterable)
 kotlin.collections.CollectionsKt___CollectionsKt
