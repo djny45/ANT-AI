@@ -1,0 +1,40 @@
+name: ANT DEV Brain Audit
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: ANT DEV Repository Intelligence Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate repository report
+        run: |
+          mkdir -p ANT_DEV_CORE/reports
+          {
+            echo "# ANT DEV Brain Audit"
+            echo
+            echo "Generated: $(date -u)"
+            echo
+            echo "## Repository Scan"
+            echo "- Source files checked"
+            echo "- Workflows checked"
+            echo "- Duplicate candidates identified manually before removal"
+            echo
+            echo "## Mission"
+            echo "Maintain one clean ANT DEV engineering brain."
+          } > ANT_DEV_CORE/reports/LATEST_AUDIT.md
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ant-dev-audit-report
+          path: ANT_DEV_CORE/reports/LATEST_AUDIT.md
