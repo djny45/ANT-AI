@@ -7,7 +7,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.unit.dp
 import com.antai.ai.OllamaStreamService
 import com.antai.ui.components.AntThinkingAnimation
@@ -25,6 +24,10 @@ fun ClaudeStyleChatScreen() {
     val ollama = remember { OllamaStreamService() }
     val focusRequester = remember { FocusRequester() }
 
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
     Column(Modifier.fillMaxSize().padding(20.dp)) {
         Text("ANT CLAW", style = MaterialTheme.typography.headlineMedium)
 
@@ -40,7 +43,6 @@ fun ClaudeStyleChatScreen() {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .focusRequester(focusRequester)
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 BasicTextField(
@@ -49,7 +51,7 @@ fun ClaudeStyleChatScreen() {
                     modifier = Modifier
                         .weight(1f)
                         .padding(16.dp)
-                        .onFocusChanged { },
+                        .focusRequester(focusRequester),
                     decorationBox = { inner ->
                         if (message.isEmpty()) {
                             Text("Message ANT CLAW...")
