@@ -2,6 +2,7 @@ package com.antai.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
@@ -19,24 +20,18 @@ private data class ChatItem(val text: String, val user: Boolean, val id: String 
 
 @Composable
 fun ClaudeStyleChatScreen(routerChatService: RouterChatService) {
-    // Input state - persists across recompositions
     var message by rememberSaveable { mutableStateOf("") }
-    
-    // UI state - persists across lifecycle events
     var typing by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf("") }
     var isSending by rememberSaveable { mutableStateOf(false) }
-    
-    // Message history - persists via serialization
-    val messages = rememberSaveable(saver = ChatItemListSaver) { 
-        mutableStateListOf<ChatItem>() 
+
+    val messages = rememberSaveable(saver = ChatItemListSaver) {
+        mutableStateListOf<ChatItem>()
     }
-    
-    // Scroll state for UI
+
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    
-    // Auto-scroll to bottom when new message arrives
+
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) {
             listState.animateScrollToItem(messages.size - 1)
@@ -46,11 +41,8 @@ fun ClaudeStyleChatScreen(routerChatService: RouterChatService) {
     Column(Modifier.fillMaxSize().padding(20.dp)) {
         Text("ANT CLAW", style = MaterialTheme.typography.headlineMedium)
 
-        // Message history with proper scrolling
         LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
+            modifier = Modifier.weight(1f).fillMaxWidth(),
             state = listState
         ) {
             items(messages.size) { index ->
@@ -61,16 +53,12 @@ fun ClaudeStyleChatScreen(routerChatService: RouterChatService) {
                     MarkdownRenderer(item.text)
                 }
             }
-            
-            // Show thinking animation only if actively typing
+
             if (typing) {
-                item {
-                    AntThinkingAnimation()
-                }
+                item { AntThinkingAnimation() }
             }
         }
-        
-        // Error display
+
         if (error.isNotEmpty()) {
             Text(
                 text = "Error: $error",
@@ -79,7 +67,6 @@ fun ClaudeStyleChatScreen(routerChatService: RouterChatService) {
             )
         }
 
-        // Input row with improved stability
         Row(Modifier.fillMaxWidth()) {
             BasicTextField(
                 value = message,
@@ -96,27 +83,23 @@ fun ClaudeStyleChatScreen(routerChatService: RouterChatService) {
                             try {
                                 isSending = true
                                 error = ""
-                                
-                                // Add user message
                                 messages.add(ChatItem(prompt, user = true))
-                                message = "" // Clear input
-                                
-                                // Add placeholder for assistant response
+                                message = ""
+
                                 val responseId = System.nanoTime().toString()
                                 messages.add(ChatItem("", user = false, id = responseId))
                                 val responseIndex = messages.lastIndex
-                                
+
                                 typing = true
                                 var fullResponse = ""
-                                
+
                                 try {
-                                    // Stream response with proper error handling
                                     routerChatService.send(prompt).collect { token ->
                                         fullResponse += token
                                         if (responseIndex < messages.size) {
                                             messages[responseIndex] = ChatItem(
-                                                fullResponse, 
-                                                user = false, 
+                                                fullResponse,
+                                                user = false,
                                                 id = responseId
                                             )
                                         }
@@ -124,11 +107,9 @@ fun ClaudeStyleChatScreen(routerChatService: RouterChatService) {
                                 } finally {
                                     typing = false
                                 }
-                                
                             } catch (e: Exception) {
                                 error = e.message ?: "Unknown error occurred"
                                 typing = false
-                                isSending = false
                             } finally {
                                 isSending = false
                             }
@@ -143,11 +124,10 @@ fun ClaudeStyleChatScreen(routerChatService: RouterChatService) {
     }
 }
 
-// Saver for persisting ChatItem list across process death
 private val ChatItemListSaver = listSaver<MutableList<ChatItem>, List<Any>>(
     save = { list ->
         list.map { item ->
-            listOf(item.text, item.user, item.id) as List<Any>
+            listOf(item.text, item.user, item.id)
         }
     },
     restore = { savedList ->
