@@ -1,0 +1,27 @@
+name: ANT DEV CORE Agent
+
+on:
+  workflow_run:
+    workflows: ["ANT CLAW Production APK Release"]
+    types:
+      - completed
+
+jobs:
+  ant-dev-core:
+    name: ANT DEV CORE Analysis
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Collect build failure
+        run: |
+          echo "ANT DEV CORE detected a failed build"
+          echo "Next stage: analyze logs and prepare repair patch"
+
+      - name: Agent status
+        run: |
+          echo "ANT DEV CORE mode: analysis only"
+          echo "Future modules: analyzer, patch generator, verifier"
