@@ -2,6 +2,14 @@ name: ANT AI APK Release
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: Release version, for example v1.2.0
+        required: true
+        default: v1.2.0
+
+permissions:
+  contents: write
 
 jobs:
   release:
@@ -9,12 +17,42 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verify release requirements
-        run: |
-          echo "Checking build artifact"
-          echo "Checking signature"
-          echo "Checking checksum"
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
 
-      - name: Publish release placeholder
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Build APK
+        run: gradle -p android_app assembleDebug --no-daemon
+
+      - name: Prepare release assets
         run: |
-          echo "Attach verified APK artifact here"
+          mkdir -p release-assets
+          cp android_app/app/build/outputs/apk/debug/app-debug.apk "release-assets/ANT-AI-${{ inputs.version }}.apk"
+          cd release-assets
+          sha256sum "ANT-AI-${{ inputs.version }}.apk" > SHA256SUMS.txt
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version }}
+          name: ANT AI ${{ inputs.version }} APK Release
+          body: |
+            # ANT AI APK Release
+
+            Version: ${{ inputs.version }}
+
+            - Android APK attached
+            - SHA256 checksum included
+            - Claude-like ANT chat interface
+            - Animated ANT waiting state
+            - Mobile APK factory, agent, project, and home screens refreshed
+          files: |
+            release-assets/ANT-AI-${{ inputs.version }}.apk
+            release-assets/SHA256SUMS.txt

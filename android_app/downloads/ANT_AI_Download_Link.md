@@ -5,7 +5,7 @@
 Download link:
 
 ```
-Pending signed release build
+https://github.com/djny45/ANT-AI/releases/latest
 ```
 
 Release requirements:
@@ -16,4 +16,4 @@ Release requirements:
 - SHA256 checksum generated
 - Release artifact uploaded
 
-After release creation, this page will contain the official APK download URL.
+Latest release assets include the Android APK and SHA256 checksum.
