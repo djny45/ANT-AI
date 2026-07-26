@@ -1,56 +1,55 @@
 <div align="center">
 
-# 🐜 ANT AI
+# 🐜 ANT CLAW
 ## Autonomous Neural Taskforce
 
-**A personal AI operating system built from cooperating agents — swarm intelligence, local-first LLM routing, persistent memory, and security-first automation.**
+**A Claude-style personal AI assistant powered by local-first AI, Ollama integration, agent workflows, memory systems, and automation tools.**
 
-[![Build Status](https://github.com/djny45/ANT-AI/actions/workflows/android-apk.yml/badge.svg)](https://github.com/djny45/ANT-AI/actions/workflows/android-apk.yml)
-[![Security Gate](https://github.com/djny45/ANT-AI/actions/workflows/security-scan.yml/badge.svg)](https://github.com/djny45/ANT-AI/actions/workflows/security-scan.yml)
+[![Build Status](https://github.com/djny45/ANT-AI/actions/workflows/release-apk.yml/badge.svg)](https://github.com/djny45/ANT-AI/actions/workflows/release-apk.yml)
 
 </div>
 
 ---
 
-# 🚀 ANT AI v1.0.0 Production Release
+# 🚀 ANT CLAW Production Android App
 
-ANT AI has reached its first production Android release.
+ANT CLAW is evolving into a personal AI companion with a clean Claude-inspired interface, local AI support, and extensible agent architecture.
 
-## Release Features
+## Current Features
 
-- ✅ Signed Android APK builds
-- ✅ GitHub Actions CI/CD pipeline
-- ✅ SHA256 APK verification
-- ✅ Multi-agent AI architecture
-- ✅ Knowledge Hive memory system
-- ✅ Security audit foundation
-
-Download releases:
-
-https://github.com/djny45/ANT-AI/releases
+- ✅ Claude-style chat interface
+- ✅ Light and dark theme support foundation
+- ✅ Streaming AI response architecture
+- ✅ ANT thinking animation system
+- ✅ Ollama local AI integration foundation
+- ✅ Model configuration support
+- ✅ Markdown response rendering
+- ✅ Code block support with copy workflow
+- ✅ File attachment system foundation
+- ✅ Android APK release pipeline
+- ✅ GitHub Actions automated builds
 
 ---
 
 # Vision
 
-ANT AI is a personal AI operating system where specialized agents collaborate to research, code, automate tasks, and manage workflows.
+ANT CLAW is designed as a personal AI operating system where users can chat, create, automate, and control AI tools from one application.
 
-Instead of one monolithic assistant, ANT AI uses a coordinated swarm of purpose-built agents controlled by an ANT Commander.
+The goal is a private AI assistant that can run with local models while supporting powerful cloud and tool integrations.
 
 ---
 
 # Architecture
 
 ```text
-                 ANT COMMANDER
-                       |
-        +--------------+--------------+
-        |              |              |
-   Swarm Agents  Knowledge Hive  Security
-        |              |              |
- Research Ant    Vector Memory   Audit Ledger
- Coding Ant      Graph Memory    Encryption
- Security Ant
+                 ANT CLAW
+                    |
+        +-----------+-----------+
+        |           |           |
+     Chat UI    AI Engine   Tools
+        |           |           |
+   Memory     Ollama AI    Agents
+   Files      LLM Models   Automation
 ```
 
 ---
@@ -59,41 +58,28 @@ Instead of one monolithic assistant, ANT AI uses a coordinated swarm of purpose-
 
 | System | Description |
 |---|---|
-| 🧠 Intelligence | LLM routing and AI reasoning |
-| 🐜 Swarm Army | Specialized autonomous agents |
-| 📚 Knowledge Hive | Persistent AI memory and retrieval |
-| 🔐 Security | Encryption, auditing, and protection |
-| ♻️ Evolution | Improvement and testing framework |
+| 🧠 AI Engine | LLM communication and reasoning |
+| 🐜 ANT Assistant | Claude-style conversational interface |
+| 🦙 Ollama | Local model support |
+| 📚 Memory | Knowledge and conversation storage |
+| 📎 Attachments | File and document workflows |
+| 🛠 Tools | Future agent and automation ecosystem |
+| 🔐 Security | Private-first AI design |
 
 ---
 
-# 📱 Android APK Release Pipeline
+# Android APK Pipeline
 
-Production releases use:
-
-```text
-.github/workflows/release-apk.yml
-```
-
-Pipeline:
+Production builds use GitHub Actions:
 
 ```text
-Git Tag v1.0.0
-        ↓
-Build Signed Release APK
-        ↓
-Generate SHA256 Checksum
-        ↓
-Upload GitHub Release
-```
-
-Required GitHub Actions secrets:
-
-```text
-ANDROID_KEYSTORE_BASE64
-ANDROID_KEY_ALIAS
-ANDROID_KEY_PASSWORD
-ANDROID_STORE_PASSWORD
+Source Code
+     ↓
+Release Build
+     ↓
+Signed APK
+     ↓
+GitHub Release
 ```
 
 ---
@@ -102,15 +88,12 @@ ANDROID_STORE_PASSWORD
 
 ```text
 ANT-AI/
-├── core/
+├── android_app/
 ├── agents/
 ├── intelligence/
 ├── memory/
+├── tools/
 ├── security/
-├── autonomy/
-├── coding_factory/
-├── apk_factory/
-├── android_app/
 └── .github/workflows/
 ```
 
@@ -123,23 +106,40 @@ git clone https://github.com/djny45/ANT-AI.git
 cd ANT-AI
 ```
 
-Configure your AI providers and runtime settings before launching.
+Configure your AI model settings and Ollama endpoint before running.
+
+Example:
+
+```text
+Ollama Server:
+http://localhost:11434
+
+Models:
+- llama3
+- qwen2.5
+- mistral
+```
 
 ---
 
 # Roadmap
 
-- More autonomous agents
-- Improved memory system
-- Plugin ecosystem
-- AI task automation
-- Advanced Android integration
+## ANT CLAW v1.1
+
+- 🔄 Real Ollama token streaming
+- 🔄 Advanced Markdown rendering
+- 🔄 Animated ANT character
+- 🔄 Voice interaction
+- 🔄 Vision/image understanding
+- 🔄 Tool calling
+- 🔄 Agent workflows
+- 🔄 Memory system expansion
 
 ---
 
 # Contributing
 
-Contributions are welcome. Review project security guidelines before modifying security, autonomy, or release systems.
+Contributions are welcome. Please review project guidelines before changing AI, security, or release systems.
 
 ---
 
