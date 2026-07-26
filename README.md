@@ -31,6 +31,25 @@ ANT CLAW is evolving into a personal AI companion with a clean Claude-inspired i
 
 ---
 
+# 📱 Download ANT CLAW APK
+
+## Latest Release
+
+🐜 **ANT CLAW v1.1.0**
+
+Download the latest Android APK:
+
+⬇️ [Download Latest ANT CLAW APK](../../releases/latest)
+
+### Installation
+
+1. Download the APK file
+2. Open it on your Android device
+3. Allow installation permission if requested
+4. Install ANT CLAW
+
+---
+
 # Vision
 
 ANT CLAW is designed as a personal AI operating system where users can chat, create, automate, and control AI tools from one application.
@@ -63,7 +82,7 @@ The goal is a private AI assistant that can run with local models while supporti
 | 🦙 Ollama | Local model support |
 | 📚 Memory | Knowledge and conversation storage |
 | 📎 Attachments | File and document workflows |
-| 🛠 Tools | Future agent and automation ecosystem |
+| 🛠 Tools | Agent and automation ecosystem |
 | 🔐 Security | Private-first AI design |
 
 ---
@@ -80,6 +99,8 @@ Release Build
 Signed APK
      ↓
 GitHub Release
+     ↓
+APK Download
 ```
 
 ---
