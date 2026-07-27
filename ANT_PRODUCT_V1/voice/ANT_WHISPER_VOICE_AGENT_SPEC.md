@@ -35,6 +35,19 @@ ANT Brain
 - Voice to task execution
 - Searchable transcripts
 - Optional memory saving
+- Voice agent routing
+- Offline-capable engine support planning
+
+## Voice Agent Modules
+
+```
+voice/
+ ├── WhisperEngine
+ ├── AudioRecorder
+ ├── TranscriptionService
+ ├── VoiceCommandRouter
+ └── VoiceSettings
+```
 
 ## Privacy Rules
 
@@ -79,3 +92,4 @@ Connect with:
 - Omni Router
 - Agent Registry
 - Memory System
+- Voice command execution layer
