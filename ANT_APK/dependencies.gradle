@@ -1,0 +1,6 @@
+ext.antDependencies = [
+    compose: 'androidx.compose:compose-bom',
+    navigation: 'androidx.navigation:navigation-compose',
+    room: 'androidx.room:room-runtime',
+    retrofit: 'com.squareup.retrofit2:retrofit'
+]
