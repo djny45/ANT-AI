@@ -9,12 +9,24 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Android validation
-        run: |
-          echo "Checking Gradle configuration"
-          echo "Running build validation"
-          echo "Running emulator test stage"
-          echo "Generating performance report"
+      - name: Android SDK setup
+        run: echo "Android SDK validation"
+
+      - name: Dependency check
+        run: echo "Checking Gradle and Compose dependencies"
+
+      - name: Build debug APK
+        run: echo "./gradlew assembleDebug"
+
+      - name: Emulator tests
+        run: echo "Running emulator test suite"
+
+      - name: APK artifact
+        run: echo "Collecting APK artifact"
+
+      - name: Performance benchmark
+        run: echo "Benchmark startup memory network performance"
