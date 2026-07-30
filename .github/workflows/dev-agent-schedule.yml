@@ -1,0 +1,14 @@
+name: ANT-X Dev Agent Schedule
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  dev-agent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Dev Agent cycle
+        run: echo "ANT-X Dev Agent cycle started"
