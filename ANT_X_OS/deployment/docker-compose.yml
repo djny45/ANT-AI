@@ -1,0 +1,10 @@
+services:
+  antx:
+    build: .
+    restart: always
+    environment:
+      - ANT_ENV=production
+
+  memory:
+    image: qdrant/qdrant:latest
+    restart: always
