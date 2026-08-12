@@ -1,0 +1,18 @@
+{
+  "idle": {
+    "glow": "soft",
+    "pulse": "slow"
+  },
+  "listening": {
+    "glow": "voice-reactive",
+    "pulse": "medium"
+  },
+  "thinking": {
+    "glow": "high-energy",
+    "pulse": "fast"
+  },
+  "responding": {
+    "glow": "wave",
+    "pulse": "smooth"
+  }
+}
