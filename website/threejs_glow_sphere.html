@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head>
+<title>ANT-AI Hologram Core</title>
+<style>
+html,body{margin:0;height:100%;background:#050505;overflow:hidden;font-family:Arial;color:#aaa}
+#cmd{position:absolute;bottom:50px;left:8%;width:84%;padding:22px;border-radius:18px;background:#111b;color:#aaa;border:1px solid #33220f;font-size:18px}
+canvas{display:block}
+</style>
+</head>
+<body>
+<div id="cmd">Type your command... ➤</div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js';
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,100);
+camera.position.z=5;
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setSize(innerWidth,innerHeight);document.body.appendChild(renderer.domElement);
+const geo=new THREE.BufferGeometry();
+const pts=[];
+for(let i=0;i<5000;i++){
+ const a=Math.random()*Math.PI*2,b=Math.acos(2*Math.random()-1),r=1.25;
+ pts.push(r*Math.sin(b)*Math.cos(a),r*Math.sin(b)*Math.sin(a),r*Math.cos(b));
+}
+geo.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
+const mat=new THREE.PointsMaterial({color:0xff8800,size:.012});
+const sphere=new THREE.Points(geo,mat);scene.add(sphere);
+function animate(){requestAnimationFrame(animate);sphere.rotation.y+=0.001;mat.size=.012+Math.sin(Date.now()*0.003)*.002;renderer.render(scene,camera)}animate();
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)})
+</script>
+</body>
+</html>
