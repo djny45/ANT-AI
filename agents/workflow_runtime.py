@@ -1,26 +1,23 @@
-"""ANT AI workflow runtime worker.
+"""ANT AI workflow execution runtime."""
 
-Connects workflow plans to agent execution.
-"""
 
 class WorkflowRuntime:
-    def __init__(self, agents=None):
+    def __init__(self, agents=None, state=None):
         self.agents = agents or {}
-        self.history = []
+        self.state = state
 
-    def execute(self, workflow):
-        result = {
-            "goal": workflow.get("goal"),
-            "steps_completed": [],
-            "status": "running"
-        }
-
+    async def execute(self, workflow):
+        results = []
         for step in workflow.get("steps", []):
-            result["steps_completed"].append(step)
-
-        result["status"] = "completed"
-        self.history.append(result)
-        return result
-
-    def get_history(self):
-        return self.history
+            agent = self.agents.get(step.get("agent"))
+            if not agent:
+                result = {"error": "agent unavailable", "step": step}
+            else:
+                try:
+                    result = await agent.execute(step)
+                except Exception as exc:
+                    result = {"error": str(exc), "step": step}
+            results.append(result)
+            if self.state:
+                self.state.log_execution(step, result)
+        return {"goal": workflow.get("goal"), "results": results, "status": "completed"}
