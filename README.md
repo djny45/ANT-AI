@@ -1,67 +1,73 @@
-![ANT AI Logo](logo.png) 
+![ANT AI Logo](logo.png)
 
 # 🐜 ANT AI TECHNOLOGIES
 
-# GODMODE 10X AI OS
+## GODMODE 10X AI OS
 
-### A Governed Multi-Agent Artificial Intelligence Platform for Building, Automating, and Orchestrating Intelligent Workflows.
+### A Governed Multi-Agent Artificial Intelligence Platform for Building, Automating, and Orchestrating Intelligent Systems.
 
 <p align="center">
 
 ![Status](https://img.shields.io/badge/status-private%20beta-orange)
-![AI](https://img.shields.io/badge/AI-multi--agent%20platform-blue)
-![Architecture](https://img.shields.io/badge/architecture-modular-green)
-![Frontend](https://img.shields.io/badge/frontend-Next.js-black)
-![Backend](https://img.shields.io/badge/backend-FastAPI-009688)
+![AI](https://img.shields.io/badge/AI-Multi--Agent%20Platform-blue)
+![Architecture](https://img.shields.io/badge/Architecture-Modular-green)
+![Frontend](https://img.shields.io/badge/Frontend-Next.js-black)
+![Backend](https://img.shields.io/badge/Backend-FastAPI-009688)
 ![AI Engine](https://img.shields.io/badge/AI-Ollama-red)
-![Infrastructure](https://img.shields.io/badge/infrastructure-Docker-blue)
-![License](https://img.shields.io/badge/license-MIT-purple)
+![Infrastructure](https://img.shields.io/badge/Infrastructure-Docker-blue)
+![License](https://img.shields.io/badge/License-MIT-purple)
 
 </p>
+
+<p align="center">
+<a href="https://github.com/djny45/ANT-AI">
+⭐ Star this repository
+</a>
+</p>
+
 
 ---
 
 # 🚀 Overview
 
-ANT AI Technologies is developing **GODMODE 10X AI OS**, a next-generation artificial intelligence operating platform designed to coordinate specialized AI agents, automate complex workflows, and enhance human decision-making.
+**ANT AI Technologies** is building **GODMODE 10X AI OS**, a next-generation Artificial Intelligence Operating System designed to coordinate specialized AI agents, automate complex workflows, and enhance human productivity.
 
 The platform combines:
 
 - Multi-agent intelligence
 - AI workflow orchestration
-- Developer automation
+- Developer assistance
 - Knowledge management
-- Secure tool execution
+- Secure AI execution
 - Context-aware memory
-- Human-controlled governance
+- Governance and auditing
 
 
-The vision is to build an AI infrastructure layer where intelligent systems can collaborate, execute tasks, and provide valuable assistance while maintaining transparency, security, and user control.
+ANT AI is designed around a simple principle:
+
+> Advanced AI should be powerful, transparent, and controlled by humans.
 
 ---
 
 # 🎯 Mission
 
-Build reliable and scalable AI systems that augment human capability through:
+Our mission is to build reliable AI infrastructure that helps people and organizations:
 
-- Intelligent automation
-- Advanced reasoning workflows
-- Software engineering assistance
-- Knowledge discovery
-- Secure AI operations
+- Automate repetitive work
+- Build software faster
+- Analyze information
+- Manage knowledge
+- Create intelligent workflows
+- Improve decision-making
 
-
-ANT AI focuses on creating practical AI systems designed for real-world productivity.
 
 ---
 
-# 🧠 Platform Vision
+# 🧠 GODMODE 10X Vision
 
-GODMODE 10X AI OS is not designed as a traditional conversational assistant.
+GODMODE 10X is not a traditional chatbot.
 
-It is an AI operating environment where multiple specialized agents collaborate through a controlled architecture.
-
-Instead of one general-purpose system, ANT AI creates an organized intelligence layer:
+It is an AI operating environment where multiple specialized agents collaborate as a coordinated intelligence system.
 
 ```
 Human User
@@ -76,7 +82,11 @@ Governance Layer
 
 ↓
 
-Master Intelligence Layer
+Master Agent
+
+↓
+
+Agent Manager
 
 ↓
 
@@ -88,7 +98,7 @@ AI Models
 
 ↓
 
-Memory & Knowledge Systems
+Memory System
 
 ↓
 
@@ -108,19 +118,19 @@ Audit Infrastructure
 
                       |
 
-              FastAPI Platform Layer
+              FastAPI Backend
 
                       |
 
-          Authentication & Authorization
+        Authentication & Security Layer
 
                       |
 
-               Master Agent
+              Master Agent
 
                       |
 
-              Agent Coordination Layer
+             Agent Coordination Layer
 
                       |
 
@@ -146,64 +156,66 @@ Audit Infrastructure
 
                       |
 
-             Tool Permission Layer
+             Devil Advocate Layer
 
                       |
 
-              Secure Execution
+            Tool Permission System
 
                       |
 
-              AI Model Router
+             Secure Sandbox Runtime
+
+                      |
+
+              Omni AI Router
 
                       |
 
         ┌─────────────┴─────────────┐
 
-       Ollama                 Cloud Models
+       Ollama                 Cloud AI
 
 
                       |
 
-              Memory Intelligence
+             Memory Intelligence
 
                       |
 
-               Audit System
+                Audit System
 
                       |
 
-              Database Layer
+                Database
 ```
 
 ---
 
 # 🤖 Multi-Agent Intelligence Framework
 
-ANT AI uses specialized AI agents designed for different responsibilities.
+## 👑 Master Agent
 
-## 🧩 Master Agent
-
-The central coordination engine.
+The central coordination system.
 
 Responsibilities:
 
 - Understand user objectives
-- Create execution strategies
-- Coordinate specialized agents
-- Combine results
-- Deliver structured responses
+- Create execution plans
+- Coordinate agents
+- Combine intelligence
+- Generate responses
 
 
 ---
 
-## 🔎 Research Agent
+## 🔍 Research Agent
 
-Designed for:
+Handles:
 
-- Information analysis
-- Knowledge discovery
-- Data organization
+- Information discovery
+- Analysis
+- Knowledge extraction
 - Research workflows
 
 
@@ -211,15 +223,15 @@ Designed for:
 
 ## 💻 Coding Agent
 
-Software engineering intelligence layer.
+Software engineering assistant.
 
 Capabilities:
 
 - Code analysis
-- Development assistance
-- Debugging support
-- Test generation
-- Documentation assistance
+- Development support
+- Debugging assistance
+- Testing support
+- Documentation generation
 
 
 ---
@@ -229,9 +241,9 @@ Capabilities:
 Responsible for:
 
 - Task decomposition
-- Project planning
-- Workflow organization
-- Execution strategies
+- Strategy
+- Workflow planning
+- Execution organization
 
 
 ---
@@ -252,9 +264,9 @@ Provides:
 
 Focused on:
 
-- Security analysis
-- Risk identification
-- Vulnerability review
+- Security review
+- Risk analysis
+- Vulnerability identification
 - Protection workflows
 
 
@@ -262,37 +274,37 @@ Focused on:
 
 ## 🐙 GitHub Agent
 
-Developer productivity assistant.
+Developer productivity layer.
 
 Capabilities:
 
 - Repository analysis
 - Code review
-- Documentation generation
-- Engineering insights
+- Documentation assistance
+- Engineering recommendations
 
 
 ---
 
 ## ⚙️ Automation Agent
 
-Designed for:
+Handles:
 
 - Workflow automation
-- Process optimization
-- Repetitive task reduction
+- Process improvement
+- Task optimization
 
 
 ---
 
-# 🛡️ Responsible AI Governance
+# 🛡️ AI Governance System
 
-ANT AI follows a governance-first architecture.
+ANT AI uses a governance-first architecture.
 
-Important operations pass through:
+Important operations follow:
 
 ```
-Request
+User Request
 
 ↓
 
@@ -304,44 +316,44 @@ Risk Assessment
 
 ↓
 
-Execution Review
+Governance Review
 
 ↓
 
-Approved Action
+Execution
 
 ↓
 
 Audit Record
 ```
 
-The governance layer evaluates:
+The system evaluates:
 
 - Security impact
 - Reliability
-- Data protection
-- Operational risk
+- Privacy
 - Resource usage
+- Operational risks
 
 
 Example:
 
 ```json
 {
-  "risk_score":15,
-  "decision":"APPROVE",
-  "reason":"Operation follows security policies"
+ "risk_score":15,
+ "decision":"APPROVE",
+ "reason":"Operation follows security policies"
 }
 ```
 
 ---
 
-# 🧠 Memory Intelligence System
+# 🧠 Memory Intelligence
 
-ANT AI uses structured memory architecture:
+ANT AI uses structured memory:
 
 ```
-Short-Term Context
+Short-Term Memory
 
 ↓
 
@@ -349,30 +361,23 @@ Working Memory
 
 ↓
 
-Validated Long-Term Knowledge
+Validated Long-Term Memory
 ```
 
-Memory records include:
+Memory stores:
 
+- Information content
 - Source
 - Timestamp
-- Confidence score
+- Confidence level
 - Validation status
-- Ownership information
-
-
-Designed for:
-
-- Personalization
-- Context retention
-- Knowledge organization
 
 
 ---
 
 # ⚡ AI Model Infrastructure
 
-Supported AI providers:
+Supported:
 
 ## Local AI
 
@@ -381,17 +386,16 @@ Powered by:
 - Ollama
 - Phi models
 - Mistral models
-- Llama-based models
+- Llama models
 
 
 ## Cloud AI
 
-Supports configurable external providers.
-
+Supports configurable AI providers.
 
 Features:
 
-- Provider switching
+- Model switching
 - Health monitoring
 - Fallback handling
 - Performance tracking
@@ -399,7 +403,7 @@ Features:
 
 ---
 
-# 💻 Technology Stack
+# 🛠️ Technology Stack
 
 ## Frontend
 
@@ -410,6 +414,7 @@ TypeScript
 Tailwind CSS
 ```
 
+
 ## Backend
 
 ```
@@ -418,6 +423,7 @@ Python
 SQLAlchemy
 Pydantic
 ```
+
 
 ## Database
 
@@ -433,6 +439,7 @@ Production:
 PostgreSQL
 ```
 
+
 ## Infrastructure
 
 ```
@@ -441,6 +448,7 @@ Docker Compose
 Nginx
 Redis
 ```
+
 
 ## Monitoring
 
@@ -457,34 +465,34 @@ Grafana
 ANT-AI/
 
 ├── frontend/
-│   └── Web Application
+│   └── Next.js Application
 
 ├── backend/
-│   └── API Services
+│   └── FastAPI Services
 
 ├── agents/
 │   └── AI Agent Framework
 
 ├── memory/
-│   └── Context Intelligence
+│   └── Memory Intelligence
 
 ├── governance/
-│   └── Security Policies
+│   └── AI Control Layer
 
 ├── security/
-│   └── Authentication Layer
+│   └── Authentication
 
 ├── database/
 │   └── Data Models
 
 ├── tools/
-│   └── AI Utilities
+│   └── AI Tools
 
 ├── tests/
-│   └── Quality Assurance
+│   └── Testing Framework
 
 ├── deployment/
-│   └── Infrastructure
+│   └── Production Infrastructure
 
 └── docs/
     └── Documentation
@@ -494,31 +502,23 @@ ANT-AI/
 
 # 🚀 Getting Started
 
-## Requirements
-
-Install:
-
-- Node.js
-- Python 3.10+
-- Docker
-- Ollama
-
-
-Clone:
+## Clone Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ANT-AI.git
+git clone https://github.com/djny45/ANT-AI.git
 
 cd ANT-AI
 ```
 
-Configure:
+
+## Setup Environment
 
 ```bash
 cp .env.example .env
 ```
 
-Run:
+
+## Run With Docker
 
 ```bash
 docker compose up
@@ -528,14 +528,10 @@ docker compose up
 
 # ☁️ Deployment Architecture
 
-Recommended production environment:
+Recommended production setup:
 
 ```
-Cloud Provider
-
-↓
-
-CDN / Cloudflare
+Cloudflare
 
 ↓
 
@@ -543,16 +539,25 @@ Next.js Application
 
 ↓
 
-API Server
+VPS Infrastructure
 
 ↓
 
-AI Services
+FastAPI Backend
 
 ↓
 
-Database Infrastructure
+PostgreSQL
+
+↓
+
+Redis
+
+↓
+
+Ollama AI Runtime
 ```
+
 
 Recommended beta server:
 
@@ -575,57 +580,43 @@ Ubuntu Linux
 # 📊 Development Status
 
 | Component | Status |
-|---|---|
+|-|-|
 | Core Architecture | ✅ Complete |
 | Agent Framework | ✅ Complete |
-| Governance System | ✅ Complete |
-| AI Routing Layer | 🔄 Development |
+| Governance Layer | ✅ Complete |
+| AI Routing | 🔄 Development |
 | Web Platform | 🔄 Development |
 | Memory System | 🔄 Integration |
-| Testing Framework | 🔄 Development |
+| Audit System | 🔄 Integration |
+| Testing | 🔄 Development |
 | Production Deployment | Planned |
 
 ---
 
 # 🗺️ Roadmap
 
-## Phase 1 — Private Beta
+## ANT AI Beta v0.1
 
-- AI interaction platform
-- Agent workflows
-- Memory capabilities
-- Governance system
-- Early user testing
+- AI Command Center
+- Multi-agent workflows
+- Memory system
+- Governance layer
+- Private testing
 
 
-## Phase 2 — Production Platform
+## ANT AI v1.0
 
-- Advanced monitoring
+- Production deployment
+- Monitoring
 - Enterprise security
 - Performance optimization
-- Scalable deployment
 
 
-## Phase 3 — AI Infrastructure Ecosystem
+## Future
 
 - Advanced automation
-- Developer ecosystem
 - Enterprise AI workflows
 - Expanded integrations
-
-
----
-
-# 🔬 Engineering Principles
-
-ANT AI is built around:
-
-✅ Modular architecture  
-✅ Security-first development  
-✅ Transparent AI operations  
-✅ Human oversight  
-✅ Scalable infrastructure  
-✅ Continuous improvement  
 
 
 ---
@@ -634,12 +625,12 @@ ANT AI is built around:
 
 Contributions are welcome.
 
-Before submitting changes:
+Guidelines:
 
-- Follow coding standards
+- Write clean code
 - Add tests
-- Document improvements
-- Maintain security practices
+- Document changes
+- Maintain security standards
 
 
 ---
@@ -653,6 +644,12 @@ MIT License
 
 # 🐜 ANT AI TECHNOLOGIES
 
-## Building the Infrastructure Layer for the Next Generation of Intelligent Systems.
+## GODMODE 10X AI OS
+
+### Building the Infrastructure Layer for the Next Generation of Intelligent Systems.
 
 **Artificial Intelligence. Human Control. Responsible Innovation.**
+
+Repository:
+
+https://github.com/djny45/ANT-AI
