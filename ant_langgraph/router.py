@@ -2,16 +2,34 @@ from typing import Literal
 
 Route = Literal["direct", "coding", "research", "complex"]
 
+CODING = ("code", "coding", "bug", "debug", "repository", "repo", "python", "typescript", "javascript", "api")
+RESEARCH = ("research", "investigate", "compare", "information", "study", "analyze")
+COMPLEX = ("build", "implement", "integrate", "architecture", "workflow", "multiple", "system", "project")
+
 
 def route_request(user_input: str) -> Route:
-    """Deterministic first-pass routing; an LLM router can refine this later."""
-    text = user_input.lower().strip()
-    coding = ("code", "coding", "bug", "debug", "repository", "repo", "python", "typescript", "javascript", "api")
-    research = ("research", "analyze", "compare", "investigate", "find information", "study")
-    complex_markers = ("build", "implement", "integrate", "architecture", "workflow", "multiple", "system")
+    """Fast deterministic routing used as a safe baseline before model routing."""
+    text = " ".join(user_input.lower().split())
+    coding_hit = any(k in text for k in CODING)
+    research_hit = any(k in text for k in RESEARCH)
+    complex_hit = any(k in text for k in COMPLEX)
 
-    if any(k in text for k in coding):
-        return "complex" if any(k in text for k in complex_markers) else "coding"
-    if any(k in text for k in research):
-        return "complex" if any(k in text for k in complex_markers) else "research"
-    return "complex" if any(k in text for k in complex_markers) else "direct"
+    if complex_hit and (coding_hit or research_hit):
+        return "complex"
+    if coding_hit:
+        return "coding"
+    if research_hit:
+        return "research"
+    if complex_hit:
+        return "complex"
+    return "direct"
+
+
+def routing_features(user_input: str) -> dict[str, bool]:
+    """Expose routing signals for metrics, evaluation and future LLM routing."""
+    text = user_input.lower()
+    return {
+        "coding": any(k in text for k in CODING),
+        "research": any(k in text for k in RESEARCH),
+        "complex": any(k in text for k in COMPLEX),
+    }
