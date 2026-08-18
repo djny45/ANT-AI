@@ -1,4 +1,4 @@
-![ANT AI Logo](logo.png)
+![ANT AI Logo](logo.png) 
 
 # 🐜 ANT AI TECHNOLOGIES
 
