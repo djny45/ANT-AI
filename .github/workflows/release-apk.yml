@@ -49,9 +49,11 @@ jobs:
       - name: Prepare ANT CLAW release assets
         env:
           RELEASE_TAG: ${{ github.ref_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          TAG=${RELEASE_TAG}
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then TAG=${{ inputs.tag }}; fi
+          TAG="${RELEASE_TAG}"
+          if [ "${EVENT_NAME}" = "workflow_dispatch" ]; then TAG="${INPUT_TAG}"; fi
           mkdir -p release
           cp android_app/app/build/outputs/apk/release/*.apk release/ANT-CLAW-${TAG}.apk
           sha256sum release/ANT-CLAW-${TAG}.apk > release/SHA256SUMS.txt

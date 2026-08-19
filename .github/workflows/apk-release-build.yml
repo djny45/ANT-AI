@@ -3,6 +3,9 @@ name: ANT CLAW Release APK
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   release:
     runs-on: ubuntu-latest

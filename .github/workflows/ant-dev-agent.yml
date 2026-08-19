@@ -9,6 +9,9 @@ on:
     types:
       - completed
 
+permissions:
+  contents: read
+
 jobs:
   ant-dev-core:
     name: ANT DEV Repository Intelligence

@@ -1,6 +1,10 @@
 .idea/
 *.log
 
+# Python caches
+__pycache__/
+*.py[cod]
+
 # Android local configuration
 local.properties
 

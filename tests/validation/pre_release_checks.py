@@ -15,6 +15,7 @@ Performs comprehensive validation checks before release:
 """
 
 import asyncio
+import os
 import sys
 import json
 import subprocess
@@ -22,12 +23,12 @@ from datetime import datetime
 from typing import Dict, List, Tuple
 import httpx
 
-# Configuration
-BACKEND_URL = "http://localhost:8000"
-FRONTEND_URL = "http://localhost:3000"
-OLLAMA_URL = "http://localhost:11434"
-REDIS_URL = "redis://localhost:6379"
-DB_URL = "postgresql://antai_user:antai_secure_password@localhost:5432/antai_knowledge"
+# Configuration - endpoints and credentials come from the environment
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
+DB_URL = os.getenv("DATABASE_URL", "")
 
 class ValidationReport:
     """Validation report generator"""
@@ -131,6 +132,8 @@ async def check_ollama_models() -> Tuple[bool, str]:
 
 async def check_database_connection() -> Tuple[bool, str]:
     """Check PostgreSQL database connection"""
+    if not DB_URL:
+        return False, "DATABASE_URL is not set"
     try:
         import psycopg2
         conn = psycopg2.connect(DB_URL)
