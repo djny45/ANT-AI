@@ -88,13 +88,13 @@ def build_default_graph(
         return state
 
     def executor(state: AgentState) -> AgentState:
-        handlers = getattr(graph_executor, "handlers", {})
+        handlers = graph_executor.handlers
         for task in state.execution_plan:
             agent = task.get("agent", "unknown")
             context = dict(state.user_context)
             context["skills"] = task.get("skills", [])
             try:
-                if hasattr(handlers, "get") and handlers.get(agent) is not None:
+                if handlers.get(agent) is not None:
                     result = graph_executor.execute(agent, task, context)
                     outcome = {"execution_path": "workflow_executor", "result": result}
                 else:
@@ -162,7 +162,6 @@ def build_default_graph(
         block = ledger.add_action(action)
         state.audit_metadata["audit_id"] = block["hash"]
         state.audit_metadata["audit_chain_length"] = len(ledger.chain)
-        state.audit_id = block["hash"]
         return state
 
     def synthesizer(state: AgentState) -> AgentState:

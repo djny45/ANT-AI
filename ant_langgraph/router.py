@@ -1,3 +1,4 @@
+import re
 from typing import Literal
 
 Route = Literal["direct", "coding", "research", "complex"]
@@ -24,6 +25,7 @@ ACTION_INTENT = (
 def route_request(user_input: str) -> Route:
     """Fast deterministic routing used as a safe baseline before model routing."""
     text = " ".join(user_input.lower().split())
+    tokens = set(re.findall(r"\b\w+\b", text))
     informational = (
         text.endswith("?")
         or any(text.startswith(f"{word} ") for word in (
@@ -40,7 +42,7 @@ def route_request(user_input: str) -> Route:
             "can",
         ))
     )
-    if informational and not any(k in text for k in ACTION_INTENT):
+    if informational and not tokens.intersection(ACTION_INTENT):
         return "direct"
 
     coding_hit = any(k in text for k in CODING)

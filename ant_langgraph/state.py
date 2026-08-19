@@ -15,6 +15,7 @@ class AgentState:
     agent_results: List[Dict[str, Any]] = field(default_factory=list)
     tool_results: List[Dict[str, Any]] = field(default_factory=list)
     memory_context: Dict[str, Any] = field(default_factory=dict)
+    memory_saved: bool = False
     verification_results: Dict[str, Any] = field(default_factory=dict)
     final_response: str | None = None
     audit_metadata: Dict[str, Any] = field(default_factory=dict)

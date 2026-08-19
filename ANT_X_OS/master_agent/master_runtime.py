@@ -46,8 +46,13 @@ class MasterAgentRuntime:
                 })
 
         if self.evaluator:
-            try:
-                return self.evaluator.evaluate(results)
-            except TypeError:
-                return self.evaluator.evaluate(goal, results)
+            aggregate = {
+                "success": not any(
+                    isinstance(result, dict)
+                    and result.get("status") == "no_agent_found"
+                    for result in results
+                ),
+                "results": results,
+            }
+            return self.evaluator.evaluate(aggregate)
         return results
