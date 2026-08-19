@@ -11,6 +11,7 @@ from ANT_X_OS.core.evaluator import Evaluator
 from ANT_X_OS.core.executor import Executor as CoreExecutor
 from ANT_X_OS.skills.loader import load_builtin_skills
 from ANT_X_OS.skills.selector import SkillSelector
+from capabilities import register_capability_handlers
 from reliability.error_recovery import ErrorRecovery
 from security.audit_logger import AuditLogger
 from security.hash_ledger import HashLedger
@@ -72,6 +73,7 @@ def build_default_graph(
     load_builtin_skills()
     selector = skill_selector or SkillSelector()
     graph_executor = workflow_executor or WorkflowExecutor()
+    register_capability_handlers(graph_executor)
     fallback_executor = core_executor or CoreExecutor()
     result_evaluator = evaluator or Evaluator()
     memory_adapter = memory or MemoryAdapter()
@@ -169,23 +171,59 @@ def build_default_graph(
         state.capability_selections = selections
         return state
 
+    def record_outcome(
+        state: AgentState,
+        agent: str,
+        outcome: dict[str, Any],
+    ) -> None:
+        state.record_result(
+            agent,
+            outcome,
+            confidence=outcome.get("confidence", 0.0),
+        )
+        recorded = state.agent_results[-1]
+        for key in (
+            "execution_path",
+            "success",
+            "capability",
+            "handler",
+            "execution_target",
+            "verification",
+        ):
+            if key in outcome:
+                recorded[key] = outcome[key]
+        if "result" in outcome:
+            recorded["execution_result"] = outcome["result"]
+
     def executor(state: AgentState) -> AgentState:
         handlers = graph_executor.handlers
         for task in state.execution_plan:
             agent = task.get("agent", "unknown")
             context = dict(state.user_context)
+            context["request"] = state.user_input
             context["skills"] = task.get("skills", [])
             try:
                 if handlers.get(agent) is not None:
-                    result = graph_executor.execute(agent, task, context)
-                    outcome = {"execution_path": "workflow_executor", "result": result}
+                    envelope = graph_executor.execute(agent, task, context)
+                    outcome = {
+                        "execution_path": "capability_handler",
+                        "success": envelope.get("success", False),
+                        "capability": envelope.get("capability"),
+                        "handler": envelope.get("handler"),
+                        "execution_target": envelope.get("execution_target"),
+                        "result": envelope.get("result"),
+                        "confidence": envelope.get("confidence", 0.0),
+                        "verification": envelope.get("verification", {}),
+                    }
+                    record_outcome(state, agent, outcome)
                 else:
                     result = fallback_executor.execute(task)
                     outcome = {"execution_path": "core_executor", "result": result}
-                state.record_result(agent, outcome)
+                    record_outcome(state, agent, outcome)
             except Exception as error:  # noqa: BLE001
                 record_failure(state, "executor", error)
-                state.record_result(
+                record_outcome(
+                    state,
                     agent,
                     {"execution_path": "error", "error": str(error)},
                 )
@@ -195,17 +233,19 @@ def build_default_graph(
         checks = []
         for recorded in state.agent_results:
             outcome = recorded["result"]
-            raw_result = outcome.get("result", outcome)
-            if isinstance(raw_result, dict) and "success" in raw_result:
-                evaluation_input = raw_result
+            if isinstance(outcome, dict) and "success" in outcome:
+                evaluation_input = outcome
             else:
                 evaluation_input = {"success": "error" not in outcome}
             check = result_evaluator.evaluate(evaluation_input)
-            checks.append({
+            check_entry = {
                 "agent": recorded["agent"],
                 "execution_path": outcome.get("execution_path"),
                 "check": check,
-            })
+            }
+            if "verification" in outcome:
+                check_entry["handler_verification"] = outcome["verification"]
+            checks.append(check_entry)
 
         passed = all(item["check"].get("success", False) for item in checks)
         status = "verified" if passed and not state.errors else "failed"
@@ -273,10 +313,21 @@ def build_default_graph(
         if not state.execution_plan:
             state.final_response = "No execution plan was generated for this request."
             return state
-        agents = ", ".join(state.selected_agents) or "no agents"
+        summaries = []
+        for recorded in state.agent_results:
+            outcome = recorded["result"]
+            capability = outcome.get("capability", recorded["agent"])
+            result = outcome.get("result", {})
+            headline = (
+                result.get("headline")
+                if isinstance(result, dict)
+                else None
+            )
+            summaries.append(f"{capability}: {headline or 'execution result available'}")
+        summary = " ".join(summaries)
         status = state.verification_results.get("status", "unknown")
         state.final_response = (
-            f"Workflow completed for {agents}. Verification status: {status}."
+            f"{summary} Verification status: {status}."
         )
         return state
 
