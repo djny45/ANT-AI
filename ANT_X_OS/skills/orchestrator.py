@@ -1,5 +1,8 @@
+import logging
 from typing import Dict, Any, List
-from .registry import registry
+from .registry import registry as default_registry
+
+logger = logging.getLogger(__name__)
 
 class SkillOrchestrator:
     """Orchestrates validation and execution of a list of skills for a task.
@@ -10,7 +13,7 @@ class SkillOrchestrator:
     """
 
     def __init__(self, registry=None, memory=None):
-        self.registry = registry or registry
+        self.registry = registry or default_registry
         self.memory = memory
 
     def run(self, task: Dict[str, Any]) -> Dict[str, Any]:
@@ -34,7 +37,12 @@ class SkillOrchestrator:
             try:
                 valid = bool(skill.validate(context))
             except Exception as e:
-                validation_results[name] = {"validated": False, "reason": f"validate_error: {e}"}
+                logger.exception("Skill validation failed for %s", name)
+                validation_results[name] = {
+                    "validated": False,
+                    "reason": f"validate_error: {e}",
+                    "error_type": type(e).__name__,
+                }
                 overall = False
                 continue
 
@@ -48,7 +56,12 @@ class SkillOrchestrator:
                 result = skill.execute(task, memory=self.memory)
                 validation_results[name] = {"validated": True, "result": result}
             except Exception as e:
-                validation_results[name] = {"validated": False, "reason": f"execute_error: {e}"}
+                logger.exception("Skill execution failed for %s", name)
+                validation_results[name] = {
+                    "validated": False,
+                    "reason": f"execute_error: {e}",
+                    "error_type": type(e).__name__,
+                }
                 overall = False
 
         workflow = {"task": task.get("task") or task, "skills": skills, "validation": validation_results, "success": overall}
@@ -56,8 +69,11 @@ class SkillOrchestrator:
         if self.memory:
             try:
                 self.memory.store_workflow(workflow)
-            except Exception:
-                # be resilient to memory errors
-                pass
+            except Exception as e:
+                logger.exception("Failed to persist workflow snapshot to memory")
+                workflow["memory_error"] = {
+                    "error_type": type(e).__name__,
+                    "error": str(e),
+                }
 
         return {"workflow": workflow}

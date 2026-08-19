@@ -1,7 +1,11 @@
+import logging
 from dataclasses import dataclass, field
-from typing import Callable, Dict, Iterable, List
+from typing import Callable, Dict, List
 
+from .errors import NodeExecutionError, UnknownNodeError
 from .state import AgentState
+
+logger = logging.getLogger(__name__)
 
 NodeFn = Callable[[AgentState], AgentState]
 
@@ -28,8 +32,16 @@ class WorkflowGraph:
         while current and steps < max_steps:
             steps += 1
             state.current_node = current
-            fn = self.nodes[current]
-            state = fn(state)
+            fn = self.nodes.get(current)
+            if fn is None:
+                state.fail(f"unknown node: {current}")
+                raise UnknownNodeError(f"Node '{current}' is not registered in the graph")
+            try:
+                state = fn(state)
+            except Exception as error:
+                logger.exception("Graph node %s raised an exception", current)
+                state.fail(f"node {current} failed: {type(error).__name__}: {error}")
+                raise NodeExecutionError(current, error) from error
             next_nodes = self.edges.get(current, [])
             if not next_nodes:
                 break
