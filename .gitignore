@@ -22,3 +22,10 @@ build/
 
 # IDE files
 *.iml
+
+# Node dependencies
+node_modules/
+
+# Python bytecode
+__pycache__/
+*.pyc

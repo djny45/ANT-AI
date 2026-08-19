@@ -5,11 +5,14 @@ This module provides the execution boundary between the graph orchestration
 layer and existing ANT AI runtime components.
 """
 
+import logging
 from dataclasses import dataclass, field
 from typing import Any, Dict, List
 
 from .state import AgentState
 from .graph import build_default_graph
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -31,10 +34,14 @@ class ANTXOSPipeline:
 
     async def execute(self, state: GraphExecutionState):
         if self.audit:
-            await self.audit.log({
-                "event": "graph_execution_started",
-                "input": state.user_input,
-            })
+            try:
+                await self.audit.log({
+                    "event": "graph_execution_started",
+                    "input": state.user_input,
+                })
+            except Exception:
+                logger.exception("Audit logging failed for graph execution start")
+                raise
 
         return state
 
@@ -62,7 +69,11 @@ async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
 
     # Build and run the default graph. Graph.run is synchronous.
     graph = build_default_graph()
-    agent_state = graph.run(agent_state, start="planner")
+    try:
+        agent_state = graph.run(agent_state, start="planner")
+    except Exception:
+        logger.exception("Graph execution failed for input: %s", user_input)
+        raise
 
     # Run the execution pipeline bridge (audit/memory hooks)
     pipeline = ANTXOSPipeline(router=None, memory=None, audit=None)
@@ -76,6 +87,7 @@ async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
         "agent_results": agent_state.agent_results,
         "verification_results": agent_state.verification_results,
         "errors": agent_state.errors,
+        "status": "failed" if agent_state.errors else "completed",
         # placeholders for optional fields other consumers expect
         "risk_score": getattr(agent_state, "risk_score", 0),
         "memory_saved": getattr(agent_state, "memory_saved", False),

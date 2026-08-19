@@ -1,11 +1,11 @@
 """Skill selector maps tasks to required skills."""
 from typing import List, Dict, Any
-from .registry import registry
+from .registry import registry as default_registry
 
 
 class SkillSelector:
     def __init__(self, registry=None):
-        self.registry = registry or registry
+        self.registry = registry or default_registry
 
     def select_for_task(self, task: Dict[str, Any]) -> List[str]:
         """Return a list of skill names based on simple heuristics in task dict.
