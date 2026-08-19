@@ -22,3 +22,7 @@ build/
 
 # IDE files
 *.iml
+
+# Python
+__pycache__/
+*.py[cod]
