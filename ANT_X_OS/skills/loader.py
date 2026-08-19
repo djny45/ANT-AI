@@ -9,6 +9,8 @@ from .review_skill import ReviewSkill
 from .debugging_skill import DebuggingSkill
 from .security_skill import SecuritySkill
 from .deployment_skill import DeploymentSkill
+from .research_skill import ResearchSkill
+from .data_skill import DataSkill
 
 
 def load_builtin_skills():
@@ -24,5 +26,7 @@ def load_builtin_skills():
     registry.register(DebuggingSkill())
     registry.register(SecuritySkill())
     registry.register(DeploymentSkill())
+    registry.register(ResearchSkill())
+    registry.register(DataSkill())
 
     return registry

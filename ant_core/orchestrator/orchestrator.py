@@ -11,10 +11,15 @@ class IntelligenceOrchestrator:
 
     def prepare(self, request: str, context=None) -> IntelligenceState:
         state = IntelligenceState(request=request, context=context or {})
-        plan = self.planner.plan(request, state.context)
+        plan = self.planner.plan(request)
         state.plan = plan["tasks"]
         state.selected_agents = [task["agent"] for task in state.plan]
+        state.strategy = plan["strategy"]
+        state.required_capabilities = list(plan["required_capabilities"])
+        state.confidence = plan["confidence"]
         decision = self.decision_engine.decide(request, len(state.plan))
         state.context["decision"] = decision.__dict__
+        state.decision = decision.route
+        state.complexity = decision.complexity
         state.status = "planned"
         return state
