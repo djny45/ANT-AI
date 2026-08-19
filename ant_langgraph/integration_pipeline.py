@@ -1,8 +1,10 @@
 """ANT AI LangGraph-style integration pipeline."""
 
+import os
 from typing import Any
 
 from .graph import build_default_graph
+from .memory import MemoryAdapter, SQLAlchemyMemoryBackend
 from .state import AgentState
 
 
@@ -30,7 +32,13 @@ async def run_pipeline(request_state: dict[str, Any]) -> dict[str, Any]:
     )
 
     # Build and run the default graph. Graph.run is synchronous.
-    graph = build_default_graph()
+    database_url = os.environ.get("ANT_MEMORY_DATABASE_URL")
+    memory = (
+        MemoryAdapter(SQLAlchemyMemoryBackend(database_url))
+        if database_url
+        else None
+    )
+    graph = build_default_graph(memory=memory)
     agent_state = graph.run(agent_state, start="planner")
 
     def stage_recovery(stage: str) -> list[dict[str, Any]]:
@@ -42,6 +50,13 @@ async def run_pipeline(request_state: dict[str, Any]) -> dict[str, Any]:
 
     def stage_status(stage: str) -> str:
         return agent_state.stage_status.get(stage, "completed")
+
+    def stage_event(stage: str) -> dict[str, Any]:
+        return next(
+            event
+            for event in agent_state.events
+            if event.get("name") == stage
+        )
 
     trace = {
         "request": {
@@ -56,6 +71,7 @@ async def run_pipeline(request_state: dict[str, Any]) -> dict[str, Any]:
         },
         "plan": {
             "status": stage_status("planner"),
+            "event": stage_event("planner"),
             "plan": list(agent_state.execution_plan),
             "strategy": agent_state.strategy,
             "required_capabilities": list(agent_state.required_capabilities),
@@ -64,33 +80,39 @@ async def run_pipeline(request_state: dict[str, Any]) -> dict[str, Any]:
         },
         "capability": {
             "status": stage_status("capability"),
+            "event": stage_event("capability"),
             "selections": list(agent_state.capability_selections),
             "plan": list(agent_state.execution_plan),
             "recovery": stage_recovery("capability"),
         },
         "execution": {
             "status": stage_status("executor"),
+            "event": stage_event("executor"),
             "results": list(agent_state.agent_results),
             "recovery": stage_recovery("executor"),
         },
         "verification": {
             "status": stage_status("verifier"),
+            "event": stage_event("verifier"),
             "result": dict(agent_state.verification_results),
             "recovery": stage_recovery("verifier"),
         },
         "memory": {
             "status": stage_status("memory"),
+            "event": stage_event("memory"),
             "saved": agent_state.memory_saved,
             "context": dict(agent_state.memory_context),
             "recovery": stage_recovery("memory"),
         },
         "audit": {
             "status": stage_status("audit"),
+            "event": stage_event("audit"),
             "metadata": dict(agent_state.audit_metadata),
             "recovery": stage_recovery("audit"),
         },
         "response": {
             "status": stage_status("synthesizer"),
+            "event": stage_event("synthesizer"),
             "final_response": agent_state.final_response or "",
             "recovery": stage_recovery("synthesizer"),
         },
@@ -108,6 +130,7 @@ async def run_pipeline(request_state: dict[str, Any]) -> dict[str, Any]:
         "audit_id": agent_state.audit_metadata.get("audit_id"),
         "memory_context": agent_state.memory_context,
         "execution_plan": agent_state.execution_plan,
+        "events": list(agent_state.events),
         **trace,
     }
 

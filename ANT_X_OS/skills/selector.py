@@ -14,8 +14,10 @@ class SkillSelector:
     def select_capabilities_for_task(self, task: dict[str, Any]) -> list[dict[str, Any]]:
         """Return selected capabilities and the evidence for each selection."""
         text = ""
+        task_type = ""
         if isinstance(task, dict):
-            text = (task.get("type", "") + " " + task.get("description", "")).lower()
+            task_type = str(task.get("type", "")).lower().strip()
+            text = (task_type + " " + task.get("description", "")).lower()
         else:
             text = str(task).lower()
 
@@ -72,6 +74,48 @@ class SkillSelector:
         )
         selections: list[dict[str, Any]] = []
         selected_names: set[str] = set()
+        family_capabilities = {
+            "coding": (
+                "Coding Skill",
+                "coding",
+                "The planner assigned the coding capability family.",
+                0.96,
+            ),
+            "research": (
+                "Research Skill",
+                "research",
+                "The planner assigned the research capability family.",
+                0.96,
+            ),
+            "security": (
+                "Security Skill",
+                "security",
+                "The planner assigned the security capability family.",
+                0.96,
+            ),
+            "data": (
+                "Data Skill",
+                "data",
+                "The planner assigned the data capability family.",
+                0.96,
+            ),
+            "master": (
+                "Think Before Coding",
+                "master",
+                "The planner assigned the master capability family.",
+                0.70,
+            ),
+        }
+        if task_type in family_capabilities:
+            capability, target, reason, confidence = family_capabilities[task_type]
+            if self.registry.get(capability):
+                selections.append({
+                    "capability": capability,
+                    "reason": reason,
+                    "confidence": confidence,
+                    "execution_target": target,
+                })
+                selected_names.add(capability)
         for keywords, capability, target, reason, confidence in rules:
             if (
                 any(keyword in text for keyword in keywords)

@@ -101,11 +101,31 @@ def test_pipeline_trace_contains_all_sections_and_preserves_existing_keys():
     assert result["request"]["request_id"] == "trace-request"
     assert result["plan"]["plan"]
     assert result["capability"]["selections"]
+    targets = {
+        selection["execution_target"]
+        for selection in result["capability"]["selections"]
+    }
+    assert {"coding", "research"}.issubset(targets)
     assert result["execution"]["results"]
     assert result["verification"]["result"]["status"] in {"verified", "failed"}
     assert result["memory"]["saved"] is True
     assert re.fullmatch(r"[0-9a-f]{64}", result["audit_id"])
     assert result["response"]["final_response"]
+    expected_events = [
+        "planner",
+        "capability",
+        "executor",
+        "verifier",
+        "memory",
+        "audit",
+        "synthesizer",
+    ]
+    assert [event["name"] for event in result["events"]] == expected_events
+    for section, stage in zip(
+        ("plan", "capability", "execution", "verification", "memory", "audit", "response"),
+        expected_events,
+    ):
+        assert result[section]["event"]["name"] == stage
     for key in (
         "final_response",
         "selected_agents",
@@ -168,3 +188,28 @@ def test_execute_returns_full_trace_for_required_request():
     assert result["execution"]["results"]
     assert result["memory"]["saved"] is True
     assert re.fullmatch(r"[0-9a-f]{64}", result["audit_id"])
+
+
+def test_pipeline_uses_configured_sqlalchemy_memory_backend(monkeypatch, tmp_path):
+    database_url = f"sqlite:///{tmp_path / 'pipeline-memory.db'}"
+    monkeypatch.setenv("ANT_MEMORY_DATABASE_URL", database_url)
+
+    first = asyncio.run(
+        run_pipeline({
+            "user_input": "implement a Python API",
+            "conversation_id": "persistent-conversation",
+        })
+    )
+    second = asyncio.run(
+        run_pipeline({
+            "user_input": "implement a Python API",
+            "conversation_id": "persistent-conversation",
+        })
+    )
+
+    assert len(first["memory_context"]["short_term"]) == 1
+    assert len(second["memory_context"]["short_term"]) == 2
+    assert all(
+        item["input"] == "implement a Python API"
+        for item in second["memory_context"]["short_term"]
+    )
