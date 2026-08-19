@@ -1,3 +1,5 @@
+import pytest
+
 from ant_langgraph.executor import WorkflowExecutor
 from ant_langgraph.memory import MemoryAdapter
 from ant_langgraph.state import AgentState
@@ -68,16 +70,14 @@ def test_workflow_executor_registers_and_executes_keyword_arguments():
 
 
 def test_workflow_executor_uses_constructor_handlers_and_rejects_unknown_agent():
-    handler = lambda **kwargs: kwargs["task"]["id"]
+    def handler(**kwargs):
+        return kwargs["task"]["id"]
+
     executor = WorkflowExecutor({"agent-a": handler})
 
     assert executor.execute("agent-a", {"id": 7}, {}) == 7
-    try:
+    with pytest.raises(KeyError, match="missing"):
         executor.execute("missing", {}, {})
-    except KeyError as error:
-        assert "missing" in str(error)
-    else:
-        raise AssertionError("missing agent did not raise KeyError")
 
 
 def test_agent_state_records_clamped_results_and_accumulates_failures():

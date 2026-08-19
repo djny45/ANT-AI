@@ -25,6 +25,8 @@ def test_block_and_unblock_client():
 
 def test_global_limit_auto_blocks_offending_client():
     limiter = RateLimiter(max_requests=1, window_seconds=60)
+    # allow() calls block_client() while holding self.lock, so the shipped
+    # non-reentrant lock deadlocks on this path; an RLock exercises the intent.
     limiter.lock = threading.RLock()
 
     for index in range(10):
