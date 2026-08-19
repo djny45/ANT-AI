@@ -1,8 +1,9 @@
 """Enhanced security manager with proper access control."""
 
 import logging
-from typing import Set, Dict, List, Any
-from datetime import datetime
+from typing import Dict, List, Any
+
+from ant_common import AuditTrail, utc_timestamp
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +13,11 @@ class SecurityManager:
     def __init__(self):
         self.allowed = set()  # Allowed actions
         self.denied = set()  # FIX: Explicitly denied actions (default deny)
-        self.access_log = []  # FIX: Access audit trail
+        self.audit = AuditTrail(logger=logger, log_level=logging.DEBUG, message_prefix="Security access log")
+    
+    @property
+    def access_log(self) -> List[Dict[str, Any]]:
+        return self.audit.entries
     
     def allow(self, action: str) -> None:
         """Explicitly allow an action."""
@@ -46,21 +51,14 @@ class SecurityManager:
         return {
             "action": action,
             "allowed": allowed,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_timestamp(),
             "reason": "Not in allowed list" if not allowed else "Allowed"
         }
     
     def _log_access(self, operation: str, action: str, result: bool) -> None:
         """Log access attempt."""
-        entry = {
-            "timestamp": datetime.utcnow().isoformat(),
-            "operation": operation,
-            "action": action,
-            "result": result
-        }
-        self.access_log.append(entry)
-        logger.debug(f"Security access log: {entry}")
+        self.audit.record(operation=operation, action=action, result=result)
     
     def get_access_log(self) -> List[Dict[str, Any]]:
         """Retrieve access log."""
-        return self.access_log.copy()
+        return self.audit.history()

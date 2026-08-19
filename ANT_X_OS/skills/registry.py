@@ -1,13 +1,16 @@
 """Registry for skills: register, find, list."""
-from typing import Dict, List, Optional
-from .base_skill import Skill, BaseSkill
+from typing import List, Optional
+
+from ant_common import Registry, keyword_match
+
+from .base_skill import Skill
 
 
 class SkillRegistry:
     _instance = None
 
     def __init__(self):
-        self._skills: Dict[str, Skill] = {}
+        self._registry: Registry[Skill] = Registry()
 
     @classmethod
     def instance(cls):
@@ -16,24 +19,26 @@ class SkillRegistry:
         return cls._instance
 
     def register(self, skill: Skill):
-        self._skills[skill.name] = skill
+        self._registry.register(skill.name, skill)
 
     def get(self, name: str) -> Optional[Skill]:
-        return self._skills.get(name)
+        return self._registry.get(name)
 
     def search(self, query: str) -> List[Skill]:
-        q = query.lower()
-        return [s for s in self._skills.values() if q in s.name.lower() or q in s.description.lower()]
+        return [
+            s for s in self._registry.values()
+            if keyword_match(s.name, query) or keyword_match(s.description, query)
+        ]
 
     def list(self) -> List[Skill]:
-        return list(self._skills.values())
+        return self._registry.values()
 
     def clear(self):
-        self._skills = {}
+        self._registry.clear()
 
     # helpers for dashboard / introspection
     def active_skills(self) -> List[str]:
-        return [s.name for s in self._skills.values()]
+        return self._registry.names()
 
 
 # convenience

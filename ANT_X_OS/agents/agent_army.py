@@ -1,5 +1,7 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, Any
+
+from ant_common import Registry
 
 @dataclass
 class AgentWorker:
@@ -16,10 +18,14 @@ class AgentWorker:
 
 class AgentArmyCoordinator:
     def __init__(self):
-        self.agents = {}
+        self._registry: Registry[AgentWorker] = Registry()
+
+    @property
+    def agents(self) -> Dict[str, AgentWorker]:
+        return self._registry.mapping
 
     def register(self, agent: AgentWorker):
-        self.agents[agent.name] = agent
+        self._registry.register(agent.name, agent)
 
     def dispatch(self, agent_name: str, task: str):
-        return self.agents[agent_name].execute(task)
+        return self._registry.mapping[agent_name].execute(task)

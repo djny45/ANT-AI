@@ -2,7 +2,8 @@
 
 import logging
 from typing import Dict, Any, List
-from datetime import datetime
+
+from ant_common import AuditTrail, approval_result
 
 logger = logging.getLogger(__name__)
 
@@ -11,12 +12,16 @@ class SecurityGateway:
     
     def __init__(self):
         self.approved_connectors = set()  # FIX: Track approved connectors
-        self.validation_log = []  # FIX: Audit trail
+        self.audit = AuditTrail(logger=logger, message_prefix="Connector validation")
         self.required_permissions = {
             'network': ['read_only', 'write', 'execute'],
             'file': ['read_only', 'write', 'delete'],
             'system': ['read_only', 'execute']
         }
+    
+    @property
+    def validation_log(self) -> List[Dict[str, Any]]:
+        return self.audit.entries
     
     def validate(self, connector: str, permissions: List[str]) -> Dict[str, Any]:
         """Validate connector and permissions. FIX: Actual validation logic."""
@@ -28,19 +33,17 @@ class SecurityGateway:
         valid_permissions = self._validate_permissions(connector, permissions)
         
         # FIX: Return actual decision instead of always pending
-        result = {
-            "connector": connector,
-            "permissions": permissions,
-            "approved": is_approved and valid_permissions,  # FIX: Actual decision
-            "review_required": not (is_approved and valid_permissions),
-            "timestamp": datetime.utcnow().isoformat(),
-            "validation_details": {
+        result = approval_result(
+            is_approved and valid_permissions,
+            connector=connector,
+            permissions=permissions,
+            validation_details={
                 "connector_approved": is_approved,
                 "permissions_valid": valid_permissions
-            }
-        }
+            },
+        )
         
-        self._log_validation(connector, result)
+        self.audit.record(connector=connector, approved=result['approved'])
         return result
     
     def approve_connector(self, connector: str) -> None:
@@ -60,12 +63,3 @@ class SecurityGateway:
             if perm not in ['read_only', 'write', 'execute', 'delete']:
                 return False
         return True
-    
-    def _log_validation(self, connector: str, result: Dict[str, Any]) -> None:
-        """Log validation attempt."""
-        self.validation_log.append({
-            "timestamp": datetime.utcnow().isoformat(),
-            "connector": connector,
-            "approved": result['approved']
-        })
-        logger.info(f"Connector validation: {connector} - Approved: {result['approved']}")

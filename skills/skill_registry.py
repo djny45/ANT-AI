@@ -1,5 +1,8 @@
 """ANT AI skill registry."""
 
+from ant_common import keyword_filter
+
+
 class SkillRegistry:
     def __init__(self):
         self.registry = []
@@ -8,4 +11,4 @@ class SkillRegistry:
         self.registry.append(skill)
 
     def search(self, keyword):
-        return [s for s in self.registry if keyword.lower() in str(s).lower()]
+        return keyword_filter(self.registry, keyword)

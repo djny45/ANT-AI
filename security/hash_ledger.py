@@ -1,6 +1,6 @@
 """ANT AI hash chain audit ledger."""
 
-import hashlib
+from ant_common import sha256_hex
 
 class HashLedger:
     def __init__(self):
@@ -8,12 +8,10 @@ class HashLedger:
 
     def add_action(self, action):
         previous = self.chain[-1]["hash"] if self.chain else "GENESIS"
-        data = previous + str(action)
-        block_hash = hashlib.sha256(data.encode()).hexdigest()
         block = {
             "action": action,
             "previous": previous,
-            "hash": block_hash
+            "hash": sha256_hex(previous + str(action))
         }
         self.chain.append(block)
         return block

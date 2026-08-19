@@ -1,11 +1,18 @@
 """ANT AI vector memory foundation."""
 
+from ant_common import KeywordStore
+
+
 class VectorMemory:
     def __init__(self):
-        self.entries = []
+        self._store = KeywordStore()
+
+    @property
+    def entries(self):
+        return self._store.entries
 
     def store(self, text, embedding=None):
-        self.entries.append({"text": text, "embedding": embedding})
+        return self._store.add(text, embedding=embedding)
 
     def search(self, query):
-        return self.entries
+        return self._store.all()

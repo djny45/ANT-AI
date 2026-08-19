@@ -1,18 +1,18 @@
 """Godmode 10x Audit Logger."""
 
-from datetime import datetime
+from ant_common import AuditTrail
 
 
 class AuditLog:
     def __init__(self):
-        self.events = []
+        self.trail = AuditTrail()
+
+    @property
+    def events(self):
+        return self.trail.entries
 
     def record(self, event: str, metadata: dict | None = None):
-        self.events.append({
-            "event": event,
-            "metadata": metadata or {},
-            "timestamp": datetime.utcnow().isoformat(),
-        })
+        return self.trail.record(event=event, metadata=metadata or {})
 
     def history(self):
-        return self.events
+        return self.trail.history()
