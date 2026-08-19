@@ -86,9 +86,9 @@ The project evolves from orchestrating independent components into a unified int
 
         |          |            |
 
-   Research    Coding      Security
+  Research  Coding  Security  Data
 
-   Capability Capability Capability
+        Capability Formation
 
 
         -------------------------
@@ -133,11 +133,11 @@ Specialized Execution
    ↓
 Verification / Risk Review
    ↓
-Synthesis
-   ↓
 Memory Update
    ↓
 Audit Event
+   ↓
+Response Synthesis
 ```
 
 Simple requests can take a direct path; focused requests can use a specialized capability; complex requests can form multiple coordinated capabilities.

@@ -53,9 +53,12 @@ async def run_pipeline(request_state: dict[str, Any]) -> dict[str, Any]:
 
     def stage_event(stage: str) -> dict[str, Any]:
         return next(
-            event
-            for event in agent_state.events
-            if event.get("name") == stage
+            (
+                event
+                for event in agent_state.events
+                if event.get("name") == stage
+            ),
+            {},
         )
 
     trace = {
