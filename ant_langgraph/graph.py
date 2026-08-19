@@ -174,26 +174,16 @@ def build_default_graph(
     def record_outcome(
         state: AgentState,
         agent: str,
-        outcome: dict[str, Any],
+        result: Any,
+        metadata: dict[str, Any],
     ) -> None:
         state.record_result(
             agent,
-            outcome,
-            confidence=outcome.get("confidence", 0.0),
+            result,
+            confidence=metadata.get("confidence", 0.0),
         )
         recorded = state.agent_results[-1]
-        for key in (
-            "execution_path",
-            "success",
-            "capability",
-            "handler",
-            "execution_target",
-            "verification",
-        ):
-            if key in outcome:
-                recorded[key] = outcome[key]
-        if "result" in outcome:
-            recorded["execution_result"] = outcome["result"]
+        recorded.update(metadata)
 
     def executor(state: AgentState) -> AgentState:
         handlers = graph_executor.handlers
@@ -205,46 +195,59 @@ def build_default_graph(
             try:
                 if handlers.get(agent) is not None:
                     envelope = graph_executor.execute(agent, task, context)
-                    outcome = {
+                    metadata = {
                         "execution_path": "capability_handler",
                         "success": envelope.get("success", False),
                         "capability": envelope.get("capability"),
                         "handler": envelope.get("handler"),
                         "execution_target": envelope.get("execution_target"),
-                        "result": envelope.get("result"),
                         "confidence": envelope.get("confidence", 0.0),
                         "verification": envelope.get("verification", {}),
                     }
-                    record_outcome(state, agent, outcome)
+                    record_outcome(
+                        state,
+                        agent,
+                        envelope.get("result"),
+                        metadata,
+                    )
                 else:
                     result = fallback_executor.execute(task)
-                    outcome = {"execution_path": "core_executor", "result": result}
-                    record_outcome(state, agent, outcome)
+                    metadata = {"execution_path": "core_executor"}
+                    if isinstance(result, dict) and "success" in result:
+                        metadata["success"] = result["success"]
+                    record_outcome(state, agent, result, metadata)
             except Exception as error:  # noqa: BLE001
                 record_failure(state, "executor", error)
                 record_outcome(
                     state,
                     agent,
-                    {"execution_path": "error", "error": str(error)},
+                    None,
+                    {
+                        "execution_path": "error",
+                        "success": False,
+                        "error": str(error),
+                    },
                 )
         return state
 
     def verifier(state: AgentState) -> AgentState:
         checks = []
         for recorded in state.agent_results:
-            outcome = recorded["result"]
-            if isinstance(outcome, dict) and "success" in outcome:
-                evaluation_input = outcome
-            else:
-                evaluation_input = {"success": "error" not in outcome}
+            evaluation_input = {
+                "success": recorded.get(
+                    "success",
+                    "error" not in recorded,
+                ),
+                "result": recorded["result"],
+            }
             check = result_evaluator.evaluate(evaluation_input)
             check_entry = {
                 "agent": recorded["agent"],
-                "execution_path": outcome.get("execution_path"),
+                "execution_path": recorded.get("execution_path"),
                 "check": check,
             }
-            if "verification" in outcome:
-                check_entry["handler_verification"] = outcome["verification"]
+            if "verification" in recorded:
+                check_entry["handler_verification"] = recorded["verification"]
             checks.append(check_entry)
 
         passed = all(item["check"].get("success", False) for item in checks)
@@ -277,7 +280,7 @@ def build_default_graph(
         tools_used = [
             {
                 "agent": recorded["agent"],
-                "execution_path": recorded["result"].get("execution_path"),
+                "execution_path": recorded.get("execution_path"),
                 "capabilities": next(
                     (
                         task.get("skills", [])
@@ -315,9 +318,8 @@ def build_default_graph(
             return state
         summaries = []
         for recorded in state.agent_results:
-            outcome = recorded["result"]
-            capability = outcome.get("capability", recorded["agent"])
-            result = outcome.get("result", {})
+            capability = recorded.get("capability", recorded["agent"])
+            result = recorded.get("result", {})
             headline = (
                 result.get("headline")
                 if isinstance(result, dict)

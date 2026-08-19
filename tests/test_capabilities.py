@@ -128,19 +128,13 @@ def test_pipeline_exposes_real_handler_result_in_trace_and_audit():
         for item in execution_results
         if item["agent"] == "coding"
     )
-    coding_result = coding_record["result"]
     assert coding_record["execution_path"] == "capability_handler"
     assert coding_record["capability"] == "Coding Skill"
     assert coding_record["handler"] == "coding_capability"
     assert coding_record["confidence"] > 0
     assert coding_record["verification"]["source_inspected"] is True
-    assert coding_record["execution_result"]["functions"][0]["name"] == "useful"
-    assert coding_result["execution_path"] == "capability_handler"
-    assert coding_result["capability"] == "Coding Skill"
-    assert coding_result["handler"] == "coding_capability"
-    assert coding_result["confidence"] > 0
-    assert coding_result["verification"]["source_inspected"] is True
-    assert coding_result["result"]["functions"][0]["name"] == "useful"
+    assert "execution_result" not in coding_record
+    assert coding_record["result"]["functions"][0]["name"] == "useful"
 
     check = next(
         item
@@ -149,13 +143,13 @@ def test_pipeline_exposes_real_handler_result_in_trace_and_audit():
     )
     assert check["handler_verification"]["source_inspected"] is True
     audit_result = next(
-        item["result"]
+        item
         for item in result["audit"]["metadata"]["audit_record"]["result"]
         if item["agent"] == "coding"
     )
     assert audit_result["execution_path"] == "capability_handler"
-    assert audit_result["result"]["functions"][0]["name"] == "useful"
     assert audit_result["verification"]["source_inspected"] is True
+    assert audit_result["result"]["functions"][0]["name"] == "useful"
     assert result["audit"]["metadata"]["audit_record"]["verification_status"] in {
         "verified",
         "failed",
