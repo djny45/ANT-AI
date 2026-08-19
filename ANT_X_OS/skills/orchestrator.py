@@ -1,5 +1,5 @@
 from typing import Dict, Any, List
-from .registry import registry
+from .registry import registry as default_registry
 
 class SkillOrchestrator:
     """Orchestrates validation and execution of a list of skills for a task.
@@ -10,7 +10,7 @@ class SkillOrchestrator:
     """
 
     def __init__(self, registry=None, memory=None):
-        self.registry = registry or registry
+        self.registry = registry or default_registry
         self.memory = memory
 
     def run(self, task: Dict[str, Any]) -> Dict[str, Any]:

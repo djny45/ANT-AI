@@ -64,11 +64,6 @@ async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
     graph = build_default_graph()
     agent_state = graph.run(agent_state, start="planner")
 
-    # Run the execution pipeline bridge (audit/memory hooks)
-    pipeline = ANTXOSPipeline(router=None, memory=None, audit=None)
-    gstate = GraphExecutionState(user_input=user_input, context=context)
-    await pipeline.execute(gstate)
-
     # Convert results to plain dict
     out: Dict[str, Any] = {
         "final_response": agent_state.final_response or "",
@@ -76,10 +71,11 @@ async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
         "agent_results": agent_state.agent_results,
         "verification_results": agent_state.verification_results,
         "errors": agent_state.errors,
-        # placeholders for optional fields other consumers expect
         "risk_score": getattr(agent_state, "risk_score", 0),
         "memory_saved": getattr(agent_state, "memory_saved", False),
-        "audit_id": getattr(gstate, "audit_id", None),
+        "audit_id": agent_state.audit_metadata.get("audit_id"),
+        "memory_context": agent_state.memory_context,
+        "execution_plan": agent_state.execution_plan,
     }
 
     return out

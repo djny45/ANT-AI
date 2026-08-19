@@ -7,14 +7,14 @@ Tag: v0.1-beta
 
 ## FINAL DECISION
 
-Decision: NO-GO (Validation Pending)
+Decision: CONDITIONAL GO (local workflow evidence complete)
 
 Reason:
-The architecture is defined, but complete release evidence is required before private beta approval.
+The local ANT AI workflow is wired and passing its end-to-end validation. Deployment, model, and service-stack validation remain outside this change.
 
 ## CORE FUNCTIONALITY
 
-Status: NO-GO
+Status: PASS (local)
 
 Pipeline:
 
@@ -37,15 +37,16 @@ Audit
 Response
 
 Evidence:
-- API test: Pending
-- Workflow test: Pending end-to-end validation
-- Capability routing test: Pending
-- Memory update test: Pending
-- Audit generation test: Pending
+- Full pytest run: 23 passed, 1 warning
+- API test: POST /execute returned 200 with normalized pipeline output
+- Workflow test: planner → capability → executor → verifier → memory → audit → synthesizer
+- Capability routing test: coding request selected registered skills
+- Memory update test: saved run record loaded into graph state
+- Audit generation test: SHA-256 ledger hash and chain length recorded
 
 ## INTELLIGENCE QUALITY
 
-Status: NO-GO
+Status: NOT VERIFIED
 
 Verification:
 - Intent understanding: Pending benchmark
@@ -56,7 +57,7 @@ Verification:
 
 ## RELIABILITY
 
-Status: NO-GO
+Status: NOT VERIFIED
 
 Required validation:
 - Error recovery
@@ -76,8 +77,7 @@ Completed design:
 Pending:
 - Security scan
 - Secret scan
-- Permission tests
-- Audit validation
+- Audit validation beyond local unit coverage
 
 ## PERFORMANCE
 
@@ -104,25 +104,25 @@ DOCKER:
 VPS:
 - Ready: NO
 
-## BLOCKERS
+## REMAINING RELEASE BLOCKERS
 
-1. Component: Full system integration testing
-Issue: Complete pipeline validation evidence missing.
-Severity: Critical
-Fix: Execute end-to-end release tests.
-
-2. Component: Production deployment validation
+1. Component: Production deployment validation
 Issue: Docker and VPS readiness not confirmed.
 Severity: High
 Fix: Complete deployment dry run and health checks.
 
+2. Component: External service stack
+Issue: Postgres, Redis, Ollama, and network-backed integrations were not exercised.
+Severity: High
+Fix: Validate the configured service stack in a controlled environment.
+
 ## FINAL STATUS
 
-Architecture: Needs Final Verification
+Architecture: Locally Verified
 
-Private Beta: Blocked
+Private Beta: Conditional on deployment validation
 
 Production Readiness: Not Ready
 
 Next Action:
-Resolve blockers and execute release validation phase.
+Resolve deployment and external-service blockers, then execute release validation.
