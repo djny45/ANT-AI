@@ -41,7 +41,7 @@ class RateLimiter:
                 if now - r < self.window_seconds
             ]
             if len(self.global_requests) >= (self.max_requests * 10):
-                self.block_client(client_id)
+                self._block_client_locked(client_id)
                 return False
             
             # Add request
@@ -52,7 +52,11 @@ class RateLimiter:
     def block_client(self, client_id: str) -> None:
         """Block a misbehaving client."""
         with self.lock:
-            self.blocked_ips.add(client_id)
+            self._block_client_locked(client_id)
+
+    def _block_client_locked(self, client_id: str) -> None:
+        """Block a client. Caller must already hold the lock."""
+        self.blocked_ips.add(client_id)
     
     def unblock_client(self, client_id: str) -> None:
         """Unblock a client."""
