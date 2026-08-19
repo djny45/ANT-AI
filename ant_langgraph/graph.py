@@ -82,7 +82,7 @@ def build_default_graph(
         for task in state.execution_plan:
             selection_task = {
                 "type": task.get("agent", ""),
-                "description": task.get("objective", ""),
+                "description": f"{task.get('objective', '')} {state.user_input}",
             }
             task["skills"] = selector.select_for_task(selection_task)
         return state

@@ -22,7 +22,9 @@ def test_run_pipeline_exposes_evidence_for_each_stage():
     )
 
     assert result["execution_plan"]
-    assert any(task.get("skills") for task in result["execution_plan"])
+    assert any(
+        "Coding Skill" in task.get("skills", []) for task in result["execution_plan"]
+    )
     assert result["agent_results"]
     assert result["verification_results"]["status"] in {"verified", "failed"}
     assert result["memory_context"]["short_term"]
