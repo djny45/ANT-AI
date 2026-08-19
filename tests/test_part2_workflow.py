@@ -3,12 +3,12 @@ import re
 
 from fastapi.testclient import TestClient
 
-from ANT_X_OS.api.server import app
 from ant_core.orchestrator.orchestrator import IntelligenceOrchestrator
 from ant_langgraph.graph import build_default_graph
 from ant_langgraph.integration_pipeline import run_pipeline
 from ant_langgraph.memory import MemoryAdapter, SQLAlchemyMemoryBackend
 from ant_langgraph.state import AgentState
+from ANT_X_OS.api.server import app
 
 
 def test_sqlalchemy_memory_persists_between_adapter_instances(tmp_path):
@@ -145,6 +145,7 @@ def test_execute_returns_full_trace_for_required_request():
         json={
             "message": "Analyze this Python project and suggest improvements",
             "conversation_id": "api-trace-test",
+            "request_id": "api-request",
         },
     )
 
@@ -161,6 +162,7 @@ def test_execute_returns_full_trace_for_required_request():
         "response",
     }.issubset(result)
     assert result["response"]["final_response"]
+    assert result["request"]["request_id"] == "api-request"
     assert result["plan"]["plan"]
     assert result["capability"]["selections"]
     assert result["execution"]["results"]

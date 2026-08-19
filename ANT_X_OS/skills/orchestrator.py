@@ -1,5 +1,7 @@
-from typing import Dict, Any, List
+from typing import Any
+
 from .registry import registry as default_registry
+
 
 class SkillOrchestrator:
     """Orchestrates validation and execution of a list of skills for a task.
@@ -13,15 +15,15 @@ class SkillOrchestrator:
         self.registry = registry or default_registry
         self.memory = memory
 
-    def run(self, task: Dict[str, Any]) -> Dict[str, Any]:
-        skills: List[str] = task.get("skills", [])
+    def run(self, task: dict[str, Any]) -> dict[str, Any]:
+        skills: list[str] = task.get("skills", [])
         context = {
             "repo": task.get("repo"),
             "description": task.get("description"),
             "goal": task.get("goal"),
         }
 
-        validation_results: Dict[str, Dict[str, Any]] = {}
+        validation_results: dict[str, dict[str, Any]] = {}
         overall = True
 
         for name in skills:
@@ -33,7 +35,7 @@ class SkillOrchestrator:
 
             try:
                 valid = bool(skill.validate(context))
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 validation_results[name] = {"validated": False, "reason": f"validate_error: {e}"}
                 overall = False
                 continue
@@ -47,7 +49,7 @@ class SkillOrchestrator:
             try:
                 result = skill.execute(task, memory=self.memory)
                 validation_results[name] = {"validated": True, "result": result}
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 validation_results[name] = {"validated": False, "reason": f"execute_error: {e}"}
                 overall = False
 
@@ -56,7 +58,7 @@ class SkillOrchestrator:
         if self.memory:
             try:
                 self.memory.store_workflow(workflow)
-            except Exception:
+            except Exception:  # noqa: BLE001, S110
                 # be resilient to memory errors
                 pass
 

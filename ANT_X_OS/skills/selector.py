@@ -1,5 +1,6 @@
 """Skill selector maps tasks to required skills."""
-from typing import List, Dict, Any
+from typing import Any
+
 from .registry import registry as default_registry
 
 
@@ -7,10 +8,10 @@ class SkillSelector:
     def __init__(self, registry=None):
         self.registry = registry or default_registry
 
-    def select_for_task(self, task: Dict[str, Any]) -> List[str]:
+    def select_for_task(self, task: dict[str, Any]) -> list[str]:
         return [selection["capability"] for selection in self.select_capabilities_for_task(task)]
 
-    def select_capabilities_for_task(self, task: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def select_capabilities_for_task(self, task: dict[str, Any]) -> list[dict[str, Any]]:
         """Return selected capabilities and the evidence for each selection."""
         text = ""
         if isinstance(task, dict):
@@ -69,18 +70,21 @@ class SkillSelector:
                 0.84,
             ),
         )
-        selections: list[Dict[str, Any]] = []
+        selections: list[dict[str, Any]] = []
         selected_names: set[str] = set()
         for keywords, capability, target, reason, confidence in rules:
-            if any(keyword in text for keyword in keywords):
-                if capability not in selected_names and self.registry.get(capability):
-                    selections.append({
-                        "capability": capability,
-                        "reason": reason,
-                        "confidence": confidence,
-                        "execution_target": target,
-                    })
-                    selected_names.add(capability)
+            if (
+                any(keyword in text for keyword in keywords)
+                and capability not in selected_names
+                and self.registry.get(capability)
+            ):
+                selections.append({
+                    "capability": capability,
+                    "reason": reason,
+                    "confidence": confidence,
+                    "execution_target": target,
+                })
+                selected_names.add(capability)
 
         if not selections and self.registry.get("Think Before Coding"):
             selections.append({

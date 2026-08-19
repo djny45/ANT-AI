@@ -1,7 +1,17 @@
 import json
-from typing import Any, Dict
+from typing import Any
 
-from sqlalchemy import Column, Integer, MetaData, String, Table, Text, create_engine, insert, select
+from sqlalchemy import (
+    Column,
+    Integer,
+    MetaData,
+    String,
+    Table,
+    Text,
+    create_engine,
+    insert,
+    select,
+)
 
 
 class SQLAlchemyMemoryBackend:
@@ -19,14 +29,14 @@ class SQLAlchemyMemoryBackend:
         )
         metadata.create_all(self.engine)
 
-    def save(self, conversation_id: str, item: Dict[str, Any]) -> None:
+    def save(self, conversation_id: str, item: dict[str, Any]) -> None:
         with self.engine.begin() as connection:
             connection.execute(insert(self.records).values(
                 conversation_id=conversation_id,
                 item_json=json.dumps(item),
             ))
 
-    def load(self, conversation_id: str | None) -> Dict[str, Any]:
+    def load(self, conversation_id: str | None) -> dict[str, Any]:
         if not conversation_id:
             return {"short_term": []}
         statement = (
@@ -47,16 +57,16 @@ class MemoryAdapter:
 
     def __init__(self, backend: Any | None = None):
         self.backend = backend
-        self._short_term: Dict[str, list] = {}
+        self._short_term: dict[str, list] = {}
 
-    def load(self, conversation_id: str | None) -> Dict[str, Any]:
+    def load(self, conversation_id: str | None) -> dict[str, Any]:
         if not conversation_id:
             return {"short_term": []}
         if self.backend and hasattr(self.backend, "load"):
             return self.backend.load(conversation_id)
         return {"short_term": self._short_term.get(conversation_id, [])}
 
-    def save(self, conversation_id: str, item: Dict[str, Any]) -> None:
+    def save(self, conversation_id: str, item: dict[str, Any]) -> None:
         if self.backend and hasattr(self.backend, "save"):
             self.backend.save(conversation_id, item)
             return

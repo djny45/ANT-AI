@@ -1,15 +1,16 @@
+from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, List
+from typing import Any
 from uuid import uuid4
 
+from ant_core import IntelligenceOrchestrator
+from ant_core.event_bus.events import EventBus
+from ant_langgraph.router import route_request
 from ANT_X_OS.core.evaluator import Evaluator
 from ANT_X_OS.core.executor import Executor as CoreExecutor
 from ANT_X_OS.skills.loader import load_builtin_skills
 from ANT_X_OS.skills.selector import SkillSelector
-from ant_core import IntelligenceOrchestrator
-from ant_core.event_bus.events import EventBus
-from ant_langgraph.router import route_request
 from reliability.error_recovery import ErrorRecovery
 from security.audit_logger import AuditLogger
 from security.hash_ledger import HashLedger
@@ -23,8 +24,8 @@ NodeFn = Callable[[AgentState], AgentState]
 
 @dataclass
 class WorkflowGraph:
-    nodes: Dict[str, NodeFn] = field(default_factory=dict)
-    edges: Dict[str, List[str]] = field(default_factory=dict)
+    nodes: dict[str, NodeFn] = field(default_factory=dict)
+    edges: dict[str, list[str]] = field(default_factory=dict)
 
     def add_node(self, name: str, fn: NodeFn) -> "WorkflowGraph":
         self.nodes[name] = fn
@@ -85,12 +86,12 @@ def build_default_graph(
         state.stage_status[stage] = "failed"
         state.fail(f"{stage}: {record['error']}")
 
-    def emit(state: AgentState, stage: str, payload: Dict[str, Any]) -> None:
+    def emit(state: AgentState, stage: str, payload: dict[str, Any]) -> None:
         event = bus.publish(stage, payload)
         state.events.append(asdict(event))
 
-    def stage_payload(state: AgentState, stage: str) -> Dict[str, Any]:
-        payload: Dict[str, Any] = {
+    def stage_payload(state: AgentState, stage: str) -> dict[str, Any]:
+        payload: dict[str, Any] = {
             "stage": stage,
             "status": state.stage_status.get(stage, "completed"),
         }
@@ -150,7 +151,7 @@ def build_default_graph(
         return state
 
     def capability(state: AgentState) -> AgentState:
-        selections: List[Dict[str, Any]] = []
+        selections: list[dict[str, Any]] = []
         for task in state.execution_plan:
             selection_task = {
                 "type": task.get("agent", ""),
@@ -182,7 +183,7 @@ def build_default_graph(
                     result = fallback_executor.execute(task)
                     outcome = {"execution_path": "core_executor", "result": result}
                 state.record_result(agent, outcome)
-            except Exception as error:
+            except Exception as error:  # noqa: BLE001
                 record_failure(state, "executor", error)
                 state.record_result(
                     agent,
@@ -223,7 +224,6 @@ def build_default_graph(
             "results": list(state.agent_results),
             "verification": dict(state.verification_results),
             "knowledge": {
-                "capabilities": list(state.capability_selections),
                 "capabilities_used": list(state.capability_selections),
                 "verification_status": state.verification_results.get("status"),
             },
@@ -287,7 +287,7 @@ def build_default_graph(
                 state = fn(state)
                 if stage not in state.stage_status:
                     state.stage_status[stage] = "completed"
-            except Exception as error:
+            except Exception as error:  # noqa: BLE001
                 record_failure(state, stage, error)
             emit(state, stage, stage_payload(state, stage))
             return state

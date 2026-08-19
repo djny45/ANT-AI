@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from .base_skill import BaseSkill
 
@@ -11,8 +11,8 @@ class ResearchSkill(BaseSkill):
             rules=["gather evidence", "compare sources", "summarize findings"],
         )
 
-    def validate(self, context: Dict[str, Any]) -> bool:
+    def validate(self, context: dict[str, Any]) -> bool:
         return True
 
-    def execute(self, task: Dict[str, Any], memory=None) -> Dict[str, Any]:
+    def execute(self, task: dict[str, Any], memory=None) -> dict[str, Any]:
         return {"skill": self.name, "result": "research_plan_ready"}

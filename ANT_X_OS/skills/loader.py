@@ -1,16 +1,16 @@
 """Loader for built-in skills. Keeps discovery simple and deterministic."""
-from .registry import registry
-from .engineering.think_before_coding import ThinkBeforeCoding
+from .coding_skill import CodingSkill
+from .data_skill import DataSkill
+from .debugging_skill import DebuggingSkill
+from .deployment_skill import DeploymentSkill
+from .engineering.goal_driven_execution import GoalDrivenExecution
 from .engineering.simplicity_first import SimplicityFirst
 from .engineering.surgical_changes import SurgicalChanges
-from .engineering.goal_driven_execution import GoalDrivenExecution
-from .coding_skill import CodingSkill
-from .review_skill import ReviewSkill
-from .debugging_skill import DebuggingSkill
-from .security_skill import SecuritySkill
-from .deployment_skill import DeploymentSkill
+from .engineering.think_before_coding import ThinkBeforeCoding
+from .registry import registry
 from .research_skill import ResearchSkill
-from .data_skill import DataSkill
+from .review_skill import ReviewSkill
+from .security_skill import SecuritySkill
 
 
 def load_builtin_skills():

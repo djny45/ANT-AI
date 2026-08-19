@@ -1,10 +1,10 @@
-from ANT_X_OS.skills.loader import load_builtin_skills
-from ANT_X_OS.skills.registry import registry
-from ANT_X_OS.skills.selector import SkillSelector
 from ant_core.event_bus.events import EventBus
 from ant_core.planner.planner import IntelligencePlanner
 from ant_langgraph.graph import build_default_graph
 from ant_langgraph.state import AgentState
+from ANT_X_OS.skills.loader import load_builtin_skills
+from ANT_X_OS.skills.registry import registry
+from ANT_X_OS.skills.selector import SkillSelector
 
 
 def test_intelligence_planner_returns_stage_contract_fields():

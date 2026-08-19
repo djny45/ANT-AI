@@ -1,12 +1,12 @@
 """ANT AI LangGraph-style integration pipeline."""
 
-from typing import Any, Dict
+from typing import Any
 
 from .graph import build_default_graph
 from .state import AgentState
 
 
-async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
+async def run_pipeline(request_state: dict[str, Any]) -> dict[str, Any]:
     """
     Execute a user request through a LangGraph pipeline and return a plain dict
     compatible with FastAPI bridge consumers.
@@ -33,7 +33,7 @@ async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
     graph = build_default_graph()
     agent_state = graph.run(agent_state, start="planner")
 
-    def stage_recovery(stage: str) -> list[Dict[str, Any]]:
+    def stage_recovery(stage: str) -> list[dict[str, Any]]:
         return [
             record
             for record in agent_state.recovery_records
@@ -97,7 +97,7 @@ async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
     }
 
     # Convert results to plain dict
-    out: Dict[str, Any] = {
+    out: dict[str, Any] = {
         "final_response": agent_state.final_response or "",
         "selected_agents": agent_state.selected_agents,
         "agent_results": agent_state.agent_results,

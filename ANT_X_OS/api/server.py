@@ -17,6 +17,7 @@ if BaseModel:
         message: str
         user_id: str | None = None
         conversation_id: str | None = None
+        request_id: str | None = None
         context: dict = Field(default_factory=dict)
 else:
     class ExecuteRequest:
@@ -27,13 +28,18 @@ if app:
     from ant_langgraph.integration_pipeline import run_pipeline
 
     @app.post("/execute")
-    async def execute(request: dict):
+    async def execute(request: ExecuteRequest):
         validator = InputValidator()
-        message = request.get("message")
+        fields = (
+            request.model_dump()
+            if hasattr(request, "model_dump")
+            else request.dict()
+        )
+        message = fields.get("message")
         if (
             not isinstance(message, str)
             or not message.strip()
-            or not validator.validate_input(request)
+            or not validator.validate_input(fields)
         ):
             return JSONResponse(
                 status_code=400,
@@ -45,21 +51,21 @@ if app:
             )
         return await run_pipeline({
             "user_input": message,
-            "user_id": request.get("user_id"),
-            "conversation_id": request.get("conversation_id"),
-            "request_id": request.get("request_id"),
-            "context": request.get("context") or {},
+            "user_id": fields.get("user_id"),
+            "conversation_id": fields.get("conversation_id"),
+            "request_id": fields.get("request_id"),
+            "context": fields.get("context") or {},
         })
 
     try:
         from ANT_X_OS.skills.registry import registry
-    except Exception:
+    except Exception:  # noqa: BLE001
         registry = None
 
     try:
         from ANT_X_OS.core.memory import Memory
         _memory = Memory()
-    except Exception:
+    except Exception:  # noqa: BLE001
         _memory = None
 
 
@@ -74,7 +80,7 @@ if app:
         if _memory:
             try:
                 validation_results = _memory.retrieve_workflows()
-            except Exception:
+            except Exception:  # noqa: BLE001
                 validation_results = []
 
         return JSONResponse({
