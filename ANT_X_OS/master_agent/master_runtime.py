@@ -1,43 +1,58 @@
-"""Master runtime extended to select skills before dispatching to agents and orchestrate them."""
+"""Master runtime for planning, skill selection and agent dispatch."""
 from typing import Any
-from ANT_X_OS.master_agent.master_runtime import MasterAgentRuntime as _OldMaster
+
 from ANT_X_OS.skills.loader import load_builtin_skills
-from ANT_X_OS.skills.selector import SkillSelector
 from ANT_X_OS.skills.orchestrator import SkillOrchestrator
+from ANT_X_OS.skills.selector import SkillSelector
 
 
-class MasterAgentRuntime(_OldMaster):
+class MasterAgentRuntime:
     def __init__(self, planner, registry, evaluator=None, memory=None):
-        super().__init__(planner, registry, evaluator)
-        # ensure skills are available
+        self.planner = planner
+        self.registry = registry
+        self.evaluator = evaluator
         load_builtin_skills()
-        self.selector = SkillSelector(registry)
-        # optional memory instance to persist workflows
+        self.selector = SkillSelector()
         self.memory = memory
         self.orchestrator = SkillOrchestrator(self.selector.registry, memory=self.memory)
 
     def run(self, goal: Any):
         tasks = self.planner.plan(goal)
+        if isinstance(tasks, dict):
+            tasks = tasks.get("tasks", [tasks])
         results = []
         for task in tasks:
-            # attach selected skills for this task
+            task = dict(task) if isinstance(task, dict) else {"task": task}
             selected = self.selector.select_for_task(task)
-            if isinstance(task, dict):
-                task["skills"] = selected
-            else:
-                task = {"task": task, "skills": selected}
+            task["skills"] = selected
 
-            # run orchestration (validate/execute skills and record workflow)
             orchestration = self.orchestrator.run(task)
             task["validation"] = orchestration.get("workflow", {})
 
-            agent = self.registry.get(task.get("agent"))
+            agent_name = task.get("agent")
+            if hasattr(self.registry, "get"):
+                agent = self.registry.get(agent_name)
+            else:
+                agent = None
             if agent:
-                # dispatch the enriched task to the agent
                 results.append(agent.run(task))
             else:
-                results.append({"agent": None, "task": task, "status": "no_agent_found", "skills": selected, "validation": orchestration.get("workflow")})
+                results.append({
+                    "agent": agent_name,
+                    "task": task,
+                    "status": "no_agent_found",
+                    "skills": selected,
+                    "validation": orchestration.get("workflow"),
+                })
 
         if self.evaluator:
-            return self.evaluator.evaluate(goal, results)
+            aggregate = {
+                "success": not any(
+                    isinstance(result, dict)
+                    and result.get("status") == "no_agent_found"
+                    for result in results
+                ),
+                "results": results,
+            }
+            return self.evaluator.evaluate(aggregate)
         return results
