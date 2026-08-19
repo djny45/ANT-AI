@@ -5,7 +5,8 @@ Proposal -> Risk Review -> Approval -> Execution
 """
 
 from dataclasses import dataclass
-from datetime import datetime
+
+from ant_common import utc_timestamp
 
 
 @dataclass
@@ -24,5 +25,5 @@ class ApprovalFlow:
         return ApprovalDecision(
             approved=allowed,
             reason="Approved by governance policy" if allowed else "Blocked by risk policy",
-            timestamp=datetime.utcnow().isoformat(),
+            timestamp=utc_timestamp(),
         )

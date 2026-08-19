@@ -1,5 +1,8 @@
 """ANT AI vector memory interface."""
 
+from ant_common import keyword_filter
+
+
 class VectorMemory:
     def __init__(self):
         self.memory = []
@@ -8,4 +11,4 @@ class VectorMemory:
         self.memory.append(item)
 
     def retrieve(self, keyword):
-        return [x for x in self.memory if keyword.lower() in str(x).lower()]
+        return keyword_filter(self.memory, keyword)

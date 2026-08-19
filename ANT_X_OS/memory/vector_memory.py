@@ -1,9 +1,16 @@
+from ant_common import KeywordStore
+
+
 class VectorMemory:
     def __init__(self):
-        self.items = []
+        self._store = KeywordStore()
+
+    @property
+    def items(self):
+        return self._store.entries
 
     def store(self, text, score=1.0):
-        self.items.append({"text": text, "score": score})
+        return self._store.add(text, score=score)
 
     def search(self, query):
-        return self.items
+        return self._store.all()

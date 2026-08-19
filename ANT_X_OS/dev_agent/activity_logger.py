@@ -1,8 +1,8 @@
-from datetime import datetime
+from ant_common import utc_timestamp
 
 class ActivityLogger:
     def log(self, event):
         return {
-            "time": datetime.utcnow().isoformat(),
+            "time": utc_timestamp(),
             "event": event
         }

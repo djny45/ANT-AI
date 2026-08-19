@@ -1,3 +1,6 @@
+from ant_common import keyword_filter
+
+
 class EmbeddingProvider:
     def __init__(self, backend="local"):
         self.backend = backend
@@ -14,4 +17,4 @@ class VectorMemoryBackend:
         self.store.append(text)
 
     def search(self, query):
-        return [x for x in self.store if query.lower() in x.lower()]
+        return keyword_filter(self.store, query)

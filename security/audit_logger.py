@@ -1,11 +1,18 @@
 """ANT AI audit logging."""
 
+from ant_common import AuditTrail
+
+
 class AuditLogger:
     def __init__(self):
-        self.logs = []
+        self.trail = AuditTrail()
+
+    @property
+    def logs(self):
+        return self.trail.entries
 
     def record(self, event):
-        self.logs.append(event)
+        return self.trail.record(event=event)
 
     def history(self):
-        return self.logs
+        return self.trail.history()

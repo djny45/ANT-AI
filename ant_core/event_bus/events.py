@@ -1,12 +1,13 @@
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from typing import Any
+
+from ant_common import utc_timestamp
 
 @dataclass(frozen=True)
 class IntelligenceEvent:
     name: str
     payload: dict[str, Any] = field(default_factory=dict)
-    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    timestamp: str = field(default_factory=utc_timestamp)
 
 class EventBus:
     def __init__(self):

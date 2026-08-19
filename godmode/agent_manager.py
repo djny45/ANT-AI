@@ -3,24 +3,31 @@
 Controls registration, capability discovery, and task routing.
 """
 
+from ant_common import Registry
+
+
 class AgentManager:
     def __init__(self):
-        self.agents = {}
+        self._registry = Registry()
+
+    @property
+    def agents(self):
+        return self._registry.mapping
 
     def register(self, name, capabilities):
-        self.agents[name] = {
+        self._registry.register(name, {
             "capabilities": capabilities,
             "status": "ready"
-        }
+        })
 
     def find_for_task(self, capability):
         return [
-            name for name, agent in self.agents.items()
+            name for name, agent in self._registry.mapping.items()
             if capability in agent["capabilities"]
         ]
 
     def assign(self, task, capability=None):
-        agents = self.find_for_task(capability) if capability else list(self.agents.keys())
+        agents = self.find_for_task(capability) if capability else self._registry.names()
         return {
             "task": task,
             "agents": agents,
@@ -28,4 +35,4 @@ class AgentManager:
         }
 
     def available_agents(self):
-        return self.agents
+        return self._registry.mapping

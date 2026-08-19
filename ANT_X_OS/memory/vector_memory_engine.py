@@ -1,9 +1,16 @@
+from ant_common import KeywordStore
+
+
 class VectorMemoryEngine:
     def __init__(self):
-        self.records = []
+        self._store = KeywordStore("content")
+
+    @property
+    def records(self):
+        return self._store.entries
 
     def add(self, content, metadata=None):
-        self.records.append({"content": content, "metadata": metadata or {}})
+        return self._store.add(content, metadata=metadata or {})
 
     def retrieve(self, query):
-        return [r for r in self.records if query.lower() in r["content"].lower()]
+        return self._store.search(query)

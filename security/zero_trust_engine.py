@@ -1,11 +1,12 @@
 """ANT AI zero trust access model with full verification."""
 
-import hashlib
-from datetime import datetime
 from typing import Dict, Any, Optional
 import logging
 
+from ant_common import AuditTrail, sha256_hex, utc_timestamp
+
 logger = logging.getLogger(__name__)
+
 
 class ZeroTrustEngine:
     """Implements zero-trust model: never trust, always verify."""
@@ -13,13 +14,16 @@ class ZeroTrustEngine:
     def __init__(self):
         self.trusted_identities = set()  # FIX: Proper identity tracking
         self.action_signatures = {}  # FIX: Track action integrity
-        self.verification_log = []  # FIX: Audit trail
+        self.audit = AuditTrail(logger=logger, message_prefix="Zero-trust verification")
+    
+    @property
+    def verification_log(self):
+        return self.audit.entries
     
     def register_identity(self, identity: str, credentials: str) -> bool:
         """Register and verify identity."""
         # FIX: Hash credentials instead of storing plaintext
-        cred_hash = hashlib.sha256(credentials.encode()).hexdigest()
-        self.trusted_identities.add((identity, cred_hash))
+        self.trusted_identities.add((identity, sha256_hex(credentials)))
         self._log_verification("REGISTER", identity, True)
         return True
     
@@ -29,7 +33,7 @@ class ZeroTrustEngine:
         # Step 1: Verify identity
         identity_verified = False
         if credentials:
-            cred_hash = hashlib.sha256(credentials.encode()).hexdigest()
+            cred_hash = sha256_hex(credentials)
             identity_verified = any(
                 i[0] == identity and i[1] == cred_hash 
                 for i in self.trusted_identities
@@ -48,7 +52,7 @@ class ZeroTrustEngine:
             "identity_verified": identity_verified,
             "action_verified": action_verified,
             "requires_validation": not verified,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": utc_timestamp()
         }
         
         self._log_verification(action, identity, verified)
@@ -56,18 +60,12 @@ class ZeroTrustEngine:
     
     def _verify_action_signature(self, action: str) -> bool:
         """Verify action hasn't been tampered with."""
+        signature = sha256_hex(action)
         if action not in self.action_signatures:
-            sig = hashlib.sha256(action.encode()).hexdigest()
-            self.action_signatures[action] = sig
+            self.action_signatures[action] = signature
             return True
-        return self.action_signatures[action] == hashlib.sha256(action.encode()).hexdigest()
+        return self.action_signatures[action] == signature
     
     def _log_verification(self, action: str, identity: str, result: bool) -> None:
         """Log verification attempt."""
-        self.verification_log.append({
-            "timestamp": datetime.utcnow().isoformat(),
-            "action": action,
-            "identity": identity,
-            "result": result
-        })
-        logger.info(f"Zero-trust verification: {action} by {identity} - {result}")
+        self.audit.record(action=action, identity=identity, result=result)
