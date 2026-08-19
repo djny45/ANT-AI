@@ -2,6 +2,10 @@
 
 ANT is a modular AI agent platform.
 
+## Autonomous Execution Pipeline
+
+![ANT AI Autonomous Execution Pipeline](docs/assets/ant-ai-execution-pipeline.png)
+
 ## Core Layers
 
 - Agent Swarm
