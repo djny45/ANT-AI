@@ -17,10 +17,13 @@ The full stage chain (User Input → FastAPI → ANT Intelligence Core → Inten
 Complexity Detection → Planning → Capability Selection → Capability Execution → Verification →
 Memory → Audit → Response Synthesis) now runs through the existing components, every stage
 emits an event and returns its own evidence in the API trace, and a stage failure degrades into
-an `{error, stage, recovery_action}` record instead of propagating. What remains unmet is not
-wiring: the capabilities behind the execution stage are still deterministic stubs, `/execute` is
-unauthenticated, and no service stack, container or model runtime was exercised. Those are the
-items under REMAINING RELEASE BLOCKERS and they gate exposing this build to private beta users.
+an `{error, stage, recovery_action}` record instead of propagating. The execution stage no longer
+echoes: four capability handlers (`capabilities/`) perform real analysis and return the capability
+used, handler name, execution result, derived confidence and their own verification evidence.
+What remains unmet is not wiring: no model is involved anywhere in the loop and no
+quality benchmark exists, `/execute` is unauthenticated, and no service stack, container or model
+runtime was exercised. Those are the items under REMAINING RELEASE BLOCKERS and they gate
+exposing this build to private beta users.
 
 ## CORE FUNCTIONALITY
 
@@ -45,8 +48,10 @@ returning tasks, strategy, required capabilities and confidence)
 Capability Selection (`ANT_X_OS.skills.SkillSelector.select_capabilities_for_task` against the
 builtin skill registry, returning capability name, reason, confidence and execution target)
 ↓
-Capability Execution (`ant_langgraph.WorkflowExecutor` handler when registered, otherwise
-`ANT_X_OS.core.executor.Executor`)
+Capability Execution (`capabilities.register_capability_handlers` registers `CodingCapability`,
+`ResearchCapability`, `SecurityCapability` and `DataAnalysisCapability` on
+`ant_langgraph.WorkflowExecutor` for the `coding`/`research`/`security`/`data` families;
+`ANT_X_OS.core.executor.Executor` remains the fallback for families with no handler)
 ↓
 Verification (`ANT_X_OS.core.evaluator.Evaluator` per result, aggregated status)
 ↓
@@ -61,7 +66,7 @@ Evidence — full suite, no exclusions:
 
 ```
 python -m pytest tests -q
-36 passed, 1 warning in 0.35s
+42 passed, 1 warning in 0.36s
 ```
 
 The single warning is Starlette's `httpx` deprecation notice from `fastapi.testclient`.
@@ -74,11 +79,11 @@ improvements"`, conversation id `rep`, observed through the `run_pipeline` trace
 | Request | `request_id` (uuid4), UTC ISO `timestamp`, `intent = "complex"`, `complexity = "complex"` |
 | Plan | `strategy = "multi-agent"`, `required_capabilities = ["coding", "research"]`, `confidence = 0.9` |
 | Capability | `Coding Skill` (target `coding`, confidence 0.96) and `Research Skill` (target `research`, confidence 0.96), each with a selection reason |
-| Execution | one recorded result per task, `execution_path = "core_executor"` |
+| Execution | one recorded result per task, `execution_path = "capability_handler"`, each entry carrying `capability`, `handler`, `confidence`, `verification` and the handler's real `result` |
 | Verification | `status = "verified"`, one `Evaluator` check per result, `errors = []` |
 | Memory | `saved = true`, the run record read back from `memory_context.short_term` |
 | Audit | 64-char SHA-256 ledger hash as `audit_id`; audit record carries `request_id`, `timestamp`, `request`, `selected_capabilities`, `tools_used`, `result`, `verification`, `verification_status`, `errors` |
-| Response | `"Workflow completed for coding, research. Verification status: verified."` |
+| Response | handler headlines plus status: `"Coding Skill: Prepared a request-derived change plan; no Python source was inspected. Research Skill: Structured 2 request sub-question(s) with 0 memory item(s). Verification status: verified."` — no source was supplied with this request, so `CodingCapability` reports the request-derived mode (confidence 0.32) rather than claiming an inspection |
 | Events | one event per stage, in order: `planner, capability, executor, verifier, memory, audit, synthesizer` |
 
 Evidence — API: `POST /execute` with `{"message": ...}` returns HTTP 200 and a trace payload
@@ -97,17 +102,34 @@ Evidence — routing: informational questions do not capture a specialist route
 `"build an integrated system with an api"` → `complex`, `"research LLM options"` → `research`).
 
 Test coverage of the exercised packages (`ant_core`, `ant_langgraph`, `ANT_X_OS`, `security`,
-`reliability`): 73%.
+`reliability`, `capabilities`): 77%.
 
 ## INTELLIGENCE QUALITY
 
-Status: FAIL
+Status: PARTIAL — execution substance PASS, model-backed reasoning FAIL
 
-The planner, router, capability selector and verifier are deterministic keyword and rule
-heuristics, and the execution stage still runs `ANT_X_OS.core.executor.Executor`, which echoes
-the task. No model is involved anywhere in the loop, so response quality, reasoning depth and
-capability-selection accuracy are unmeasured and no benchmark set exists. What the tests prove
-is that each stage produces the evidence its contract requires — not that the answers are good.
+What improved and is measured: the execution stage performs real, checkable analysis instead of
+echoing the task. Observed on one run of `"Analyze this Python project and suggest improvements,
+and review security"` with a three-line source file supplied in the context:
+
+| Handler | Real output observed | Derived confidence |
+|---|---|---|
+| `CodingCapability` | AST parse: 1 function `f` (lines 1–3), missing docstring, syntax valid | 0.74 |
+| `ResearchCapability` | 3 request-derived sub-questions, 0 memory items, every item attributed to `request` or `memory` | 0.82 |
+| `SecurityCapability` | `eval_or_exec` finding at line 2, severity `high`, 3 lines scanned | 0.64 |
+| `DataAnalysisCapability` | row/field counts, inferred field types, per-field missing counts, min/max/mean/median for numeric fields (covered by `tests/test_capabilities.py`) | evidence-derived |
+
+Confidence is derived from the concrete evidence a handler actually had, not a constant: the
+same handler reports a lower confidence when it only has request text and states
+`source_inspected: false` / `dataset_provided: false` rather than guessing. Handlers never invent
+external facts — `ResearchCapability` reports `external_sources_used: 0`.
+
+What is still FAIL: every stage — planner, router, selector, handlers, verifier — is a
+deterministic rule/AST heuristic. No model runtime is involved anywhere in the loop
+(`ANT_X_OS/models`, `model_router`, `model_platform` and `tools/mcp_executor` are stubs), so
+reasoning depth, answer quality and capability-selection accuracy are still unmeasured and no
+benchmark set exists. This category cannot be reported as PASS on this evidence: the tests prove
+the handlers compute what they claim, not that ANT AI reasons well.
 
 ## RELIABILITY
 
@@ -148,8 +170,9 @@ Open items:
 
 Status: PASS (in-process only, not representative)
 
-Measured over 20 consecutive `run_pipeline` calls with the release-criteria input: p50 0.40 ms,
-p95 0.53 ms, max 0.83 ms. This measures the wiring, not the product: it excludes model
+Measured over 20 consecutive `run_pipeline` calls with the release-criteria input, with the real
+handlers in the path: p50 0.53 ms, p95 0.59 ms, max 0.74 ms. This measures the wiring and the
+deterministic handlers, not the product: it excludes model
 inference, database access and network transport, so the <2s simple-request and <10s
 medium-workflow targets remain effectively unmeasured until real capabilities and a real stack
 are behind the loop.
@@ -177,7 +200,7 @@ VPS:
 
 ## CLEANUP AND CHECKS
 
-- `pytest tests -q`: 36 passed.
+- `pytest tests -q`: 42 passed.
 - Lint: the repository has no lint configuration. `ruff check` (0.16.3) over `ant_core`,
   `ant_langgraph`, `ANT_X_OS`, `security`, `reliability` and `tests` reports 0 findings in every
   file this branch touched and 249 pre-existing findings elsewhere (largest groups: `UP006` 88,
@@ -196,12 +219,14 @@ VPS:
 
 ## REMAINING RELEASE BLOCKERS
 
-1. Component: Execution stage depth
-   Issue: The chain executes through `ANT_X_OS.core.executor.Executor`, which echoes the task.
-   No real capability handler is registered, so the loop is complete and observable but does no
-   substantive work.
+1. Component: Model-backed reasoning
+   Issue: The four capability handlers do real deterministic analysis (AST inspection, pattern
+   scanning, dataset statistics, attributed research structuring), but no model runtime is wired
+   in and no intelligence-quality benchmark exists, so answer quality is unmeasured. The echo
+   fallback is gone from the beta path; the remaining gap is reasoning, not wiring.
    Severity: Critical for a user-facing beta
-   Fix: Register real handlers on `WorkflowExecutor` and re-run the chain validation.
+   Fix: Wire a real model provider behind the handlers, then measure a small benchmark set for
+   capability-selection accuracy and answer quality.
 
 2. Component: API authentication and rate limiting
    Issue: `/execute` is unauthenticated and `RateLimiter.allow()` deadlocks on its global path.
@@ -231,14 +256,16 @@ VPS:
 
 ## FINAL STATUS
 
-Intelligence execution loop: Verified in-process, end to end, with evidence at every stage.
+Intelligence execution loop: Verified in-process, end to end, with evidence at every stage and
+real capability execution behind the executor node.
 
-Private Beta: Blocked on blockers 1–2 (substantive execution and API exposure safety); 3–4 gate
-a hosted deployment.
+Private Beta: Blocked on blockers 1–2 (model-backed reasoning with a measured benchmark, and API
+exposure safety); 3–4 gate a hosted deployment.
 
 Production Readiness: Not Ready.
 
 Next Action:
-Register real capability handlers behind the execution stage and secure `/execute` (API key +
-lock-safe rate limiter), then expose the validation endpoints and re-run
-`tests/validation/pre_release_checks.py` against a live stack.
+Wire a model provider behind the capability handlers and define the benchmark that would let
+INTELLIGENCE QUALITY be graded PASS, and secure `/execute` (API key + lock-safe rate limiter),
+then expose the validation endpoints and re-run `tests/validation/pre_release_checks.py` against
+a live stack.
