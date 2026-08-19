@@ -1,5 +1,7 @@
 from dataclasses import asdict, dataclass, field
+from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List
+from uuid import uuid4
 
 from ANT_X_OS.core.evaluator import Evaluator
 from ANT_X_OS.core.executor import Executor as CoreExecutor
@@ -23,7 +25,6 @@ NodeFn = Callable[[AgentState], AgentState]
 class WorkflowGraph:
     nodes: Dict[str, NodeFn] = field(default_factory=dict)
     edges: Dict[str, List[str]] = field(default_factory=dict)
-    event_bus: EventBus | None = None
 
     def add_node(self, name: str, fn: NodeFn) -> "WorkflowGraph":
         self.nodes[name] = fn
@@ -97,6 +98,7 @@ def build_default_graph(
             payload.update({
                 "intent": state.intent,
                 "complexity": state.complexity,
+                "memory_context": dict(state.memory_context),
                 "strategy": state.strategy,
                 "required_capabilities": list(state.required_capabilities),
                 "confidence": state.confidence,
@@ -119,16 +121,22 @@ def build_default_graph(
         return payload
 
     def planner(state: AgentState) -> AgentState:
+        if not state.request_id:
+            state.request_id = str(uuid4())
+        if not state.request_timestamp:
+            state.request_timestamp = datetime.now(timezone.utc).isoformat()
+        conversation_id = state.conversation_id or "default"
+        state.memory_context = memory_adapter.load(conversation_id)
+        state.user_context = dict(state.user_context)
+        state.user_context["memory_context"] = state.memory_context
         planned = planner_service.prepare(state.user_input, state.user_context)
         state.execution_plan = [dict(task) for task in planned.plan]
         state.selected_agents = list(planned.selected_agents)
-        state.strategy = getattr(planned, "strategy", "PENDING")
-        state.required_capabilities = list(
-            getattr(planned, "required_capabilities", [])
-        )
-        state.confidence = getattr(planned, "confidence", 0.0)
+        state.strategy = planned.strategy
+        state.required_capabilities = list(planned.required_capabilities)
+        state.confidence = planned.confidence
         state.intent = route_request(state.user_input)
-        state.complexity = getattr(planned, "complexity", "PENDING")
+        state.complexity = planned.complexity
         state.audit_metadata["decision"] = planned.context.get("decision", {})
         state.audit_metadata["intent_analysis"] = {
             "route": state.intent,
@@ -148,7 +156,7 @@ def build_default_graph(
                 "type": task.get("agent", ""),
                 "description": f"{task.get('objective', '')} {state.user_input}",
             }
-            rich_selections = selector.select_for_task_with_evidence(selection_task)
+            rich_selections = selector.select_capabilities_for_task(selection_task)
             if not rich_selections:
                 raise LookupError(
                     f"no capability selected for task: {task.get('objective', '')}"
@@ -214,6 +222,11 @@ def build_default_graph(
             "input": state.user_input,
             "results": list(state.agent_results),
             "verification": dict(state.verification_results),
+            "knowledge": {
+                "capabilities": list(state.capability_selections),
+                "capabilities_used": list(state.capability_selections),
+                "verification_status": state.verification_results.get("status"),
+            },
         }
         memory_adapter.save(conversation_id, record)
         state.memory_context = memory_adapter.load(conversation_id)
@@ -221,13 +234,37 @@ def build_default_graph(
         return state
 
     def audit(state: AgentState) -> AgentState:
+        tools_used = [
+            {
+                "agent": recorded["agent"],
+                "execution_path": recorded["result"].get("execution_path"),
+                "capabilities": next(
+                    (
+                        task.get("skills", [])
+                        for task in state.execution_plan
+                        if task.get("agent") == recorded["agent"]
+                    ),
+                    [],
+                ),
+            }
+            for recorded in state.agent_results
+        ]
         action = {
-            "input": state.user_input,
-            "agents": list(state.selected_agents),
-            "verification": state.verification_results,
+            "request_id": state.request_id,
+            "timestamp": state.request_timestamp,
+            "request": state.user_input,
+            "selected_capabilities": list(state.capability_selections),
+            "tools_used": tools_used,
+            "result": list(state.agent_results),
+            "verification": dict(state.verification_results),
+            "verification_status": state.verification_results.get("status"),
+            "errors": list(state.errors),
         }
         logger.record(action)
         block = ledger.add_action(action)
+        state.audit_metadata["request_id"] = state.request_id
+        state.audit_metadata["timestamp"] = state.request_timestamp
+        state.audit_metadata["audit_record"] = action
         state.audit_metadata["audit_id"] = block["hash"]
         state.audit_metadata["audit_chain_length"] = len(ledger.chain)
         return state
@@ -258,7 +295,7 @@ def build_default_graph(
         return run_stage
 
     return (
-        WorkflowGraph(event_bus=bus)
+        WorkflowGraph()
         .add_node("planner", guarded("planner", planner))
         .add_node("capability", guarded("capability", capability))
         .add_node("executor", guarded("executor", executor))

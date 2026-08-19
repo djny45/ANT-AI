@@ -9,6 +9,8 @@ class AgentState:
     user_input: str
     user_context: Dict[str, Any] = field(default_factory=dict)
     conversation_id: str | None = None
+    request_id: str = ""
+    request_timestamp: str = ""
     execution_plan: List[Dict[str, Any]] = field(default_factory=list)
     selected_agents: List[str] = field(default_factory=list)
     strategy: str = "PENDING"

@@ -90,7 +90,7 @@ def test_timeout_failure_records_recovery_and_workflow_continues():
 
 def test_missing_capability_records_stage_recovery_and_continues():
     class EmptySelector:
-        def select_for_task_with_evidence(self, task):
+        def select_capabilities_for_task(self, task):
             return []
 
     graph = build_default_graph(skill_selector=EmptySelector())

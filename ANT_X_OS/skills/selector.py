@@ -10,9 +10,6 @@ class SkillSelector:
     def select_for_task(self, task: Dict[str, Any]) -> List[str]:
         return [selection["capability"] for selection in self.select_capabilities_for_task(task)]
 
-    def select_for_task_with_evidence(self, task: Dict[str, Any]) -> List[Dict[str, Any]]:
-        return self.select_capabilities_for_task(task)
-
     def select_capabilities_for_task(self, task: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Return selected capabilities and the evidence for each selection."""
         text = ""

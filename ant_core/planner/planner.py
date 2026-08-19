@@ -1,3 +1,6 @@
+from typing import Any
+
+
 class IntelligencePlanner:
     """Deterministic planning layer; an LLM planner can be injected later."""
 
@@ -28,7 +31,6 @@ class IntelligencePlanner:
         return {
             "goal": goal,
             "tasks": tasks,
-            "context": {},
             "strategy": strategy,
             "required_capabilities": required_capabilities,
             "confidence": confidence,

@@ -7,6 +7,8 @@ except ImportError:
     BaseModel = None
     Field = None
 
+from security.input_validator import InputValidator
+
 app = FastAPI() if FastAPI else None
 
 
@@ -25,12 +27,28 @@ if app:
     from ant_langgraph.integration_pipeline import run_pipeline
 
     @app.post("/execute")
-    async def execute(request: ExecuteRequest):
+    async def execute(request: dict):
+        validator = InputValidator()
+        message = request.get("message")
+        if (
+            not isinstance(message, str)
+            or not message.strip()
+            or not validator.validate_input(request)
+        ):
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "error": "Input validation failed",
+                    "stage": "validation",
+                    "recovery_action": "reject_invalid_input",
+                },
+            )
         return await run_pipeline({
-            "user_input": request.message,
-            "user_id": request.user_id,
-            "conversation_id": request.conversation_id,
-            "context": request.context,
+            "user_input": message,
+            "user_id": request.get("user_id"),
+            "conversation_id": request.get("conversation_id"),
+            "request_id": request.get("request_id"),
+            "context": request.get("context") or {},
         })
 
     try:
