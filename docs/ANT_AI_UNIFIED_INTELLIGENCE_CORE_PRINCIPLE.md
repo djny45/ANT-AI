@@ -8,16 +8,16 @@ ANT AI uses:
 
 One Unified Intelligence Core
 
-that dynamically creates specialized Nano Capability Units when required.
+that dynamically creates specialized adaptive capability units when required.
 
-```
+```text
 User Request
       ↓
 ANT Intelligence Core
       ↓
 Problem Understanding
       ↓
-Dynamic Nano Capability Formation
+Dynamic Capability Formation
       ↓
 Specialized Internal Execution Units
       ↓
@@ -28,23 +28,23 @@ Memory Update
 Final Response
 ```
 
-## Nano Capability Model
+## Adaptive Capability Model
 
-Nano Units are not separate artificial intelligences.
+Capability units are not separate artificial intelligences.
 
 They are temporary specialized cognitive execution pathways controlled by the ANT Core.
 
 Examples:
 
-- Coding Nano Unit
-- Security Nano Unit
-- Research Nano Unit
-- Analysis Nano Unit
-- Testing Nano Unit
+- Coding Capability
+- Security Capability
+- Research Capability
+- Analysis Capability
+- Testing Capability
 
 The ANT Core decides:
 
-- when to create a Nano Unit
+- when to create a capability unit
 - what objective it receives
 - what permissions it has
 - how results are verified
@@ -63,4 +63,6 @@ The ANT Core decides:
 
 The goal is not creating more agents.
 
-The goal is creating one adaptive intelligence capable of reorganizing itself into specialized Nano Capabilities based on task complexity.
+The goal is creating one adaptive intelligence capable of reorganizing itself into specialized capabilities based on task complexity.
+
+The architecture is inspired by natural systems and coordinated biological behavior. This describes the design inspiration, not the technology name.
