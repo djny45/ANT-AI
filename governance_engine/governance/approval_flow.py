@@ -1,6 +1,6 @@
-"""Godmode 10x Governance Approval Flow.
+"""ANT AI governance approval flow.
 
-Controls execution lifecycle:
+Controls the execution lifecycle:
 Proposal -> Risk Review -> Approval -> Execution
 """
 
@@ -23,6 +23,10 @@ class ApprovalFlow:
         allowed = risk_score < self.risk_threshold
         return ApprovalDecision(
             approved=allowed,
-            reason="Approved by governance policy" if allowed else "Blocked by risk policy",
+            reason=(
+                "Approved by governance policy"
+                if allowed
+                else "Blocked by risk policy"
+            ),
             timestamp=datetime.utcnow().isoformat(),
         )

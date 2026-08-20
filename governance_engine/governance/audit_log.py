@@ -1,4 +1,4 @@
-"""Godmode 10x Audit Logger."""
+"""ANT AI governance audit logger."""
 
 from datetime import datetime
 

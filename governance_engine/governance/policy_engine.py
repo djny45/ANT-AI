@@ -1,6 +1,6 @@
-"""Godmode 10x Policy Engine.
+"""ANT AI governance policy engine.
 
-Central rules for safe autonomous actions.
+Defines central rules for controlled autonomous actions.
 """
 
 

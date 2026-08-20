@@ -1,8 +1,8 @@
 """
-Godmode 10x Devil Advocate Risk Engine
+ANT AI Risk Assessment Engine
 
-Reviews agent proposals before execution.
-Designed as a safety layer, not an autonomous executor.
+Reviews proposed operations before execution.
+Designed as a safety and reliability control, not an autonomous executor.
 """
 
 from dataclasses import dataclass

@@ -1,7 +1,8 @@
-"""ANT AI God Mode controller.
+"""ANT AI control-plane controller.
 
-Coordinates agents, workflows, security, and deployment stages.
+Coordinates capabilities, workflows, security checks, and delivery stages.
 """
+
 
 class ANTController:
     def __init__(self, registry=None):
@@ -14,12 +15,12 @@ class ANTController:
             "pipeline": [
                 "analyze",
                 "plan",
-                "assign_agents",
+                "assign_capabilities",
                 "execute",
                 "security_check",
-                "deliver"
+                "deliver",
             ],
-            "status": "initialized"
+            "status": "initialized",
         }
         self.history.append(task)
         return task
