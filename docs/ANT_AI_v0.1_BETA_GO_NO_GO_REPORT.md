@@ -1,7 +1,7 @@
 # ANT AI — v0.1-BETA GO / NO-GO RELEASE REPORT
 
 ## Release
-ANT AI Adaptive Nano-Intelligence Operating System Beta v0.1
+ANT AI Adaptive Intelligence Operating System Beta v0.1
 
 Tag: v0.1-beta
 
