@@ -1,0 +1,1 @@
+Website-only cleanup: removed obsolete mobile/APK build systems and legacy swarm CI. ANT AI remains centered on the unified intelligence core, adaptive capabilities, web frontend, backend, memory, governance, and execution systems.
