@@ -1,5 +1,0 @@
-<resources>
-    <style name="Theme.ANTAI" parent="android:style/Theme.Material.Light.NoActionBar">
-        <item name="android:fontFamily">sans</item>
-    </style>
-</resources>
