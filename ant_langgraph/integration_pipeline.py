@@ -2,11 +2,13 @@
 
 from dataclasses import dataclass, field
 from typing import Any, Dict, List
+from uuid import uuid4
 
 from .graph import build_default_graph
 from .memory import MemoryAdapter
 from .state import AgentState
 from governance_engine.governance.approval_flow import ApprovalFlow
+from governance_engine.governance.audit_log import AuditLog
 
 
 @dataclass
@@ -19,21 +21,29 @@ class GraphExecutionState:
     audit_id: str | None = None
 
 
+# Lightweight process-local services for the free/open-source prototype.
+# Production deployments can replace these through the existing adapter boundaries.
+_MEMORY = MemoryAdapter()
+_AUDIT = AuditLog()
+_GOVERNANCE = ApprovalFlow()
+
+
 class ANTXOSPipeline:
     """Execution boundary with injectable model, memory, governance and audit services."""
 
     def __init__(self, router=None, memory=None, audit=None, governance=None):
         self.router = router
-        self.memory = memory or MemoryAdapter()
-        self.audit = audit
-        self.governance = governance or ApprovalFlow()
+        self.memory = memory or _MEMORY
+        self.audit = audit or _AUDIT
+        self.governance = governance or _GOVERNANCE
 
     async def execute(self, state: GraphExecutionState) -> GraphExecutionState:
-        if self.audit:
-            event = {"event": "graph_execution_started", "input": state.user_input}
-            result = self.audit.log(event)
-            if hasattr(result, "__await__"):
-                await result
+        if not state.audit_id:
+            state.audit_id = str(uuid4())
+        self.audit.record(
+            "graph_execution_started",
+            {"execution_id": state.audit_id, "input": state.user_input},
+        )
         return state
 
 
@@ -55,37 +65,30 @@ async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
             "audit_id": None,
         }
 
+    execution_id = str(uuid4())
+    _AUDIT.record("request_received", {"execution_id": execution_id})
+
     state = AgentState(
         user_input=user_input,
         user_context=context,
         conversation_id=conversation_id,
     )
 
-    # Retrieve relevant short-term context before planning.
-    memory = MemoryAdapter()
-    state.memory_context = memory.load(conversation_id)
+    # Retrieve relevant context before planning.
+    state.memory_context = _MEMORY.load(conversation_id)
 
     graph = build_default_graph()
     state = graph.run(state)
 
-    # Apply the existing governance policy to the formed capability set.
-    risk_score = min(100, len(state.selected_agents) * 15)
-    if any(capability in {"security", "coding"} for capability in state.selected_agents):
-        risk_score = min(100, risk_score + 10)
-    decision = ApprovalFlow().evaluate(risk_score)
-    state.audit_metadata.update({
-        "risk_score": risk_score,
-        "governance_approved": decision.approved,
-        "governance_reason": decision.reason,
-    })
-    if not decision.approved:
-        state.fail(decision.reason)
-        state.final_response = "ANT blocked this execution under the active governance policy."
+    # Governance is enforced inside the graph immediately before capability execution.
+    risk_score = int(state.audit_metadata.get("risk_score", 0))
+    governance_approved = bool(state.audit_metadata.get("governance_approved", False))
 
-    # Persist the verified execution outcome into short-term memory.
+    # Persist only verified outcomes.
     memory_saved = False
     if conversation_id and state.verification_results.get("status") == "passed":
-        memory.save(conversation_id, {
+        _MEMORY.save(conversation_id, {
+            "execution_id": execution_id,
             "request": user_input,
             "capabilities": list(state.selected_agents),
             "response": state.final_response or "",
@@ -93,29 +96,35 @@ async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
         })
         memory_saved = True
 
-    execution = GraphExecutionState(
-        user_input=user_input,
-        context=context,
-        tasks=state.execution_plan,
-        results=state.agent_results,
-        final_response=state.final_response or "",
+    _AUDIT.record(
+        "graph_execution_completed",
+        {
+            "execution_id": execution_id,
+            "capabilities": list(state.selected_agents),
+            "risk_score": risk_score,
+            "governance_approved": governance_approved,
+            "verification": state.verification_results,
+            "memory_saved": memory_saved,
+            "errors": list(state.errors),
+        },
     )
-    await ANTXOSPipeline().execute(execution)
 
     return {
+        "execution_id": execution_id,
         "final_response": state.final_response or "",
         "selected_agents": state.selected_agents,
         "agent_results": state.agent_results,
         "verification_results": state.verification_results,
         "errors": state.errors,
-        "risk_score": state.audit_metadata.get("risk_score", 0),
+        "risk_score": risk_score,
         "governance": {
-            "approved": state.audit_metadata.get("governance_approved", False),
+            "approved": governance_approved,
             "reason": state.audit_metadata.get("governance_reason", ""),
         },
         "memory_saved": memory_saved,
         "memory_context": state.memory_context,
-        "audit_id": execution.audit_id,
+        "audit_id": execution_id,
+        "audit_events": _AUDIT.history(),
         "execution_plan": state.execution_plan,
         "current_node": state.current_node,
         "latency_ms": state.audit_metadata.get("latency_ms", 0.0),
