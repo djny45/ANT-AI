@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>ANT-AI Hologram</title>
+<meta charset="UTF-8">
+<title>ANT AI</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="assets/ant.css">
 </head>
 <body>
 <div id="ant-sphere" class="sphere" data-state="idle"></div>
 <div class="bar">
-<input id="command-input" placeholder="Ask ANT anything..." />
-<span id="send-btn" class="send">➤</span>
+<input id="command-input" autocomplete="off" placeholder="Ask ANT anything..." />
+<button id="send-btn" class="send" type="button" aria-label="Send">➤</button>
 </div>
+<div id="ant-response" class="response" aria-live="polite"></div>
 
 <script src="assets/ant-performance.js"></script>
 <script src="assets/ant-state-engine.js"></script>
