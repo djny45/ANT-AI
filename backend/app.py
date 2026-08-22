@@ -1,7 +1,10 @@
 """Minimal production-shaped FastAPI entrypoint for the ANT prototype."""
 
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from ant_langgraph.integrations.fastapi_bridge import process_chat_request
@@ -40,3 +43,9 @@ async def chat(request: ChatRequest) -> dict:
         )
     except Exception as exc:
         raise HTTPException(status_code=500, detail="ANT execution failed") from exc
+
+
+# Serve the existing prototype website when running the backend locally.
+website_dir = Path(__file__).resolve().parent.parent / "website"
+if website_dir.exists():
+    app.mount("/", StaticFiles(directory=website_dir, html=True), name="website")
