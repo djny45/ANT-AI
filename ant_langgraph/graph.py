@@ -55,6 +55,13 @@ def _classify_capabilities(user_input: str) -> List[str]:
     return capabilities or ["reasoning"]
 
 
+def _risk_score(capabilities: List[str]) -> int:
+    score = min(100, len(capabilities) * 15)
+    if any(capability in {"security", "coding"} for capability in capabilities):
+        score = min(100, score + 10)
+    return score
+
+
 def build_default_graph() -> WorkflowGraph:
     """Build the default unified-intelligence execution path."""
     def understand(state: AgentState) -> AgentState:
@@ -69,11 +76,20 @@ def build_default_graph() -> WorkflowGraph:
             for capability in capabilities
         ]
         state.audit_metadata["capability_count"] = len(capabilities)
+        state.audit_metadata["risk_score"] = _risk_score(capabilities)
         return state
 
     def execute(state: AgentState) -> AgentState:
-        """Execute formed capabilities using the local model when available."""
+        """Govern, then execute formed capabilities using the local model."""
+        from governance_engine.governance.approval_flow import ApprovalFlow
         from intelligence.ollama_connector import OllamaConnector
+
+        decision = ApprovalFlow().evaluate(int(state.audit_metadata.get("risk_score", 0)))
+        state.audit_metadata["governance_approved"] = decision.approved
+        state.audit_metadata["governance_reason"] = decision.reason
+        if not decision.approved:
+            state.fail(decision.reason)
+            return state
 
         connector = OllamaConnector()
         for item in state.execution_plan:
@@ -101,6 +117,7 @@ def build_default_graph() -> WorkflowGraph:
             "capabilities_checked": list(state.selected_agents),
             "successful_capabilities": [r["agent"] for r in successful],
             "errors": list(state.errors),
+            "governance_approved": state.audit_metadata.get("governance_approved", False),
         }
         return state
 
