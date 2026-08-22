@@ -99,7 +99,7 @@ def build_default_graph() -> WorkflowGraph:
         provider = os.getenv("ANT_MODEL_PROVIDER", "ollama").strip().lower()
         if provider == "openrouter":
             model_runtime = OpenRouterConnector()
-            model_name = os.getenv("OPENROUTER_MODEL", OpenRouterConnector.DEFAULT_MODEL)
+            model_name = model_runtime.default_model
         else:
             provider = "ollama"
             model_runtime = OllamaConnector()
@@ -123,7 +123,7 @@ def build_default_graph() -> WorkflowGraph:
                     "Work only on the user's request and return concise, useful findings.\n"
                     f"User request: {item['task']}"
                 )
-            return capability, model_runtime.generate(prompt, model=model_name)
+            return capability, model_runtime.generate(prompt)
 
         started_results: Dict[str, dict] = {}
         if len(state.execution_plan) == 1:
