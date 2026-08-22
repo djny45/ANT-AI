@@ -15,7 +15,7 @@ ANT AI is a nature-inspired AI platform built around a single unified intelligen
 ![Architecture](https://img.shields.io/badge/architecture-unified%20intelligence-blue)
 ![Workflow](https://img.shields.io/badge/workflow-graph--based-green)
 ![Backend](https://img.shields.io/badge/backend-FastAPI-009688)
-![AI](https://img.shields.io/badge/local%20AI-Ollama-red)
+![AI](https://img.shields.io/badge/model%20runtime-Ollama%20%7C%20OpenRouter-red)
 ![License](https://img.shields.io/badge/license-MIT-purple)
 
 </p>
@@ -62,6 +62,29 @@ The internal capabilities are temporary cognitive pathways of the same ANT intel
 
 ---
 
+## Model Runtime
+
+ANT keeps a single model boundary inside the unified intelligence. The runtime can be configured for local or hosted inference without changing the intelligence architecture.
+
+### Local development
+
+```text
+ANT_MODEL_PROVIDER=ollama
+OLLAMA_MODEL=llama3.2
+```
+
+### OpenRouter development/evaluation
+
+```text
+ANT_MODEL_PROVIDER=openrouter
+OPENROUTER_MODEL=nvidia/nemotron-3-ultra-550b-a55b:free
+OPENROUTER_API_KEY=your_key
+```
+
+The OpenRouter Nemotron route is an optional hosted development/evaluation runtime. The API key must remain in the local environment and must never be committed to GitHub.
+
+---
+
 ## Current Prototype
 
 Verified foundation currently present in the repository:
@@ -69,6 +92,7 @@ Verified foundation currently present in the repository:
 - Unified graph execution boundary
 - Dynamic internal capability formation
 - Local Ollama model execution
+- Optional OpenRouter Nemotron model runtime
 - Governance and risk evaluation
 - Result verification
 - Process-local memory lifecycle
@@ -100,7 +124,7 @@ Dynamic Capability Formation
   ↓
 Governance
   ↓
-Ollama / Model Runtime
+Configured Model Runtime
   ↓
 Verification
   ↓
@@ -119,198 +143,32 @@ ANT AI is designed to minimize unnecessary model work.
 
 ### Fast path
 
-```text
-Simple Request
-      ↓
-ANT Intelligence
-      ↓
-Direct Reasoning
-      ↓
-Verify
-      ↓
-Response
-```
+Simple requests avoid unnecessary internal capability formation.
 
-### Parallel internal work
+### Parallel internal capabilities
 
-```text
-             ANT Intelligence
-                    ↓
-        ┌───────────┼───────────┐
-        ↓           ↓           ↓
-    Capability   Capability   Capability
-        └───────────┼───────────┘
-                    ↓
-                 Verify
-```
+Independent temporary capabilities may execute concurrently while remaining part of the same ANT intelligence execution context.
 
-Parallel execution is used only when internal work is independent. The intelligence remains unified.
+### Model runtime selection
+
+The configured runtime is recorded in execution metadata so latency and reliability can be measured without creating additional intelligence identities.
 
 ---
 
-## Governance
+## Security Principles
 
-Important operations pass through the governance layer:
-
-```text
-Request
-  ↓
-Risk Evaluation
-  ↓
-Permission / Governance
-  ↓
-Execution
-  ↓
-Verification
-  ↓
-Audit
-```
-
-Optimization must never bypass governance or verification.
+- Environment-based secrets
+- Restricted CORS configuration
+- Governance before execution
+- Verification after execution
+- Audit metadata for execution tracking
+- No API keys committed to the repository
+- Internal capabilities do not bypass the central intelligence controls
 
 ---
 
-## Memory
+## Development Status
 
-The prototype supports a memory lifecycle around execution:
+**Private prototype / development stage.**
 
-```text
-Request
-  ↓
-Relevant Context
-  ↓
-ANT Intelligence
-  ↓
-Verified Result
-  ↓
-Experience Storage
-```
-
-The current execution memory is lightweight and process-local. Persistent production memory is a future deployment milestone.
-
----
-
-## Local AI
-
-ANT AI supports free/open-source local inference through **Ollama**.
-
-Example environment configuration:
-
-```text
-OLLAMA_URL=http://localhost:11434
-OLLAMA_MODEL=llama3.2
-OLLAMA_TIMEOUT=30
-ANT_CORS_ORIGINS=http://localhost:3000
-```
-
-No paid model API is required for the basic prototype.
-
----
-
-## Technology Stack
-
-- Python
-- FastAPI
-- Graph-based workflow execution
-- Ollama
-- Static web frontend under `website/`
-- Security and governance components
-- GitHub Actions
-- Docker/deployment configuration already present in the repository
-
----
-
-## Repository Structure
-
-The active prototype is centered on these areas:
-
-```text
-ANT-AI/
-├── ant_core/              # Core planning, decision and state components
-├── ant_langgraph/         # Graph execution and integration boundary
-├── backend/               # FastAPI application
-├── governance_engine/     # Governance and risk controls
-├── intelligence/          # Model and intelligence utilities
-├── memory/                # Memory implementations
-├── security/              # Security controls
-├── tests/                 # Automated tests
-├── tools/                 # Tool infrastructure
-├── website/               # Current web interface
-├── docs/                  # Architecture and release documentation
-└── .github/               # CI/security workflows
-```
-
-The repository also contains legacy and experimental components that are being reduced carefully as dependencies are verified.
-
----
-
-## Development
-
-```bash
-git clone https://github.com/djny45/ANT-AI.git
-cd ANT-AI
-```
-
-Copy `.env.example` to your local environment and configure an available Ollama model.
-
-The FastAPI application is under `backend/` and the current web interface is under `website/`.
-
-Run tests with:
-
-```bash
-pytest
-```
-
-The integration suite uses a model test double for deterministic testing and therefore does not require a running Ollama server for those tests.
-
----
-
-## Roadmap
-
-### Prototype completion
-
-- [x] Unified intelligence graph foundation
-- [x] Dynamic internal capability formation
-- [x] Local model execution
-- [x] Governance integration
-- [x] Verification
-- [x] Website/API connection
-- [x] Fast-path execution
-- [x] Parallel internal capability execution
-- [x] Deterministic integration tests
-- [ ] Persistent production memory
-- [ ] Full runtime CI verification
-- [ ] Production deployment
-- [ ] VPS end-to-end validation
-
-### Future optimization
-
-- Semantic memory retrieval
-- Adaptive model selection
-- Workflow checkpointing
-- Recovery automation
-- Performance learning from real execution data
-
-Development will prioritize measured reliability and performance rather than architectural proliferation.
-
----
-
-## Security
-
-Never commit API keys, credentials, tokens, or production secrets.
-
-Production hardening should include authentication, authorization, least-privilege tool access, rate limiting, dependency scanning, persistent audit storage, and rollback procedures.
-
----
-
-## License
-
-MIT License.
-
----
-
-## ANT AI Technologies
-
-**One intelligence. Dynamic specialization. Governed execution. Continuous improvement.**
-
-Repository: https://github.com/djny45/ANT-AI
+The core architecture is being validated before public production deployment. The next major milestone is reliable end-to-end browser → API → model → verification → memory execution followed by deployment hardening.
