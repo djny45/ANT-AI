@@ -48,7 +48,7 @@ class ANTXOSPipeline:
 
 
 async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
-    """Run a request through the unified ANT capability workflow."""
+    """Run a request through the single ANT intelligence capability workflow."""
     user_input = (request_state.get("user_input") or request_state.get("message") or "").strip()
     context = request_state.get("context") or request_state.get("user_context") or {}
     conversation_id = request_state.get("conversation_id")
@@ -56,8 +56,8 @@ async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
     if not user_input:
         return {
             "final_response": "A non-empty request is required.",
-            "selected_agents": [],
-            "agent_results": [],
+            "selected_capabilities": [],
+            "capability_results": [],
             "verification_results": {"status": "failed", "reason": "empty_request"},
             "errors": ["empty_request"],
             "risk_score": 0,
@@ -74,23 +74,20 @@ async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
         conversation_id=conversation_id,
     )
 
-    # Retrieve relevant context before planning.
     state.memory_context = _MEMORY.load(conversation_id)
 
     graph = build_default_graph()
     state = graph.run(state)
 
-    # Governance is enforced inside the graph immediately before capability execution.
     risk_score = int(state.audit_metadata.get("risk_score", 0))
     governance_approved = bool(state.audit_metadata.get("governance_approved", False))
 
-    # Persist only verified outcomes.
     memory_saved = False
     if conversation_id and state.verification_results.get("status") == "passed":
         _MEMORY.save(conversation_id, {
             "execution_id": execution_id,
             "request": user_input,
-            "capabilities": list(state.selected_agents),
+            "capabilities": list(state.selected_capabilities),
             "response": state.final_response or "",
             "verification": state.verification_results,
         })
@@ -100,7 +97,7 @@ async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
         "graph_execution_completed",
         {
             "execution_id": execution_id,
-            "capabilities": list(state.selected_agents),
+            "capabilities": list(state.selected_capabilities),
             "risk_score": risk_score,
             "governance_approved": governance_approved,
             "verification": state.verification_results,
@@ -112,8 +109,8 @@ async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "execution_id": execution_id,
         "final_response": state.final_response or "",
-        "selected_agents": state.selected_agents,
-        "agent_results": state.agent_results,
+        "selected_capabilities": state.selected_capabilities,
+        "capability_results": state.capability_results,
         "verification_results": state.verification_results,
         "errors": state.errors,
         "risk_score": risk_score,
@@ -128,4 +125,6 @@ async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
         "execution_plan": state.execution_plan,
         "current_node": state.current_node,
         "latency_ms": state.audit_metadata.get("latency_ms", 0.0),
+        "fast_path": state.audit_metadata.get("fast_path", False),
+        "parallel_execution": state.audit_metadata.get("parallel_execution", False),
     }
