@@ -13,7 +13,7 @@ def _fake_generate(self, prompt):
 
 
 def test_run_pipeline_basic(monkeypatch):
-    """The execution boundary works without a live Ollama server."""
+    """The unified intelligence boundary works without a live Ollama server."""
     monkeypatch.setattr(OllamaConnector, "generate", _fake_generate)
     result = asyncio.run(run_pipeline({
         "user_input": "test integration",
@@ -24,7 +24,9 @@ def test_run_pipeline_basic(monkeypatch):
     assert isinstance(result, dict)
     assert result["execution_id"]
     assert result["final_response"]
-    assert result["selected_agents"] == ["reasoning"]
+    assert result["selected_capabilities"] == ["reasoning"]
+    assert result["fast_path"] is True
+    assert result["parallel_execution"] is False
     assert result["verification_results"]["status"] == "passed"
     assert result["governance"]["approved"] is True
     assert result["memory_saved"] is True
@@ -32,12 +34,13 @@ def test_run_pipeline_basic(monkeypatch):
 
 
 def test_dynamic_capability_selection(monkeypatch):
-    """A single request forms only the capabilities it needs."""
+    """One request forms only the internal capabilities it needs."""
     monkeypatch.setattr(OllamaConnector, "generate", _fake_generate)
     result = asyncio.run(run_pipeline({"user_input": "build and test authentication"}))
-    assert "coding" in result["selected_agents"]
-    assert "testing" in result["selected_agents"]
-    assert "reasoning" not in result["selected_agents"]
+    assert "coding" in result["selected_capabilities"]
+    assert "testing" in result["selected_capabilities"]
+    assert "reasoning" not in result["selected_capabilities"]
+    assert result["parallel_execution"] is True
 
 
 def test_memory_lifecycle(monkeypatch):
