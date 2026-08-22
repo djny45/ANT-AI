@@ -86,6 +86,7 @@ def build_default_graph() -> WorkflowGraph:
         """Govern once, then execute independent temporary capabilities concurrently."""
         from governance_engine.governance.approval_flow import ApprovalFlow
         from intelligence.ollama_connector import OllamaConnector
+        from intelligence.openrouter_connector import OpenRouterConnector
 
         decision = ApprovalFlow().evaluate(int(state.audit_metadata.get("risk_score", 0)))
         state.audit_metadata["governance_approved"] = decision.approved
@@ -93,6 +94,17 @@ def build_default_graph() -> WorkflowGraph:
         if not decision.approved:
             state.fail(decision.reason)
             return state
+
+        provider = os.getenv("ANT_MODEL_PROVIDER", "ollama").strip().lower()
+        if provider == "openrouter":
+            model_runtime = OpenRouterConnector()
+            model_name = os.getenv("OPENROUTER_MODEL", OpenRouterConnector.DEFAULT_MODEL)
+        else:
+            model_runtime = OllamaConnector()
+            model_name = os.getenv("OLLAMA_MODEL", "llama3.2")
+
+        state.audit_metadata["model_provider"] = provider
+        state.audit_metadata["model"] = model_name
 
         def execute_capability(item: Dict[str, str]):
             capability = item["capability"]
@@ -109,10 +121,8 @@ def build_default_graph() -> WorkflowGraph:
                     "Work only on the user's request and return concise, useful findings.\n"
                     f"User request: {item['task']}"
                 )
-            return capability, OllamaConnector().generate(prompt)
+            return capability, model_runtime.generate(prompt, model=model_name)
 
-        # Internal capabilities are temporary parts of the same intelligence.
-        # Parallelize only when independent; a simple request stays on the fast path.
         started_results: Dict[str, dict] = {}
         if len(state.execution_plan) == 1:
             capability, result = execute_capability(state.execution_plan[0])
@@ -165,7 +175,7 @@ def build_default_graph() -> WorkflowGraph:
                     responses.append(f"[{item['capability']}] {response}")
 
         if not responses:
-            state.final_response = "ANT could not generate a model response. Check local Ollama availability."
+            state.final_response = "ANT could not generate a model response. Check the configured model runtime."
         else:
             state.final_response = "\n\n".join(responses)
             if state.errors:
