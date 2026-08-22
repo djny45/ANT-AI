@@ -3,7 +3,7 @@ ANT AI FastAPI -> unified intelligence runtime bridge.
 
 The API exposes one ANT intelligence core. Capabilities are temporary
 cognitive pathways formed for the current request; they are not permanent
-independent agents.
+independent intelligences.
 """
 
 from typing import Any, Dict
@@ -27,7 +27,7 @@ async def process_chat_request(
 
     return {
         "response": result.get("final_response", ""),
-        "capabilities_used": result.get("selected_agents", []),
+        "capabilities_used": result.get("selected_capabilities", []),
         "execution_plan": result.get("execution_plan", []),
         "verification": result.get("verification_results", {}),
         "governance": result.get("governance", {}),
@@ -36,5 +36,7 @@ async def process_chat_request(
         "memory_context": result.get("memory_context", {}),
         "audit_id": result.get("audit_id"),
         "latency_ms": result.get("latency_ms", 0.0),
+        "fast_path": result.get("fast_path", False),
+        "parallel_execution": result.get("parallel_execution", False),
         "errors": result.get("errors", []),
     }
