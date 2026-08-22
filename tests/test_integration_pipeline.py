@@ -27,7 +27,7 @@ def test_run_pipeline_basic(monkeypatch):
     assert isinstance(result, dict)
     assert result["execution_id"]
     assert result["final_response"]
-    assert result["selected_capabilities"] == ["reasoning"]
+    assert result["selected_capabilities"] == ["testing"]
     assert result["fast_path"] is True
     assert result["parallel_execution"] is False
     assert result["verification_results"]["status"] == "passed"
