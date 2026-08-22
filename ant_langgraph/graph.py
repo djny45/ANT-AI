@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List
 
@@ -80,7 +81,7 @@ def build_default_graph() -> WorkflowGraph:
         return state
 
     def execute(state: AgentState) -> AgentState:
-        """Govern, then execute formed capabilities using the local model."""
+        """Govern once, then execute independent temporary capabilities concurrently."""
         from governance_engine.governance.approval_flow import ApprovalFlow
         from intelligence.ollama_connector import OllamaConnector
 
@@ -91,8 +92,7 @@ def build_default_graph() -> WorkflowGraph:
             state.fail(decision.reason)
             return state
 
-        connector = OllamaConnector()
-        for item in state.execution_plan:
+        def execute_capability(item: Dict[str, str]):
             capability = item["capability"]
             prompt = (
                 "You are a temporary cognitive capability inside ANT AI. "
@@ -100,14 +100,31 @@ def build_default_graph() -> WorkflowGraph:
                 "Work only on the user's request and return concise, useful findings.\n"
                 f"User request: {item['task']}"
             )
-            result = connector.generate(prompt)
+            return capability, OllamaConnector().generate(prompt)
+
+        # Capabilities are internal parts of the same ANT intelligence. They are
+        # parallelized only when independent, reducing wall-clock latency without
+        # introducing permanent independent agents.
+        started_results: Dict[str, dict] = {}
+        with ThreadPoolExecutor(max_workers=max(1, len(state.execution_plan))) as pool:
+            futures = [pool.submit(execute_capability, item) for item in state.execution_plan]
+            for future in as_completed(futures):
+                capability, result = future.result()
+                started_results[capability] = result
+
+        total_latency = 0.0
+        for item in state.execution_plan:
+            capability = item["capability"]
+            result = started_results[capability]
             if result.get("error"):
                 state.fail(f"{capability}: model execution failed: {result['error']}")
                 state.record_result(capability, result, confidence=0.0)
             else:
                 state.record_result(capability, result, confidence=0.8)
-                state.audit_metadata.setdefault("latency_ms", 0.0)
-                state.audit_metadata["latency_ms"] += result.get("latency_ms", 0.0)
+            total_latency = max(total_latency, float(result.get("latency_ms", 0.0)))
+
+        state.audit_metadata["latency_ms"] = total_latency
+        state.audit_metadata["parallel_execution"] = len(state.execution_plan) > 1
         return state
 
     def verify(state: AgentState) -> AgentState:
