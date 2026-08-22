@@ -5,7 +5,7 @@
 
 **One intelligence. One core. Dynamic internal capabilities. Governed execution.**
 
-ANT AI is a nature-inspired AI platform built around a single unified intelligence core. When a task requires different kinds of work, the core temporarily divides its own cognition into specialized internal capabilities, executes them, verifies the results, and recombines them into one response.
+ANT AI is a nature-inspired AI platform built around a single unified intelligence core. When a task requires different kinds of work, the core can temporarily divide its cognition into specialized internal capabilities, execute them, verify the results, and recombine them into one response.
 
 > ANT AI is not a collection of independent AI agents. It is one intelligence that dynamically specializes itself.
 
@@ -14,7 +14,6 @@ ANT AI is a nature-inspired AI platform built around a single unified intelligen
 ![Status](https://img.shields.io/badge/status-development-orange)
 ![Architecture](https://img.shields.io/badge/architecture-unified%20intelligence-blue)
 ![Workflow](https://img.shields.io/badge/workflow-graph--based-green)
-![Frontend](https://img.shields.io/badge/frontend-Next.js-black)
 ![Backend](https://img.shields.io/badge/backend-FastAPI-009688)
 ![AI](https://img.shields.io/badge/local%20AI-Ollama-red)
 ![License](https://img.shields.io/badge/license-MIT-purple)
@@ -51,21 +50,21 @@ ANT AI is a nature-inspired AI platform built around a single unified intelligen
                       ONE RESPONSE
 ```
 
-The internal capabilities above are temporary cognitive pathways of the same ANT intelligence. They are not independent permanent intelligences.
+The internal capabilities are temporary cognitive pathways of the same ANT intelligence. They are not independent permanent intelligences.
 
 ### Adaptive execution
 
-- **Simple task:** direct fast path with minimal internal decomposition.
+- **Simple task:** direct fast path with minimal processing.
 - **Focused task:** form only the capability required.
 - **Complex task:** form multiple independent capabilities and execute them concurrently when safe.
 - **Sensitive task:** apply governance before execution and verification afterward.
-- **Repeated work:** use available memory context to avoid unnecessary processing.
+- **Repeated work:** use available memory context to reduce unnecessary processing.
 
 ---
 
 ## Current Prototype
 
-The repository currently contains the following verified foundation:
+Verified foundation currently present in the repository:
 
 - Unified graph execution boundary
 - Dynamic internal capability formation
@@ -75,7 +74,7 @@ The repository currently contains the following verified foundation:
 - Process-local memory lifecycle
 - Audit events and execution IDs
 - FastAPI backend
-- Web frontend integration
+- Web frontend/API integration
 - Fast-path execution for simple requests
 - Parallel execution for independent internal capabilities
 - Deterministic integration tests
@@ -145,13 +144,13 @@ Response
                  Verify
 ```
 
-Parallel execution is used only when the internal work is independent. The intelligence remains unified.
+Parallel execution is used only when internal work is independent. The intelligence remains unified.
 
 ---
 
 ## Governance
 
-Important operations pass through the existing governance layer:
+Important operations pass through the governance layer:
 
 ```text
 Request
@@ -167,7 +166,7 @@ Verification
 Audit
 ```
 
-The optimization layer must never bypass governance or verification.
+Optimization must never bypass governance or verification.
 
 ---
 
@@ -187,7 +186,7 @@ Verified Result
 Experience Storage
 ```
 
-The current implementation uses lightweight process-local storage. Persistent production memory is a future deployment milestone.
+The current execution memory is lightweight and process-local. Persistent production memory is a future deployment milestone.
 
 ---
 
@@ -212,34 +211,36 @@ No paid model API is required for the basic prototype.
 
 - Python
 - FastAPI
-- Next.js
 - Graph-based workflow execution
 - Ollama
-- PostgreSQL-ready persistence architecture
-- Redis-ready infrastructure
-- Docker-ready deployment direction
-- GitHub Actions for CI
+- Static web frontend under `website/`
+- Security and governance components
+- GitHub Actions
+- Docker/deployment configuration already present in the repository
 
 ---
 
 ## Repository Structure
 
+The active prototype is centered on these areas:
+
 ```text
 ANT-AI/
-├── ant_core/              # Unified intelligence coordination
-├── ant_langgraph/         # Graph execution boundary
-├── capabilities/          # Internal capability definitions
-├── memory/                # Memory systems and adapters
-├── governance/            # Risk and permission controls
-├── security/              # Security components
-├── backend/               # FastAPI services
-├── frontend/              # Website
-├── database/              # Persistence layer
-├── tools/                 # Tool integrations
+├── ant_core/              # Core planning, decision and state components
+├── ant_langgraph/         # Graph execution and integration boundary
+├── backend/               # FastAPI application
+├── governance_engine/     # Governance and risk controls
+├── intelligence/          # Model and intelligence utilities
+├── memory/                # Memory implementations
+├── security/              # Security controls
 ├── tests/                 # Automated tests
-├── deployment/            # Deployment configuration
-└── docs/                  # Documentation
+├── tools/                 # Tool infrastructure
+├── website/               # Current web interface
+├── docs/                  # Architecture and release documentation
+└── .github/               # CI/security workflows
 ```
+
+The repository also contains legacy and experimental components that are being reduced carefully as dependencies are verified.
 
 ---
 
@@ -250,9 +251,9 @@ git clone https://github.com/djny45/ANT-AI.git
 cd ANT-AI
 ```
 
-Copy `.env.example` to your local environment configuration and provide an available Ollama model.
+Copy `.env.example` to your local environment and configure an available Ollama model.
 
-Run the backend and frontend using the project's current development configuration.
+The FastAPI application is under `backend/` and the current web interface is under `website/`.
 
 Run tests with:
 
@@ -260,7 +261,7 @@ Run tests with:
 pytest
 ```
 
-The integration suite uses a model test double, so those tests do not require a running Ollama server.
+The integration suite uses a model test double for deterministic testing and therefore does not require a running Ollama server for those tests.
 
 ---
 
@@ -269,7 +270,7 @@ The integration suite uses a model test double, so those tests do not require a 
 ### Prototype completion
 
 - [x] Unified intelligence graph foundation
-- [x] Dynamic capability formation
+- [x] Dynamic internal capability formation
 - [x] Local model execution
 - [x] Governance integration
 - [x] Verification
@@ -282,15 +283,15 @@ The integration suite uses a model test double, so those tests do not require a 
 - [ ] Production deployment
 - [ ] VPS end-to-end validation
 
-### Future
+### Future optimization
 
 - Semantic memory retrieval
-- Advanced model routing
+- Adaptive model selection
 - Workflow checkpointing
 - Recovery automation
 - Performance learning from real execution data
 
-Scale will follow measured reliability rather than architectural proliferation.
+Development will prioritize measured reliability and performance rather than architectural proliferation.
 
 ---
 
