@@ -1,276 +1,224 @@
 ![ANT AI Logo](logo.png)
 
-# 🐜 ANT AI Technologies
+# ANT AI Technologies
+## Unified Adaptive Intelligence Operating System
 
-## Nature-Inspired Adaptive Intelligence Operating System
+**One intelligence. One core. Dynamic internal capabilities. Governed execution.**
 
-One unified intelligence core that dynamically forms specialized capabilities to understand, execute, verify, and improve complex tasks.
+ANT AI is a nature-inspired AI platform built around a single unified intelligence core. When a task requires different kinds of work, the core temporarily divides its own cognition into specialized internal capabilities, executes them, verifies the results, and recombines them into one response.
+
+> ANT AI is not a collection of independent AI agents. It is one intelligence that dynamically specializes itself.
 
 <p align="center">
 
 ![Status](https://img.shields.io/badge/status-development-orange)
-![AI](https://img.shields.io/badge/AI-Adaptive%20Intelligence%20Operating%20System-blue)
-![Graph](https://img.shields.io/badge/Workflow-Graph--Based-green)
-![Frontend](https://img.shields.io/badge/Frontend-Next.js-black)
-![Backend](https://img.shields.io/badge/Backend-FastAPI-009688)
-![AI Runtime](https://img.shields.io/badge/AI-Ollama-red)
-![Infrastructure](https://img.shields.io/badge/Infrastructure-Docker-blue)
-![License](https://img.shields.io/badge/License-MIT-purple)
+![Architecture](https://img.shields.io/badge/architecture-unified%20intelligence-blue)
+![Workflow](https://img.shields.io/badge/workflow-graph--based-green)
+![Frontend](https://img.shields.io/badge/frontend-Next.js-black)
+![Backend](https://img.shields.io/badge/backend-FastAPI-009688)
+![AI](https://img.shields.io/badge/local%20AI-Ollama-red)
+![License](https://img.shields.io/badge/license-MIT-purple)
 
 </p>
 
-<p align="center">
-<a href="https://github.com/djny45/ANT-AI">Repository</a> · <a href="https://github.com/djny45/ANT-AI/issues">Issues</a>
-</p>
-
 ---
 
-## Vision
-
-ANT AI is a next-generation intelligence platform inspired by natural and biological systems.
-
-Instead of relying on disconnected AI agents, ANT AI contains a central intelligence architecture capable of dynamically creating specialized cognitive processes.
-
-The system adapts itself based on:
-
-- Task requirements
-- Complexity analysis
-- Available resources
-- Historical performance
-
----
-
-## Overview
-
-ANT AI Technologies is building a professional intelligence orchestration platform in which specialized reasoning pathways and task-specific execution units collaborate through explicit state, routing, governance, memory, verification, and audit controls.
-
-The project evolves from orchestrating independent components into a unified intelligence system with dynamic capability formation. The design prioritizes modularity, observable execution, human governance, and replaceable model infrastructure.
-
-### Core Principles
-
-- **Unified intelligence over agent proliferation** — one core that dynamically forms capabilities
-- **Capability orchestration** — route work to the right specialized reasoning pathway
-- **Stateful execution** — preserve task context across workflow stages
-- **Governed operations** — important actions pass through permission and risk controls
-- **Verifiable results** — outputs can be reviewed before being synthesized
-- **Persistent context** — memory is separated from transient workflow state
-- **Observable systems** — execution, failures, and performance should be measurable
-
----
-
-## Architecture
+## How ANT AI Works
 
 ```text
-                 USER
-
-                   |
-
-                   ↓
-
-        ANT AI INTELLIGENCE CORE
-
-                   |
-
-                   ↓
-
-        INTENT & PLANNING ENGINE
-
-                   |
-
-                   ↓
-
-      DYNAMIC CAPABILITY FORMATION
-
-
-        -------------------------
-
-        |          |            |
-
-   Research    Coding      Security
-
-   Capability Capability Capability
-
-
-        -------------------------
-
-                   |
-
-                   ↓
-
-        VERIFICATION & GOVERNANCE
-
-                   |
-
-                   ↓
-
-          MEMORY INTELLIGENCE
-
-                   |
-
-                   ↓
-
-             FINAL RESPONSE
+                         USER
+                           ↓
+                 ONE ANT INTELLIGENCE
+                           ↓
+                    Understand Task
+                           ↓
+                         Plan
+                           ↓
+              Dynamic Self-Decomposition
+                           ↓
+             ┌─────────────┼─────────────┐
+             ↓             ↓             ↓
+          Research      Coding       Security
+        capability    capability    capability
+             └─────────────┼─────────────┘
+                           ↓
+                    Unified Execution
+                           ↓
+                   Governance + Verify
+                           ↓
+                        Memory
+                           ↓
+                      ONE RESPONSE
 ```
 
+The internal capabilities above are temporary cognitive pathways of the same ANT intelligence. They are not independent permanent intelligences.
+
+### Adaptive execution
+
+- **Simple task:** direct fast path with minimal internal decomposition.
+- **Focused task:** form only the capability required.
+- **Complex task:** form multiple independent capabilities and execute them concurrently when safe.
+- **Sensitive task:** apply governance before execution and verification afterward.
+- **Repeated work:** use available memory context to avoid unnecessary processing.
+
 ---
 
-## Intelligence Execution Model
+## Current Prototype
 
-A typical complex request follows:
+The repository currently contains the following verified foundation:
+
+- Unified graph execution boundary
+- Dynamic internal capability formation
+- Local Ollama model execution
+- Governance and risk evaluation
+- Result verification
+- Process-local memory lifecycle
+- Audit events and execution IDs
+- FastAPI backend
+- Web frontend integration
+- Fast-path execution for simple requests
+- Parallel execution for independent internal capabilities
+- Deterministic integration tests
+
+Production persistence, full deployment automation, and real-runtime validation remain development work.
+
+---
+
+## Execution Pipeline
 
 ```text
-User Goal
-   ↓
-Intent / Complexity Analysis
-   ↓
-Strategic Planning
-   ↓
-Task Decomposition
-   ↓
+Browser
+  ↓
+FastAPI
+  ↓
+ANT Intelligence Core
+  ↓
+Understand
+  ↓
+Plan
+  ↓
 Dynamic Capability Formation
-   ↓
-Specialized Execution
-   ↓
-Verification / Risk Review
-   ↓
-Synthesis
-   ↓
-Memory Update
-   ↓
-Audit Event
+  ↓
+Governance
+  ↓
+Ollama / Model Runtime
+  ↓
+Verification
+  ↓
+Memory
+  ↓
+Audit
+  ↓
+Response
 ```
 
-Simple requests can take a direct path; focused requests can use a specialized capability; complex requests can form multiple coordinated capabilities.
-
 ---
 
-## Adaptive Capability Network
+## Performance Model
 
-The `ant_langgraph/` layer provides a LangGraph-inspired integration boundary with shared execution state, routing, workflow execution, memory hooks, tools, and integration bridges.
+ANT AI is designed to minimize unnecessary model work.
 
-The state model tracks:
-
-- User input
-- User context
-- Conversation ID
-- Execution plan
-- Selected capabilities
-- Current node
-- Capability results
-- Tool results
-- Memory context
-- Verification results
-- Final response
-- Audit metadata
-- Errors
-
-The implementation is intentionally modular so the existing ANT-X-OS runtime can continue to evolve without a destructive rewrite.
-
----
-
-## ANT Core Intelligence Layer
-
-The `ant_core/` package provides the central coordination layer:
+### Fast path
 
 ```text
-ant_core/
-├── orchestrator/
-├── planner/
-├── decision_engine/
-├── state_manager/
-└── event_bus/
+Simple Request
+      ↓
+ANT Intelligence
+      ↓
+Direct Reasoning
+      ↓
+Verify
+      ↓
+Response
 ```
 
-### Planner
-Transforms a user goal into structured tasks and candidate specialized capabilities.
+### Parallel internal work
 
-### Decision Engine
-Chooses between direct, focused, and multi-capability execution paths.
+```text
+             ANT Intelligence
+                    ↓
+        ┌───────────┼───────────┐
+        ↓           ↓           ↓
+    Capability   Capability   Capability
+        └───────────┼───────────┘
+                    ↓
+                 Verify
+```
 
-### State Manager
-Maintains execution state independently of individual capabilities.
-
-### Event Bus
-Provides a lightweight event stream for observability and workflow integrations.
-
----
-
-## Capability Runtime
-
-Specialized capabilities are formed dynamically. The runtime layer adds a common operational profile:
-
-- Identity
-- Mission
-- Specialized reasoning pathways
-- Permissions
-- Memory scope
-- Health
-- Execution count
-- Failure count
-
-Internal intelligence coordination uses a validated message envelope containing sender, receiver, objective, context, priority, confidence, result, and timestamp.
+Parallel execution is used only when the internal work is independent. The intelligence remains unified.
 
 ---
 
 ## Governance
 
-ANT AI is designed around human-governed execution.
+Important operations pass through the existing governance layer:
 
 ```text
 Request
-   ↓
-Permission Check
-   ↓
-Risk Assessment
-   ↓
-Governance Review
-   ↓
+  ↓
+Risk Evaluation
+  ↓
+Permission / Governance
+  ↓
 Execution
-   ↓
+  ↓
 Verification
-   ↓
+  ↓
 Audit
 ```
 
-The governance layer evaluates security, privacy, reliability, operational impact, and tool permissions before sensitive operations are performed.
+The optimization layer must never bypass governance or verification.
 
 ---
 
 ## Memory
 
-The platform supports progressive memory layers:
+The prototype supports a memory lifecycle around execution:
 
 ```text
-Short-Term Context
-         ↓
-Working Memory
-         ↓
-Long-Term Knowledge
-         ↓
-System Experience
+Request
+  ↓
+Relevant Context
+  ↓
+ANT Intelligence
+  ↓
+Verified Result
+  ↓
+Experience Storage
 ```
 
-The architecture is designed to support semantic retrieval, vector storage, knowledge relationships, and isolated project memory.
+The current implementation uses lightweight process-local storage. Persistent production memory is a future deployment milestone.
 
 ---
 
-## AI Model Infrastructure
+## Local AI
 
-ANT AI supports a provider abstraction so orchestration logic does not depend on a single model vendor.
+ANT AI supports free/open-source local inference through **Ollama**.
 
-### Local
+Example environment configuration:
 
+```text
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2
+OLLAMA_TIMEOUT=30
+ANT_CORS_ORIGINS=http://localhost:3000
+```
+
+No paid model API is required for the basic prototype.
+
+---
+
+## Technology Stack
+
+- Python
+- FastAPI
+- Next.js
+- Graph-based workflow execution
 - Ollama
-- Llama-family models
-- Mistral-family models
-- Phi-family models
-
-### Cloud
-
-- OpenAI-compatible providers
-- Other configurable providers
-
-The routing layer tracks availability, latency, reliability, and future cost/quality signals.
+- PostgreSQL-ready persistence architecture
+- Redis-ready infrastructure
+- Docker-ready deployment direction
+- GitHub Actions for CI
 
 ---
 
@@ -278,136 +226,79 @@ The routing layer tracks availability, latency, reliability, and future cost/qua
 
 ```text
 ANT-AI/
-├── ant_core/              # Central intelligence coordination
-├── ant_langgraph/         # Graph orchestration layer
-├── capabilities/          # Dynamic specialized capabilities
-├── memory/                # Memory systems
-├── governance/            # Governance and policy controls
-├── security/              # Authentication and security
-├── backend/               # API services
-├── frontend/              # Web interface
+├── ant_core/              # Unified intelligence coordination
+├── ant_langgraph/         # Graph execution boundary
+├── capabilities/          # Internal capability definitions
+├── memory/                # Memory systems and adapters
+├── governance/            # Risk and permission controls
+├── security/              # Security components
+├── backend/               # FastAPI services
+├── frontend/              # Website
 ├── database/              # Persistence layer
 ├── tools/                 # Tool integrations
-├── tests/                 # Automated testing
-├── deployment/            # Deployment infrastructure
-└── docs/                  # Engineering documentation
+├── tests/                 # Automated tests
+├── deployment/            # Deployment configuration
+└── docs/                  # Documentation
 ```
 
 ---
 
-## Development Status
-
-| Area | Status |
-|---|---|
-| Existing capability ecosystem | Active |
-| Capability registry/runtime | Active |
-| Graph orchestration foundation | Active |
-| ANT Core intelligence layer | **New / Active** |
-| Intelligent routing | Active |
-| Governance | Active |
-| Memory | Active / Integration |
-| Audit | Active / Integration |
-| Frontend | Development |
-| Backend | Development |
-| Automated testing | Development |
-| Production deployment | Pending |
-
-**v1.0 objective:** prove one complete, observable, governed user workflow end-to-end before expanding system scale.
-
----
-
-## Local Development
+## Development
 
 ```bash
 git clone https://github.com/djny45/ANT-AI.git
 cd ANT-AI
 ```
 
-Create environment configuration from the project's environment template when available, then run the appropriate frontend/backend or Docker development stack.
+Copy `.env.example` to your local environment configuration and provide an available Ollama model.
 
-For AI inference, configure an Ollama endpoint and an available model appropriate to the workload.
+Run the backend and frontend using the project's current development configuration.
 
----
+Run tests with:
 
-## Production Direction
-
-The intended deployment stack is:
-
-```text
-Cloudflare / CDN
-       ↓
-Next.js
-       ↓
-Nginx
-       ↓
-FastAPI
-       ↓
-PostgreSQL + Redis
-       ↓
-Ollama / Model Providers
+```bash
+pytest
 ```
 
-Docker is the first deployment target. Kubernetes remains an optional scale layer after the core workflow is proven stable.
+The integration suite uses a model test double, so those tests do not require a running Ollama server.
 
 ---
 
-## Engineering Roadmap
+## Roadmap
 
-### v1.0 — Intelligence Reliability
+### Prototype completion
 
-- Complete graph-to-capability execution
-- Strengthen planner quality
-- Improve routing evaluation
-- Connect memory retrieval to execution
-- Connect governance to sensitive actions
-- Expand capability metrics
-- Complete end-to-end tests
-- Validate Docker deployment
+- [x] Unified intelligence graph foundation
+- [x] Dynamic capability formation
+- [x] Local model execution
+- [x] Governance integration
+- [x] Verification
+- [x] Website/API connection
+- [x] Fast-path execution
+- [x] Parallel internal capability execution
+- [x] Deterministic integration tests
+- [ ] Persistent production memory
+- [ ] Full runtime CI verification
+- [ ] Production deployment
+- [ ] VPS end-to-end validation
 
-### Post-v1.0
+### Future
 
-- Semantic memory
-- Vector retrieval
-- Knowledge graph capabilities
+- Semantic memory retrieval
 - Advanced model routing
 - Workflow checkpointing
 - Recovery automation
-- Expanded enterprise integrations
+- Performance learning from real execution data
 
-Scale should follow measured reliability rather than capability proliferation.
+Scale will follow measured reliability rather than architectural proliferation.
 
 ---
 
 ## Security
 
-Never commit secrets, API keys, credentials, or production configuration to the repository.
+Never commit API keys, credentials, tokens, or production secrets.
 
-Security improvements should include:
-
-- Authentication and authorization
-- Least-privilege permissions
-- Sandboxed tool execution
-- Input validation
-- Rate limiting
-- Audit trails
-- Dependency scanning
-- Recovery and rollback procedures
-
-See `SECURITY.md` for project security guidance.
-
----
-
-## Contributing
-
-Contributions are welcome.
-
-Before submitting changes:
-
-1. Preserve existing interfaces unless a migration is intentional.
-2. Add or update tests.
-3. Document architectural changes.
-4. Avoid duplicate capability or orchestration systems.
-5. Treat security and observability as first-class requirements.
+Production hardening should include authentication, authorization, least-privilege tool access, rate limiting, dependency scanning, persistent audit storage, and rollback procedures.
 
 ---
 
@@ -419,8 +310,6 @@ MIT License.
 
 ## ANT AI Technologies
 
-### Building a unified intelligence core for the next generation of AI applications.
-
-**Nature-Inspired Adaptive Intelligence. Human Governance. Measurable Execution.**
+**One intelligence. Dynamic specialization. Governed execution. Continuous improvement.**
 
 Repository: https://github.com/djny45/ANT-AI
