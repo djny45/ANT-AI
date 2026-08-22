@@ -9,7 +9,7 @@ NodeFn = Callable[[AgentState], AgentState]
 
 @dataclass
 class WorkflowGraph:
-    """Small, dependency-free workflow graph used by the ANT execution boundary."""
+    """Small, dependency-free workflow graph for one unified ANT intelligence run."""
 
     nodes: Dict[str, NodeFn] = field(default_factory=dict)
     edges: Dict[str, List[str]] = field(default_factory=dict)
@@ -42,7 +42,7 @@ class WorkflowGraph:
 
 
 def _classify_capabilities(user_input: str) -> List[str]:
-    """Form temporary cognitive capabilities from a request; no permanent agents are created."""
+    """Form temporary internal capabilities from one ANT intelligence request."""
     text = user_input.lower()
     capabilities: List[str] = []
     if any(word in text for word in ("research", "analyze", "compare", "investigate")):
@@ -64,20 +64,22 @@ def _risk_score(capabilities: List[str]) -> int:
 
 
 def build_default_graph() -> WorkflowGraph:
-    """Build the default unified-intelligence execution path."""
+    """Build the default execution path for the single ANT intelligence."""
+
     def understand(state: AgentState) -> AgentState:
         state.audit_metadata["task_type"] = "general"
         return state
 
     def plan(state: AgentState) -> AgentState:
         capabilities = _classify_capabilities(state.user_input)
-        state.selected_agents = capabilities
+        state.selected_capabilities = capabilities
         state.execution_plan = [
             {"capability": capability, "task": state.user_input}
             for capability in capabilities
         ]
         state.audit_metadata["capability_count"] = len(capabilities)
         state.audit_metadata["risk_score"] = _risk_score(capabilities)
+        state.audit_metadata["fast_path"] = capabilities == ["reasoning"]
         return state
 
     def execute(state: AgentState) -> AgentState:
@@ -94,23 +96,33 @@ def build_default_graph() -> WorkflowGraph:
 
         def execute_capability(item: Dict[str, str]):
             capability = item["capability"]
-            prompt = (
-                "You are a temporary cognitive capability inside ANT AI. "
-                f"Capability: {capability}.\n"
-                "Work only on the user's request and return concise, useful findings.\n"
-                f"User request: {item['task']}"
-            )
+            if capability == "reasoning":
+                prompt = (
+                    "You are the full ANT Intelligence Core. Answer the user's request directly. "
+                    "Do not describe internal capabilities or simulate separate agents.\n"
+                    f"User request: {item['task']}"
+                )
+            else:
+                prompt = (
+                    "You are the full ANT Intelligence Core temporarily focusing on one internal capability. "
+                    f"Current capability: {capability}.\n"
+                    "Work only on the user's request and return concise, useful findings.\n"
+                    f"User request: {item['task']}"
+                )
             return capability, OllamaConnector().generate(prompt)
 
-        # Capabilities are internal parts of the same ANT intelligence. They are
-        # parallelized only when independent, reducing wall-clock latency without
-        # introducing permanent independent agents.
+        # Internal capabilities are temporary parts of the same intelligence.
+        # Parallelize only when independent; a simple request stays on the fast path.
         started_results: Dict[str, dict] = {}
-        with ThreadPoolExecutor(max_workers=max(1, len(state.execution_plan))) as pool:
-            futures = [pool.submit(execute_capability, item) for item in state.execution_plan]
-            for future in as_completed(futures):
-                capability, result = future.result()
-                started_results[capability] = result
+        if len(state.execution_plan) == 1:
+            capability, result = execute_capability(state.execution_plan[0])
+            started_results[capability] = result
+        else:
+            with ThreadPoolExecutor(max_workers=len(state.execution_plan)) as pool:
+                futures = [pool.submit(execute_capability, item) for item in state.execution_plan]
+                for future in as_completed(futures):
+                    capability, result = future.result()
+                    started_results[capability] = result
 
         total_latency = 0.0
         for item in state.execution_plan:
@@ -128,33 +140,36 @@ def build_default_graph() -> WorkflowGraph:
         return state
 
     def verify(state: AgentState) -> AgentState:
-        successful = [r for r in state.agent_results if r.get("result", {}).get("response")]
+        successful = [r for r in state.capability_results if r.get("result", {}).get("response")]
         state.verification_results = {
             "status": "passed" if successful and not state.errors else "failed",
-            "capabilities_checked": list(state.selected_agents),
-            "successful_capabilities": [r["agent"] for r in successful],
+            "capabilities_checked": list(state.selected_capabilities),
+            "successful_capabilities": [r["capability"] for r in successful],
             "errors": list(state.errors),
             "governance_approved": state.audit_metadata.get("governance_approved", False),
         }
         return state
 
     def synthesize(state: AgentState) -> AgentState:
-        if state.errors and not state.agent_results:
+        if state.errors and not state.capability_results:
             state.final_response = "ANT could not complete the request safely: " + "; ".join(state.errors)
             return state
 
         responses = []
-        for item in state.agent_results:
+        for item in state.capability_results:
             response = item.get("result", {}).get("response")
             if response:
-                responses.append(f"[{item['agent']}] {response}")
+                if state.audit_metadata.get("fast_path"):
+                    responses.append(response)
+                else:
+                    responses.append(f"[{item['capability']}] {response}")
 
         if not responses:
             state.final_response = "ANT could not generate a model response. Check local Ollama availability."
         else:
             state.final_response = "\n\n".join(responses)
             if state.errors:
-                state.final_response += "\n\nSome capabilities failed and were excluded from the final result."
+                state.final_response += "\n\nSome internal capabilities failed and were excluded from the final result."
         return state
 
     return (
