@@ -1,3 +1,4 @@
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List
@@ -100,6 +101,7 @@ def build_default_graph() -> WorkflowGraph:
             model_runtime = OpenRouterConnector()
             model_name = os.getenv("OPENROUTER_MODEL", OpenRouterConnector.DEFAULT_MODEL)
         else:
+            provider = "ollama"
             model_runtime = OllamaConnector()
             model_name = os.getenv("OLLAMA_MODEL", "llama3.2")
 
