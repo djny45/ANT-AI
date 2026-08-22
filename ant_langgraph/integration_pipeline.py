@@ -1,15 +1,10 @@
-"""
-ANT AI LangGraph-style integration pipeline.
-
-This module provides the execution boundary between the graph orchestration
-layer and existing ANT AI runtime components.
-"""
+"""ANT AI execution boundary for the unified intelligence graph."""
 
 from dataclasses import dataclass, field
 from typing import Any, Dict, List
 
-from .state import AgentState
 from .graph import build_default_graph
+from .state import AgentState
 
 
 @dataclass
@@ -19,67 +14,76 @@ class GraphExecutionState:
     tasks: List[Dict[str, Any]] = field(default_factory=list)
     results: List[Dict[str, Any]] = field(default_factory=list)
     final_response: str = ""
+    audit_id: str | None = None
 
 
 class ANTXOSPipeline:
-    """Bridge graph execution with ANT AI services."""
+    """Execution boundary that keeps optional services injectable."""
 
     def __init__(self, router=None, memory=None, audit=None):
         self.router = router
         self.memory = memory
         self.audit = audit
 
-    async def execute(self, state: GraphExecutionState):
+    async def execute(self, state: GraphExecutionState) -> GraphExecutionState:
         if self.audit:
-            await self.audit.log({
-                "event": "graph_execution_started",
-                "input": state.user_input,
-            })
-
+            event = {"event": "graph_execution_started", "input": state.user_input}
+            result = self.audit.log(event)
+            if hasattr(result, "__await__"):
+                await result
         return state
 
 
 async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Execute a user request through a LangGraph pipeline and return a plain dict
-    compatible with FastAPI bridge consumers.
+    """Run a request through the unified ANT capability workflow.
 
-    Expected input (minimal): {"user_input": "...", "context": {...}}
-    Returns a dict containing at least: final_response, selected_agents, agent_results.
+    The function accepts ``message`` or ``user_input`` and returns a stable
+    dictionary for API consumers. Model, memory, and audit adapters remain
+    optional so the graph can run locally without paid services.
     """
-
-    # Normalize incoming state
-    user_input = request_state.get("user_input") or request_state.get("message") or ""
+    user_input = (request_state.get("user_input") or request_state.get("message") or "").strip()
+    context = request_state.get("context") or request_state.get("user_context") or {}
     conversation_id = request_state.get("conversation_id")
-    context = request_state.get("context") or {}
 
-    # Create AgentState for graph execution
-    agent_state = AgentState(
+    if not user_input:
+        return {
+            "final_response": "A non-empty request is required.",
+            "selected_agents": [],
+            "agent_results": [],
+            "verification_results": {"status": "failed", "reason": "empty_request"},
+            "errors": ["empty_request"],
+            "risk_score": 0,
+            "memory_saved": False,
+            "audit_id": None,
+        }
+
+    state = AgentState(
         user_input=user_input,
         user_context=context,
         conversation_id=conversation_id,
     )
 
-    # Build and run the default graph. Graph.run is synchronous.
     graph = build_default_graph()
-    agent_state = graph.run(agent_state, start="planner")
+    state = graph.run(state)
 
-    # Run the execution pipeline bridge (audit/memory hooks)
-    pipeline = ANTXOSPipeline(router=None, memory=None, audit=None)
-    gstate = GraphExecutionState(user_input=user_input, context=context)
-    await pipeline.execute(gstate)
+    execution = GraphExecutionState(
+        user_input=user_input,
+        context=context,
+        tasks=state.execution_plan,
+        results=state.agent_results,
+        final_response=state.final_response or "",
+    )
+    await ANTXOSPipeline().execute(execution)
 
-    # Convert results to plain dict
-    out: Dict[str, Any] = {
-        "final_response": agent_state.final_response or "",
-        "selected_agents": agent_state.selected_agents,
-        "agent_results": agent_state.agent_results,
-        "verification_results": agent_state.verification_results,
-        "errors": agent_state.errors,
-        # placeholders for optional fields other consumers expect
-        "risk_score": getattr(agent_state, "risk_score", 0),
-        "memory_saved": getattr(agent_state, "memory_saved", False),
-        "audit_id": getattr(gstate, "audit_id", None),
+    return {
+        "final_response": state.final_response or "",
+        "selected_agents": state.selected_agents,
+        "agent_results": state.agent_results,
+        "verification_results": state.verification_results,
+        "errors": state.errors,
+        "risk_score": state.audit_metadata.get("risk_score", 0),
+        "memory_saved": False,
+        "audit_id": execution.audit_id,
+        "execution_plan": state.execution_plan,
+        "current_node": state.current_node,
     }
-
-    return out
