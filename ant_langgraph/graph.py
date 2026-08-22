@@ -72,32 +72,55 @@ def build_default_graph() -> WorkflowGraph:
         return state
 
     def execute(state: AgentState) -> AgentState:
+        """Execute formed capabilities using the local model when available."""
+        from intelligence.ollama_connector import OllamaConnector
+
+        connector = OllamaConnector()
         for item in state.execution_plan:
             capability = item["capability"]
-            state.record_result(
-                capability,
-                {"status": "capability_ready", "task": item["task"]},
-                confidence=0.5,
+            prompt = (
+                "You are a temporary cognitive capability inside ANT AI. "
+                f"Capability: {capability}.\n"
+                "Work only on the user's request and return concise, useful findings.\n"
+                f"User request: {item['task']}"
             )
+            result = connector.generate(prompt)
+            if result.get("error"):
+                state.fail(f"{capability}: model execution failed: {result['error']}")
+                state.record_result(capability, result, confidence=0.0)
+            else:
+                state.record_result(capability, result, confidence=0.8)
+                state.audit_metadata.setdefault("latency_ms", 0.0)
+                state.audit_metadata["latency_ms"] += result.get("latency_ms", 0.0)
         return state
 
     def verify(state: AgentState) -> AgentState:
+        successful = [r for r in state.agent_results if r.get("result", {}).get("response")]
         state.verification_results = {
-            "status": "passed" if not state.errors else "failed",
+            "status": "passed" if successful and not state.errors else "failed",
             "capabilities_checked": list(state.selected_agents),
+            "successful_capabilities": [r["agent"] for r in successful],
             "errors": list(state.errors),
         }
         return state
 
     def synthesize(state: AgentState) -> AgentState:
-        if state.errors:
-            state.final_response = "ANT execution could not complete safely: " + "; ".join(state.errors)
+        if state.errors and not state.agent_results:
+            state.final_response = "ANT could not complete the request safely: " + "; ".join(state.errors)
+            return state
+
+        responses = []
+        for item in state.agent_results:
+            response = item.get("result", {}).get("response")
+            if response:
+                responses.append(f"[{item['agent']}] {response}")
+
+        if not responses:
+            state.final_response = "ANT could not generate a model response. Check local Ollama availability."
         else:
-            capabilities = ", ".join(state.selected_agents)
-            state.final_response = (
-                "ANT completed planning, capability formation, execution, and verification. "
-                f"Formed capabilities: {capabilities}."
-            )
+            state.final_response = "\n\n".join(responses)
+            if state.errors:
+                state.final_response += "\n\nSome capabilities failed and were excluded from the final result."
         return state
 
     return (
