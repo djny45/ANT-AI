@@ -6,10 +6,19 @@ and registered external capabilities.
 
 
 class ToolExecutionController:
-    def __init__(self, registry):
+    def __init__(self, registry, permissions=None):
         self.registry = registry
+        self.permissions = permissions
 
     def execute(self, name, payload=None):
+        if self.permissions is not None:
+            if not self.permissions.is_allowed(name):
+                return {
+                    "status": "blocked",
+                    "tool": name,
+                    "error": "permission_denied",
+                }
+
         tool = self.registry.get(name)
 
         if tool is None:
