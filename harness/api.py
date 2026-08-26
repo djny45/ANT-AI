@@ -6,10 +6,10 @@ Harness execution pipeline.
 """
 
 from .execution_service import HarnessExecutionService
-from .routes import register_routes
+from .api_registry import initialize_api_registry
 
 
-ROUTES = register_routes()
+ROUTES = initialize_api_registry()
 execution_service = HarnessExecutionService()
 
 
