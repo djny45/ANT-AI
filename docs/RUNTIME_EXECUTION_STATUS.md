@@ -1,11 +1,11 @@
 # ANT AI Runtime Execution Status
 
 ## Current Objective
-Complete backend execution loop before frontend expansion.
+Complete the backend execution loop before frontend expansion.
 
 ## Runtime Pipeline
 
-Request -> Harness -> Execution Service -> Orchestrator -> Runtime Controller -> Agent Runtime Adapter -> Agent Engine -> Capability -> Memory/Tools -> Telemetry -> Result
+Request -> Harness -> Execution Service -> Orchestrator -> Runtime Controller -> Agent Runtime Adapter -> Agent Engine -> Capability Registry -> Memory/Tools -> Telemetry -> Result
 
 ## Verified Foundation
 - Harness execution boundary
@@ -16,27 +16,31 @@ Request -> Harness -> Execution Service -> Orchestrator -> Runtime Controller ->
 - Execution lifecycle tracking
 - Memory context integration layer
 
-## Remaining Engineering Work
+## Active Execution Phase
 
-### 1. Agent Engine Core
+### 1. Agent Engine Core 🔥
 - Bind production execution engine
-- Complete unified execution path
+- Maintain single execution path
 - Validate task lifecycle
+- Stabilize failure handling
 
-### 2. Capability Registry
-- Add capability registration
+### 2. Capability Registry 🔥
+- Register capabilities
 - Add discovery and validation
-- Connect capability dispatch through runtime
+- Route capability dispatch through runtime
+- Prevent uncontrolled execution paths
 
-### 3. Runtime Execution Test
-- Validate complete request-to-result flow
-- Verify failure recovery
+### 3. Runtime Execution Test 🔥
+- Validate request-to-result flow
+- Verify capability execution
 - Verify telemetry events
+- Verify recovery behavior
 
 ### 4. Memory and Tools
 - Validate context injection
 - Validate outcome storage
 - Complete tool permission governance
+- Add execution auditing
 
 ### 5. Deployment Hardening
 - Production configuration
