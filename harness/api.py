@@ -5,6 +5,11 @@ Provides the boundary between frontend clients and the internal
 Harness execution pipeline.
 """
 
+from .routes import register_routes
+
+
+ROUTES = register_routes()
+
 
 def handle_request(payload):
     """Receive frontend request and pass it to the harness pipeline."""
@@ -17,7 +22,4 @@ def handle_request(payload):
 
 def health_check():
     """Basic service health response."""
-    return {
-        "service": "ANT AI Harness",
-        "status": "online",
-    }
+    return ROUTES["GET /health"]()
