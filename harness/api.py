@@ -9,6 +9,7 @@ from .execution_service import HarnessExecutionService
 from .api_registry import initialize_api_registry
 from .error_middleware import handle_api_error
 from .response_models import success_response
+from .request_validation import validate_request
 
 
 ROUTES = initialize_api_registry()
@@ -17,7 +18,8 @@ execution_service = HarnessExecutionService()
 
 @handle_api_error
 def handle_request(payload):
-    """Receive frontend request and execute through the harness pipeline."""
+    """Receive validated frontend request and execute through the harness pipeline."""
+    validate_request(payload)
     result = execution_service.execute(payload)
     return success_response(
         result=result,
