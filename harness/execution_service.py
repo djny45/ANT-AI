@@ -20,7 +20,7 @@ class HarnessExecutionService:
         self.history.record_start(execution_id, request)
 
         try:
-            result = self.pipeline.run(request)
+            result = self.pipeline.execute(request)
             self.status.complete(execution_id, result)
             self.history.record_complete(execution_id, result)
             return {
