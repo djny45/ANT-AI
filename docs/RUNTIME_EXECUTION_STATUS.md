@@ -23,18 +23,21 @@ Request -> Harness -> Execution Service -> Orchestrator -> Runtime Controller ->
 - Maintain single execution path
 - Validate task lifecycle
 - Stabilize failure handling
+- Prepare first real execution cycle
 
 ### 2. Capability Registry 🔥
 - Register capabilities
 - Add discovery and validation
 - Route capability dispatch through runtime
 - Prevent uncontrolled execution paths
+- Connect capability adapters
 
 ### 3. Runtime Execution Test 🔥
 - Validate request-to-result flow
 - Verify capability execution
 - Verify telemetry events
 - Verify recovery behavior
+- Complete prototype acceptance test
 
 ### 4. Memory and Tools
 - Validate context injection
@@ -47,9 +50,13 @@ Request -> Harness -> Execution Service -> Orchestrator -> Runtime Controller ->
 - Health checks
 - Monitoring
 - Security validation
+- Prototype deployment readiness
 
 ## Engineering Rule
 Avoid duplicate agent paths. Keep runtime, orchestration, memory, and tools modular.
 
 ## Next Milestone
 First successful end-to-end backend execution cycle through Agent Engine, Capability Registry, Memory, and Tools.
+
+## Latest Execution Focus
+Move from architecture completion to verified runtime execution. Prioritize working prototype behavior over additional features.
