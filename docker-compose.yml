@@ -1,0 +1,150 @@
+version: '3.8'
+
+services:
+  # Frontend - Next.js application
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: ant-ai-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost/api
+    networks:
+      - ant-ai-network
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend - FastAPI application
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: ant-ai-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - ANT_API_KEY=${ANT_API_KEY:-your-secret-key-here}
+      - ANT_ALLOWED_ORIGINS=http://localhost,http://localhost:3000
+      - ANT_MEMORY_DATABASE_URL=sqlite:///./ant_memory.db
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./backend:/app/backend
+      - ant-ai-data:/app/data
+    networks:
+      - ant-ai-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx - Reverse proxy and load balancer
+  nginx:
+    image: nginx:latest
+    container_name: ant-ai-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./devops/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./devops/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./devops/nginx/ssl:/etc/nginx/ssl:ro
+      - nginx-logs:/var/log/nginx
+    networks:
+      - ant-ai-network
+    depends_on:
+      - frontend
+      - backend
+      - prometheus
+      - grafana
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Prometheus - Metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ant-ai-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./devops/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - ant-ai-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Grafana - Visualization and dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ant-ai-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./devops/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - ant-ai-network
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis - Cache and session storage (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: ant-ai-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - ant-ai-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  ant-ai-network:
+    driver: bridge
+
+volumes:
+  ant-ai-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  redis-data:
+    driver: local
+  nginx-logs:
+    driver: local
