@@ -1,0 +1,270 @@
+groups:
+  - name: ant_ai_alerts
+    interval: 30s
+    rules:
+      # ================================================================
+      # API & Backend Alerts
+      # ================================================================
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} over last 5 minutes"
+
+      - alert: APILatencyHigh
+        expr: histogram_quantile(0.95, http_request_duration_seconds_bucket) > 1.0
+        for: 5m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "High API latency detected"
+          description: "P95 latency is {{ $value }}s"
+
+      - alert: ExecuteEndpointErrors
+        expr: rate(http_requests_total{endpoint="/execute",status=~"5.."}[5m]) > 0.01
+        for: 2m
+        labels:
+          severity: critical
+          component: execution
+        annotations:
+          summary: "Execute endpoint experiencing errors"
+          description: "Error rate on /execute is {{ $value | humanizePercentage }}"
+
+      - alert: AuthenticationFailureSpike
+        expr: rate(http_requests_total{endpoint="/execute",status="401"}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "Authentication failure spike detected"
+          description: "Auth failures on /execute: {{ $value | humanizePercentage }}"
+
+      # ================================================================
+      # Rate Limiting Alerts
+      # ================================================================
+      - alert: RateLimitThrottling
+        expr: rate(http_requests_total{status="429"}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+          component: ratelimit
+        annotations:
+          summary: "Significant rate limiting occurring"
+          description: "{{ $value | humanizePercentage }} of requests being rate limited"
+
+      - alert: RateLimitExhausted
+        expr: rate(http_requests_total{status="429"}[5m]) > 0.2
+        for: 1m
+        labels:
+          severity: critical
+          component: ratelimit
+        annotations:
+          summary: "Rate limit exhaustion - possible DDoS"
+          description: "{{ $value | humanizePercentage }} of requests rate limited"
+
+      # ================================================================
+      # Database Alerts
+      # ================================================================
+      - alert: DatabaseConnectionErrors
+        expr: increase(database_connection_errors_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "Database connection errors"
+          description: "{{ $value }} connection errors in last 5 minutes"
+
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes / 1024 / 1024 > 800
+        for: 5m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "High memory usage detected"
+          description: "Backend using {{ $value | humanize }}MB of memory"
+
+      - alert: CriticalMemoryUsage
+        expr: process_resident_memory_bytes / 1024 / 1024 > 1500
+        for: 2m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "Critical memory usage - potential crash risk"
+          description: "Backend using {{ $value | humanize }}MB of memory"
+
+      # ================================================================
+      # Pipeline & Execution Alerts
+      # ================================================================
+      - alert: PipelineExecutionFailure
+        expr: rate(pipeline_executions_failed_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          component: pipeline
+        annotations:
+          summary: "Pipeline execution failures detected"
+          description: "{{ $value | humanizePercentage }} of pipeline executions are failing"
+
+      - alert: CapabilityHandlerErrors
+        expr: rate(capability_handler_errors_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+          component: capabilities
+        annotations:
+          summary: "Capability handler errors"
+          description: "{{ $value | humanizePercentage }} of capability handlers failing"
+
+      - alert: LongRunningExecution
+        expr: histogram_quantile(0.95, pipeline_execution_duration_seconds_bucket) > 30
+        for: 5m
+        labels:
+          severity: warning
+          component: pipeline
+        annotations:
+          summary: "Long-running pipeline execution detected"
+          description: "P95 execution time is {{ $value }}s"
+
+      # ================================================================
+      # Service Availability Alerts
+      # ================================================================
+      - alert: BackendDown
+        expr: up{job="backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "Backend service is down"
+          description: "Backend service has been down for {{ $value }}m"
+
+      - alert: FrontendDown
+        expr: up{job="frontend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: frontend
+        annotations:
+          summary: "Frontend service is down"
+          description: "Frontend service has been down for {{ $value }}m"
+
+      - alert: PrometheusDown
+        expr: up{job="prometheus"} == 0
+        for: 1m
+        labels:
+          severity: warning
+          component: monitoring
+        annotations:
+          summary: "Prometheus is down"
+          description: "Monitoring service is unavailable"
+
+      # ================================================================
+      # Security Alerts
+      # ================================================================
+      - alert: SuspiciousInputDetected
+        expr: increase(security_suspicious_input_total[5m]) > 10
+        for: 1m
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "Suspicious input patterns detected"
+          description: "{{ $value }} suspicious inputs detected in last 5 minutes"
+
+      - alert: VerificationFailures
+        expr: rate(execution_verification_failures_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          component: verification
+        annotations:
+          summary: "High execution verification failure rate"
+          description: "{{ $value | humanizePercentage }} of verifications failing"
+
+      - alert: AuditLogWriteFailures
+        expr: increase(audit_log_write_errors_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: critical
+          component: audit
+        annotations:
+          summary: "Audit logging failures"
+          description: "Unable to write audit logs - {{ $value }} errors in last 5 minutes"
+
+      # ================================================================
+      # Storage & Capacity Alerts
+      # ================================================================
+      - alert: DiskSpaceLow
+        expr: node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} < 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "Low disk space"
+          description: "Only {{ $value | humanizePercentage }} disk space remaining"
+
+      - alert: DiskSpaceCritical
+        expr: node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} < 0.05
+        for: 2m
+        labels:
+          severity: critical
+          component: system
+        annotations:
+          summary: "Critical disk space shortage"
+          description: "Only {{ $value | humanizePercentage }} disk space remaining"
+
+      # ================================================================
+      # Request Pattern Alerts
+      # ================================================================
+      - alert: AnomalousRequestRate
+        expr: abs(rate(http_requests_total[5m]) - avg_over_time(rate(http_requests_total[5m])[1h:5m])) > 2 * stddev_over_time(rate(http_requests_total[5m])[1h:5m])
+        for: 5m
+        labels:
+          severity: warning
+          component: traffic
+        annotations:
+          summary: "Anomalous request rate detected"
+          description: "Request rate deviates significantly from baseline"
+
+      - alert: RequestQueueBuildup
+        expr: http_requests_in_progress > 100
+        for: 3m
+        labels:
+          severity: warning
+          component: performance
+        annotations:
+          summary: "Request queue building up"
+          description: "{{ $value }} requests currently in progress"
+
+      # ================================================================
+      # Uptime & Deployment Alerts
+      # ================================================================
+      - alert: ServiceRestartedRecently
+        expr: time() - process_start_time_seconds{job="backend"} < 300
+        for: 1m
+        labels:
+          severity: info
+          component: deployment
+        annotations:
+          summary: "Service was recently restarted"
+          description: "Service has been up for less than 5 minutes"
+
+      - alert: MultipleServiceRestarts
+        expr: increase(process_start_time_seconds{job="backend"}[1h]) > 2
+        for: 1m
+        labels:
+          severity: warning
+          component: stability
+        annotations:
+          summary: "Multiple service restarts in last hour"
+          description: "Service has restarted {{ $value }} times in the last hour"
