@@ -3,107 +3,149 @@
 # ANT AI Technologies
 ## Unified Adaptive Intelligence Operating System
 
-**One intelligence. One core. Dynamic specialized capabilities. Governed execution.**
+**One intelligence. One core. Dynamic specialized nano-capabilities. Self-learning. Self-adapting. Self-repairing. Governed execution.**
 
-ANT AI is a web-based adaptive intelligence platform built around a unified intelligence core. The system dynamically creates specialized capabilities for different tasks, coordinates execution, verifies results, and integrates outcomes back into the core intelligence.
+ANT AI is an adaptive intelligence platform built around a unified intelligence core. Instead of maintaining a fixed collection of agents, ANT dynamically creates specialized nano-capabilities when required, coordinates execution, verifies results, and integrates knowledge back into the core intelligence.
 
-> ANT AI is not a collection of independent permanent agents. It is one intelligence with adaptive specialization.
+> ANT AI is not a group of independent permanent agents. It is one intelligence that can divide into specialized nano-intelligence units when needed.
 
-## Core Architecture
+## Core Nano-Brain Architecture
 
 ```text
-                         USER
-                           ↓
-                    ANT AI WEBSITE
-                           ↓
-                 ONE ANT INTELLIGENCE CORE
-                           ↓
-              Adaptive Orchestration Layer
-                           ↓
+                         USER GOAL
+                            ↓
+                    ANT INTELLIGENCE CORE
+                       (Queen Brain)
+                            ↓
+              Adaptive Swarm Orchestration Layer
+                            ↓
         ┌──────────────┼──────────────┐
         ↓              ↓              ↓
-   Research       Development      Analysis
-   Capability     Capability       Capability
+   Research Nano   Development Nano  Analysis Nano
+        ↓              ↓              ↓
+   Sub-capabilities  Sub-capabilities  Sub-capabilities
         └──────────────┼──────────────┘
                        ↓
-              Knowledge Integration
+          Collective Knowledge Integration
                        ↓
-              Verification + Memory
+        Verification + Memory + Self Improvement
                        ↓
-                    Response
+                    Final Intelligence
 ```
 
 ## Adaptive Intelligence Model
 
-ANT AI follows a self-organizing capability model:
+ANT AI follows a biological-inspired adaptive model:
 
-- Simple tasks use a minimal execution path.
-- Complex tasks generate specialized temporary capabilities.
-- Capabilities collaborate through centralized orchestration.
-- Results are verified before integration.
-- Memory reduces repeated processing.
+- Small tasks use minimal intelligence pathways.
+- Complex tasks create specialized temporary nano-capabilities.
+- Capabilities collaborate through the central intelligence core.
+- Results are verified before becoming knowledge.
+- Previous experience improves future decisions.
 
-## ANT DEV Core
-
-ANT DEV Core is designed as an adaptive software engineering intelligence layer.
-
-Capabilities include:
-
-- Repository understanding
-- Open-source engineering pattern integration
-- Code analysis
-- Bug identification
-- Minimal repair workflows
-- Code optimization
-- Verification before changes are accepted
-
-The goal is not unnecessary code generation. ANT focuses on precise changes, cleaner architecture, and efficient development workflows.
-
-## Self-Learning Development Vision
+## Self-Learning Engine
 
 ```text
 Open Source Knowledge
           ↓
-Engineering Pattern Understanding
+Pattern Understanding
           ↓
-Repository Analysis
+Capability Discovery
           ↓
-Issue Detection
+Security / Quality Evaluation
           ↓
-Minimal Repair / Optimization
+Skill Integration
           ↓
 Testing and Verification
           ↓
-Knowledge Improvement
+Collective Knowledge Growth
 ```
+
+ANT learns engineering patterns from trusted sources and converts useful patterns into controlled capabilities rather than blindly copying code.
+
+## Self-Adapting Swarm Intelligence
+
+ANT can dynamically decide:
+
+- What capabilities are required.
+- How many specialized nano-units are needed.
+- When capabilities should combine.
+- When additional skills should be created.
+
+## Self-Repair System
+
+```text
+Problem Detection
+        ↓
+Root Cause Analysis
+        ↓
+Minimal Repair Generation
+        ↓
+Testing
+        ↓
+Verification
+        ↓
+System Improvement
+```
+
+ANT focuses on minimal verified repairs instead of uncontrolled rewrites.
+
+## ANT DEV Core
+
+Adaptive software engineering intelligence layer:
+
+- Repository understanding
+- Open-source engineering pattern analysis
+- Code review intelligence
+- Bug detection
+- Self-repair workflows
+- Optimization suggestions
+- Verification pipelines
+
+## Collective Memory / Pheromone Intelligence
+
+Inspired by ant colonies:
+
+```text
+Nano Capability
+       ↓
+Experience Signal
+       ↓
+Collective Memory
+       ↓
+Future Decision Improvement
+```
+
+Useful discoveries increase future intelligence while maintaining governance and verification.
 
 ## Performance Principles
 
-ANT AI is designed to avoid unnecessary computation:
-
-- Analyze relevant code paths instead of entire systems when possible.
-- Generate only required capabilities.
-- Prefer minimal, verified changes over large rewrites.
-- Maintain a central intelligence boundary.
+- Generate only required intelligence.
+- Avoid unnecessary permanent agents.
+- Prefer minimal verified changes.
+- Keep one central intelligence boundary.
+- Optimize computation through adaptive routing.
 
 ## Security Principles
 
-- Governance before execution
-- Verification after execution
-- Environment-based secrets
-- Audit tracking
-- Controlled capability access
-- Central intelligence oversight
+- Governance before execution.
+- Verification after execution.
+- Controlled capability access.
+- Audit tracking.
+- Environment-based secrets.
+- Human approval boundaries for critical operations.
 
 ## Development Status
 
-**Private prototype / development stage.**
+**Adaptive intelligence prototype / development stage.**
 
-Current focus:
+Current evolution:
 
 - ANT Core intelligence engine
-- Web platform integration
-- Adaptive capability orchestration
-- Memory architecture
+- Adaptive orchestration
+- Nano-capability architecture
+- Self-learning framework
+- Self-repair workflows
+- Collective memory design
 - Development intelligence workflows
 - End-to-end verification pipeline
