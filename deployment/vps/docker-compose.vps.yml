@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  ant-runtime:
+    image: ant-ai-runtime:latest
+    restart: unless-stopped
+    environment:
+      - ENVIRONMENT=production
+      - RUNTIME_MODE=autonomous
+    ports:
+      - "8000:8000"
+
+  monitoring:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+
