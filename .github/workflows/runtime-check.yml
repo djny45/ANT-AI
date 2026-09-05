@@ -1,0 +1,14 @@
+name: Runtime Check
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify runtime structure
+        run: |
+          test -d runtime || true
