@@ -1,151 +1,73 @@
-![ANT AI Logo](logo.png)
+# React + TypeScript + Vite
 
-# ANT AI Technologies
-## Unified Adaptive Intelligence Operating System
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-**One intelligence. One core. Dynamic specialized nano-capabilities. Self-learning. Self-adapting. Self-repairing. Governed execution.**
+Currently, two official plugins are available:
 
-ANT AI is an adaptive intelligence platform built around a unified intelligence core. Instead of maintaining a fixed collection of agents, ANT dynamically creates specialized nano-capabilities when required, coordinates execution, verifies results, and integrates knowledge back into the core intelligence.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-> ANT AI is not a group of independent permanent agents. It is one intelligence that can divide into specialized nano-intelligence units when needed.
+## React Compiler
 
-## Core Nano-Brain Architecture
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-```text
-                         USER GOAL
-                            ↓
-                    ANT INTELLIGENCE CORE
-                       (Queen Brain)
-                            ↓
-              Adaptive Swarm Orchestration Layer
-                            ↓
-        ┌──────────────┼──────────────┐
-        ↓              ↓              ↓
-   Research Nano   Development Nano  Analysis Nano
-        ↓              ↓              ↓
-   Sub-capabilities  Sub-capabilities  Sub-capabilities
-        └──────────────┼──────────────┘
-                       ↓
-          Collective Knowledge Integration
-                       ↓
-        Verification + Memory + Self Improvement
-                       ↓
-                    Final Intelligence
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
+
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
 
-## Adaptive Intelligence Model
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-ANT AI follows a biological-inspired adaptive model:
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-- Small tasks use minimal intelligence pathways.
-- Complex tasks create specialized temporary nano-capabilities.
-- Capabilities collaborate through the central intelligence core.
-- Results are verified before becoming knowledge.
-- Previous experience improves future decisions.
-
-## Self-Learning Engine
-
-```text
-Open Source Knowledge
-          ↓
-Pattern Understanding
-          ↓
-Capability Discovery
-          ↓
-Security / Quality Evaluation
-          ↓
-Skill Integration
-          ↓
-Testing and Verification
-          ↓
-Collective Knowledge Growth
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
-
-ANT learns engineering patterns from trusted sources and converts useful patterns into controlled capabilities rather than blindly copying code.
-
-## Self-Adapting Swarm Intelligence
-
-ANT can dynamically decide:
-
-- What capabilities are required.
-- How many specialized nano-units are needed.
-- When capabilities should combine.
-- When additional skills should be created.
-
-## Self-Repair System
-
-```text
-Problem Detection
-        ↓
-Root Cause Analysis
-        ↓
-Minimal Repair Generation
-        ↓
-Testing
-        ↓
-Verification
-        ↓
-System Improvement
-```
-
-ANT focuses on minimal verified repairs instead of uncontrolled rewrites.
-
-## ANT DEV Core
-
-Adaptive software engineering intelligence layer:
-
-- Repository understanding
-- Open-source engineering pattern analysis
-- Code review intelligence
-- Bug detection
-- Self-repair workflows
-- Optimization suggestions
-- Verification pipelines
-
-## Collective Memory / Pheromone Intelligence
-
-Inspired by ant colonies:
-
-```text
-Nano Capability
-       ↓
-Experience Signal
-       ↓
-Collective Memory
-       ↓
-Future Decision Improvement
-```
-
-Useful discoveries increase future intelligence while maintaining governance and verification.
-
-## Performance Principles
-
-- Generate only required intelligence.
-- Avoid unnecessary permanent agents.
-- Prefer minimal verified changes.
-- Keep one central intelligence boundary.
-- Optimize computation through adaptive routing.
-
-## Security Principles
-
-- Governance before execution.
-- Verification after execution.
-- Controlled capability access.
-- Audit tracking.
-- Environment-based secrets.
-- Human approval boundaries for critical operations.
-
-## Development Status
-
-**Adaptive intelligence prototype / development stage.**
-
-Current evolution:
-
-- ANT Core intelligence engine
-- Adaptive orchestration
-- Nano-capability architecture
-- Self-learning framework
-- Self-repair workflows
-- Collective memory design
-- Development intelligence workflows
-- End-to-end verification pipeline
