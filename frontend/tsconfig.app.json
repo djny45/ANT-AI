@@ -9,8 +9,10 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
-    "noEmit": true,
-    "jsx": "react-jsx"
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "noEmit": true
   },
   "include": ["src"]
 }
