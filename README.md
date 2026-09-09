@@ -14,7 +14,7 @@ The project combines:
 
 ## Architecture
 
-```
+```text
 User Interface
       |
       v
@@ -36,7 +36,7 @@ Agent Swarm
 
 ## Repository Structure
 
-```
+```text
 ANT-AI/
 |
 ├── frontend/          # React + TypeScript web interface
@@ -54,12 +54,13 @@ Built with:
 - TypeScript
 - Vite
 
-Frontend features:
+Frontend includes:
 
 - ANT architecture visualization
 - Agent workflow presentation
-- Runtime connection ready
-- Vercel deployment support
+- Component-based UI structure
+- Vercel deployment configuration
+- Runtime integration preparation
 
 Run locally:
 
@@ -86,9 +87,9 @@ Frontend deployment target:
 
 ## Runtime Integration
 
-Planned production flow:
+Connection architecture:
 
-```
+```text
 Frontend
    |
    v
@@ -104,12 +105,21 @@ ANT Runtime
 Agent Swarm
 ```
 
-## Development Roadmap
+Backend/runtime architecture remains modular and independent from the frontend layer.
+
+## Development Status
+
+Completed:
 
 - [x] Frontend foundation
 - [x] React component architecture
-- [x] Vite build configuration
+- [x] Vite configuration
 - [x] TypeScript configuration
+- [x] Vercel deployment setup
+
+In progress:
+
+- [ ] Final production build validation
 - [ ] Runtime API connection
 - [ ] Live agent monitoring dashboard
 - [ ] Production agent orchestration
