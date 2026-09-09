@@ -1,27 +1,56 @@
 # ANT-AI
 
-## Autonomous Neural Team AI Framework
+## Autonomous Neural Team AI Platform
 
-ANT-AI is a hierarchical AI agent framework designed for orchestrating autonomous agents through a scalable swarm architecture.
+ANT-AI is a web-based AI assistant platform designed to provide users with a conversational AI experience through a dedicated website, similar to modern AI platforms such as ChatGPT and Claude.
 
-The project combines:
+Users interact with ANT-AI through the web interface. The website acts as the primary access layer while the intelligence system operates behind the scenes through ANT's agent architecture.
 
-- Agent orchestration
-- Runtime execution layers
-- Web interface control
-- API bridge communication
-- Modular AI workflows
-
-## Architecture
+## Product Vision
 
 ```text
-User Interface
+User
+ |
+ v
+ANT-AI Website
+ |
+ v
+Conversation Interface
+ |
+ v
+ANT API Layer
+ |
+ v
+ANT Web Bridge
+ |
+ v
+ANT Runtime
+ |
+ v
+Autonomous Agent Swarm
+```
+
+The goal is to create a complete AI platform where users can:
+
+- Chat with ANT-AI through a browser
+- Request tasks and workflows
+- Interact with autonomous AI agents
+- Access specialized intelligence modules
+- Receive coordinated responses from multiple agents
+
+## Core Architecture
+
+```text
+ANT-AI Website
       |
       v
 Frontend (React + Vite + TypeScript)
       |
       v
-ANT Web Bridge
+ANT API Client
+      |
+      v
+Web Bridge
       |
       v
 ANT Runtime
@@ -39,14 +68,14 @@ Agent Swarm
 ```text
 ANT-AI/
 |
-├── frontend/          # React + TypeScript web interface
-├── web_bridge/        # Frontend/runtime communication layer
-├── runtime/           # Core execution engine
+├── frontend/          # User-facing AI website interface
+├── web_bridge/        # Frontend and AI communication layer
+├── runtime/           # Core AI execution system
 ├── agents/            # Autonomous agent modules
 └── README.md
 ```
 
-## Frontend
+## Frontend Website
 
 Built with:
 
@@ -54,13 +83,15 @@ Built with:
 - TypeScript
 - Vite
 
-Frontend includes:
+The frontend is the main user experience layer of ANT-AI.
 
+Features:
+
+- Chat-style AI interface foundation
 - ANT architecture visualization
 - Agent workflow presentation
-- Component-based UI structure
-- Vercel deployment configuration
-- Runtime integration preparation
+- Web application deployment support
+- Runtime connection preparation
 
 Run locally:
 
@@ -78,34 +109,37 @@ npm run build
 
 ## Deployment
 
-Frontend deployment target:
+The ANT-AI website is designed for cloud deployment.
 
-- Vercel
+Recommended configuration:
+
+- Platform: Vercel
 - Root directory: `frontend`
 - Build command: `npm run build`
 - Output directory: `dist`
 
-## Runtime Integration
-
-Connection architecture:
+## AI Runtime Flow
 
 ```text
-Frontend
-   |
-   v
-ANT API Client
-   |
-   v
-web_bridge
-   |
-   v
+Website User
+      |
+      v
+ANT Conversation UI
+      |
+      v
+ANT API
+      |
+      v
+Web Bridge
+      |
+      v
 ANT Runtime
-   |
-   v
-Agent Swarm
+      |
+      v
+Agent Intelligence Layer
 ```
 
-Backend/runtime architecture remains modular and independent from the frontend layer.
+The frontend and backend systems remain modular so the AI runtime can evolve independently.
 
 ## Development Status
 
@@ -113,17 +147,18 @@ Completed:
 
 - [x] Frontend foundation
 - [x] React component architecture
-- [x] Vite configuration
+- [x] Vite setup
 - [x] TypeScript configuration
-- [x] Vercel deployment setup
+- [x] Web deployment preparation
 
 In progress:
 
-- [ ] Final production build validation
-- [ ] Runtime API connection
-- [ ] Live agent monitoring dashboard
-- [ ] Production agent orchestration
+- [ ] Production website deployment
+- [ ] ANT API connection
+- [ ] Real-time AI chat interface
+- [ ] Agent monitoring dashboard
+- [ ] Production autonomous workflows
 
 ## Vision
 
-ANT-AI aims to provide a flexible foundation for building autonomous AI systems where multiple specialized agents collaborate through a coordinated intelligence layer.
+ANT-AI aims to become a complete browser-based AI platform where users communicate with an intelligent agent system through a simple website interface, while a coordinated swarm of specialized agents works behind the scenes.
