@@ -1,73 +1,119 @@
-# React + TypeScript + Vite
+# ANT-AI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Autonomous Neural Team AI Framework
 
-Currently, two official plugins are available:
+ANT-AI is a hierarchical AI agent framework designed for orchestrating autonomous agents through a scalable swarm architecture.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The project combines:
 
-## React Compiler
+- Agent orchestration
+- Runtime execution layers
+- Web interface control
+- API bridge communication
+- Modular AI workflows
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Architecture
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+User Interface
+      |
+      v
+Frontend (React + Vite + TypeScript)
+      |
+      v
+ANT Web Bridge
+      |
+      v
+ANT Runtime
+      |
+      v
+Agent Swarm
+      |
+      +-- Commander Agent
+      +-- Specialist Agents
+      +-- Worker Agents
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Repository Structure
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+ANT-AI/
+|
+├── frontend/          # React + TypeScript web interface
+├── web_bridge/        # Frontend/runtime communication layer
+├── runtime/           # Core execution engine
+├── agents/            # Autonomous agent modules
+└── README.md
+```
+
+## Frontend
+
+Built with:
+
+- React
+- TypeScript
+- Vite
+
+Frontend features:
+
+- ANT architecture visualization
+- Agent workflow presentation
+- Runtime connection ready
+- Vercel deployment support
+
+Run locally:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Build:
+
+```bash
+npm run build
+```
+
+## Deployment
+
+Frontend deployment target:
+
+- Vercel
+- Root directory: `frontend`
+- Build command: `npm run build`
+- Output directory: `dist`
+
+## Runtime Integration
+
+Planned production flow:
+
+```
+Frontend
+   |
+   v
+ANT API Client
+   |
+   v
+web_bridge
+   |
+   v
+ANT Runtime
+   |
+   v
+Agent Swarm
+```
+
+## Development Roadmap
+
+- [x] Frontend foundation
+- [x] React component architecture
+- [x] Vite build configuration
+- [x] TypeScript configuration
+- [ ] Runtime API connection
+- [ ] Live agent monitoring dashboard
+- [ ] Production agent orchestration
+
+## Vision
+
+ANT-AI aims to provide a flexible foundation for building autonomous AI systems where multiple specialized agents collaborate through a coordinated intelligence layer.
