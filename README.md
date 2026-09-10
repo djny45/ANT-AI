@@ -1,164 +1,166 @@
-# ANT-AI
+# 🐜 ANT AI
 
-## Autonomous Neural Team AI Platform
+**Autonomous Neural Taskforce**  
+*One intelligence. One core. Dynamic internal capabilities. Governed execution.*
 
-ANT-AI is a web-based AI assistant platform designed to provide users with a conversational AI experience through a dedicated website, similar to modern AI platforms such as ChatGPT and Claude.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/status-active%20development-blue)]()
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue)]()
+[![Node](https://img.shields.io/badge/node-18%2B-green)]()
 
-Users interact with ANT-AI through the web interface. The website acts as the primary access layer while the intelligence system operates behind the scenes through ANT's agent architecture.
+ANT AI is a **unified adaptive intelligence platform**.  
+It is not a collection of independent permanent agents.  
+It is **one intelligence core** that can temporarily form specialized internal capabilities, execute them under governance, verify results, and recombine them into a single coherent response.
 
-## Product Vision
+> Inspired by coordinated natural systems — one organism, many temporary specialized pathways.
 
-```text
-User
- |
- v
-ANT-AI Website
- |
- v
-Conversation Interface
- |
- v
-ANT API Layer
- |
- v
-ANT Web Bridge
- |
- v
-ANT Runtime
- |
- v
-Autonomous Agent Swarm
-```
+---
 
-The goal is to create a complete AI platform where users can:
+## Core Principle
+User Request
+↓
+ANT Intelligence Core
+↓
+Problem Understanding + Planning
+↓
+Dynamic Capability Formation
+↓
+Temporary Internal Capabilities
+(Research · Coding · Security · Analysis · Testing …)
+↓
+Governed Parallel / Sequential Execution
+↓
+Verification + Risk Evaluation
+↓
+Memory Update
+↓
+Unified Final Response
 
-- Chat with ANT-AI through a browser
-- Request tasks and workflows
-- Interact with autonomous AI agents
-- Access specialized intelligence modules
-- Receive coordinated responses from multiple agents
+### Hard Architecture Invariants
 
-## Core Architecture
+1. **One intelligence identity** — all capabilities belong to the same ANT execution context.
+2. **Temporary specialization** — capabilities are formed for the current task and dissolve afterward.
+3. **Shared context** — memory, governance, and state are common.
+4. **Central governance** — no capability bypasses permission, risk, or verification controls.
+5. **Unified result** — outputs are recombined into one verified response.
+6. **No permanent agent registry** — the system does not rely on independent long-lived agents voting or competing.
 
-```text
-ANT-AI Website
-      |
-      v
-Frontend (React + Vite + TypeScript)
-      |
-      v
-ANT API Client
-      |
-      v
-Web Bridge
-      |
-      v
-ANT Runtime
-      |
-      v
-Agent Swarm
-      |
-      +-- Commander Agent
-      +-- Specialist Agents
-      +-- Worker Agents
-```
+---
 
-## Repository Structure
+## Key Features
 
-```text
+| Feature                        | Description                                                                 |
+|--------------------------------|-----------------------------------------------------------------------------|
+| **Unified Intelligence Core**  | Single reasoning identity with dynamic self-decomposition                   |
+| **LLM Routing**                | Local (Ollama) + hosted (OpenRouter) with configurable model selection      |
+| **Knowledge Hive Memory**      | Persistent, contextual memory across sessions and tasks                     |
+| **Governance & Risk Engine**   | Pre-execution risk evaluation + post-execution verification                 |
+| **Secure Audit Trail**         | Blockchain-inspired immutable logging of decisions and actions              |
+| **Self-Improvement Loop**      | Learning from outcomes to improve future capability formation               |
+| **Web Interface**              | Modern React + Vite + TypeScript frontend                                   |
+| **Modular Runtime**            | Harness → Orchestrator → Capability Registry → Tools / Memory               |
+| **Extensible Connectors**      | OpenRouter, Ollama, OmniRoute, and custom tool integrations                 |
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- Python 3.10+
+- Node.js 18+
+- [Ollama](https://ollama.com) (recommended for local models)
+- Optional: OpenRouter API key for hosted models
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/djny45/ANT-AI.git
+cd ANT-AI
+
+2. Environment setup
+cp .env.example .env
+# Edit .env with your preferences
+ANT_MODEL_PROVIDER=ollama          # or "openrouter"
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2
+OPENROUTER_API_KEY=                # only if using OpenRouter
+OPENROUTER_MODEL=nvidia/nemotron-3-ultra-550b-a55b:free
+ANT_CORS_ORIGINS=http://localhost:3000,http://localhost:8000
+
+Architecture Overview
+┌─────────────────────────────────────────────────────────────┐
+│                    ANT-AI Website (React)                   │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+┌────────────────────────────▼────────────────────────────────┐
+│                     Web Bridge / API Layer                  │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+┌────────────────────────────▼────────────────────────────────┐
+│                    Harness + Runtime                        │
+│  Orchestrator · Planner · Decision Engine · State Manager   │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+┌────────────────────────────▼────────────────────────────────┐
+│              ANT Intelligence Core                          │
+│  Dynamic Capability Formation · Governance · Verification   │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+        ┌────────────────────┼────────────────────┐
+        ▼                    ▼                    ▼
+   Research Cap.        Coding Cap.          Security Cap.
+        │                    │                    │
+        └────────────────────┼────────────────────┘
+                             │
+┌────────────────────────────▼────────────────────────────────┐
+│         Memory · Tools · Knowledge Graph · Audit Log        │
+└─────────────────────────────────────────────────────────────┘
+
 ANT-AI/
-|
-├── frontend/          # User-facing AI website interface
-├── web_bridge/        # Frontend and AI communication layer
-├── runtime/           # Core AI execution system
-├── agents/            # Autonomous agent modules
-└── README.md
-```
+├── frontend/              # React + Vite + TypeScript web UI
+├── web_bridge/            # Frontend ↔ Runtime communication
+├── runtime/               # Core execution engine
+├── ant_core/              # Orchestrator, planner, decision engine
+├── intelligence/          # Model routers, connectors (Ollama, OpenRouter…)
+├── memory/ & memory_v2/   # Knowledge hive & persistent memory
+├── governance_engine/     # Risk & policy controls
+├── security/ & security_v2/
+├── knowledge_engine/      # Knowledge graph & retrieval
+├── connectors/            # External tool & service integrations
+├── harness/               # Execution boundary & lifecycle
+├── docs/                  # Architecture, roadmaps, principles
+├── tests/
+└── ...
 
-## Frontend Website
+Development Status
+Verified foundation
+Unified graph execution boundary
+Dynamic internal capability formation
+Local Ollama model execution
+Optional OpenRouter runtime
+Governance and risk evaluation layer
+Frontend foundation (React + TypeScript + Vite)
+Active focus
+End-to-end runtime execution cycle
+Capability registry + agent engine binding
+Memory context injection & outcome storage
+Production hardening and monitoring
+See docs/RUNTIME_EXECUTION_STATUS.md and related documents for the latest phase status.
 
-Built with:
+Security
+Report vulnerabilities privately to the maintainers.
+All external tools, models, and code must pass security gates before integration.
+See SECURITY.md and SECURITY_IMPROVEMENTS.md
 
-- React
-- TypeScript
-- Vite
+License
+This project is licensed under the MIT License.
+See the LICENSE file for details.
 
-The frontend is the main user experience layer of ANT-AI.
+Vision
+ANT AI aims to become a complete, browser-accessible adaptive intelligence platform:
+Users interact through a clean web interface.
+Behind the scenes, a single governed intelligence dynamically specializes itself.
+Every action is audited, verifiable, and continuously improving.
+One intelligence. Adaptive. Governed. Evolving
 
-Features:
-
-- Chat-style AI interface foundation
-- ANT architecture visualization
-- Agent workflow presentation
-- Web application deployment support
-- Runtime connection preparation
-
-Run locally:
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Build:
-
-```bash
-npm run build
-```
-
-## Deployment
-
-The ANT-AI website is designed for cloud deployment.
-
-Recommended configuration:
-
-- Platform: Vercel
-- Root directory: `frontend`
-- Build command: `npm run build`
-- Output directory: `dist`
-
-## AI Runtime Flow
-
-```text
-Website User
-      |
-      v
-ANT Conversation UI
-      |
-      v
-ANT API
-      |
-      v
-Web Bridge
-      |
-      v
-ANT Runtime
-      |
-      v
-Agent Intelligence Layer
-```
-
-The frontend and backend systems remain modular so the AI runtime can evolve independently.
-
-## Development Status
-
-Completed:
-
-- [x] Frontend foundation
-- [x] React component architecture
-- [x] Vite setup
-- [x] TypeScript configuration
-- [x] Web deployment preparation
-
-In progress:
-
-- [ ] Production website deployment
-- [ ] ANT API connection
-- [ ] Real-time AI chat interface
-- [ ] Agent monitoring dashboard
-- [ ] Production autonomous workflows
-
-## Vision
-
-ANT-AI aims to become a complete browser-based AI platform where users communicate with an intelligent agent system through a simple website interface, while a coordinated swarm of specialized agents works behind the scenes.
