@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Bot, User, Sparkles, Cpu, Trash2 } from 'lucide-react'
+import { sendToANT } from '../lib/api'
+import { getApiKey } from '../lib/storage'
 
 type Role = 'user' | 'ant' | 'system'
 
@@ -32,49 +34,6 @@ const suggestions = [
   'Diagnose failing test suite',
   'Suggest perf optimizations',
 ]
-
-function getReply(input: string): { text: string; meta: string } {
-  const lower = input.toLowerCase().trim()
-  if (!lower) return { text: 'Waiting for input…', meta: 'Queen · idle' }
-  if (lower.includes('refactor') || lower.includes('oauth')) {
-    return {
-      text:
-        'Spawning Development Nano. Cloning repository, mapping auth surface, ' +
-        'drafting minimal OAuth2 patch, running tests, committing with audit hash.',
-      meta: 'Development Nano · verified',
-    }
-  }
-  if (lower.includes('audit') || lower.includes('commit')) {
-    return {
-      text:
-        'Querying blockchain audit trail. Found 12 signed capabilities in the ' +
-        'last 24h — all verified, none tampered.',
-      meta: 'Audit Nano · 12 records',
-    }
-  }
-  if (lower.includes('test') || lower.includes('fail') || lower.includes('bug')) {
-    return {
-      text:
-        'Spawning Repair Nano. Diagnosing root cause, generating minimal patch, ' +
-        'running test suite in isolation, integrating only if green.',
-      meta: 'Repair Nano · pipeline ready',
-    }
-  }
-  if (lower.includes('perf') || lower.includes('optim')) {
-    return {
-      text:
-        'Spawning Analysis Nano. Profiling hot paths, ranking optimizations by ' +
-        'impact/effort, queuing top three for governance approval.',
-      meta: 'Analysis Nano · profiling',
-    }
-  }
-  return {
-    text:
-      `Routing "“${input.slice(0, 60)}${input.length > 60 ? '…' : ''}”" through the Queen. ` +
-      'Choosing capability, drafting plan, pausing for governance check.',
-    meta: 'Queen · planning',
-  }
-}
 
 function MessageBubble({ m }: { m: Message }) {
   const isUser = m.role === 'user'
@@ -137,30 +96,52 @@ export default function ChatBox() {
     })
   }, [messages, thinking])
 
-  const send = (text?: string) => {
+  const send = async (text?: string) => {
     const value = (text ?? input).trim()
     if (!value || thinking) return
+
     const userMsg: Message = {
       id: `u-${Date.now()}`,
       role: 'user',
       text: value,
     }
+
     setMessages((m) => [...m, userMsg])
     setInput('')
     setThinking(true)
-    const reply = getReply(value)
-    setTimeout(() => {
+
+    try {
+      const apiKey = getApiKey()
+      if (!apiKey) {
+        throw new Error('API key not configured. Open the API Key panel first.')
+      }
+
+      const result = await sendToANT(value, apiKey)
+      const responseText =
+        result?.message ?? result?.response ?? result?.text ?? 'ANT returned no response.'
+
       setMessages((m) => [
         ...m,
         {
           id: `a-${Date.now()}`,
           role: 'ant',
-          text: reply.text,
-          meta: reply.meta,
+          text: String(responseText),
+          meta: 'ANT API · live',
         },
       ])
+    } catch (error) {
+      setMessages((m) => [
+        ...m,
+        {
+          id: `e-${Date.now()}`,
+          role: 'system',
+          text: error instanceof Error ? error.message : 'ANT API request failed.',
+          meta: 'error',
+        },
+      ])
+    } finally {
       setThinking(false)
-    }, 900 + Math.random() * 600)
+    }
   }
 
   const clear = () => {
@@ -206,7 +187,6 @@ export default function ChatBox() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="grid grid-cols-1 lg:grid-cols-12 gap-6"
         >
-          {/* Sidebar — capabilities */}
           <div className="lg:col-span-3 space-y-2">
             <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 px-1">
               Nano capabilities
@@ -245,7 +225,6 @@ export default function ChatBox() {
               </motion.div>
             ))}
 
-            {/* Mini stats */}
             <div className="mt-4 rounded-2xl border border-white/5 bg-white/[0.015] p-4">
               <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">
                 Session
@@ -257,16 +236,14 @@ export default function ChatBox() {
                 </div>
                 <div>
                   <div className="text-zinc-500">Latency</div>
-                  <div className="font-mono text-white">~1.2s</div>
+                  <div className="font-mono text-white">API</div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Chat panel */}
           <div className="lg:col-span-9">
             <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-sm gradient-border">
-              {/* Header */}
               <div className="flex items-center justify-between border-b border-white/5 bg-white/[0.02] px-5 py-3">
                 <div className="flex items-center gap-3">
                   <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400">
@@ -291,7 +268,6 @@ export default function ChatBox() {
                 </button>
               </div>
 
-              {/* Messages */}
               <div
                 ref={scrollRef}
                 className="h-[360px] overflow-y-auto px-5 py-5 sm:px-7 sm:py-7 space-y-3"
@@ -327,7 +303,6 @@ export default function ChatBox() {
                 )}
               </div>
 
-              {/* Suggestions */}
               <div className="border-t border-white/5 bg-white/[0.01] px-5 py-3 sm:px-7">
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="h-3 w-3 text-amber-400" />
@@ -349,11 +324,10 @@ export default function ChatBox() {
                 </div>
               </div>
 
-              {/* Input */}
               <form
                 onSubmit={(e) => {
                   e.preventDefault()
-                  send()
+                  void send()
                 }}
                 className="border-t border-white/5 bg-white/[0.02] px-5 py-3 sm:px-7 sm:py-4"
               >
@@ -369,19 +343,12 @@ export default function ChatBox() {
                     type="submit"
                     disabled={!input.trim() || thinking}
                     aria-label="Send"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500 text-black transition-all hover:bg-amber-400 hover:shadow-[0_0_20px_-2px_rgba(245,158,11,0.6)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-amber-500 disabled:hover:shadow-none"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500 text-black transition-all hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    <Send className="h-4 w-4" />
+                    <Send className="h-3.5 w-3.5" />
                   </button>
                 </div>
-                <div className="mt-2 flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-zinc-600">
-                  <span>demo · replies are simulated</span>
-                  <span>⏎ to send</span>
-                </div>
               </form>
-
-              {/* Corner glow */}
-              <div className="absolute -top-1 -right-1 h-24 w-24 rounded-full bg-amber-500/10 blur-2xl pointer-events-none" />
             </div>
           </div>
         </motion.div>
