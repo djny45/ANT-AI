@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { saveApiKey, getApiKey, clearApiKey } from '../lib/storage'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   KeyRound,
@@ -56,8 +57,16 @@ function maskKey(k: string) {
 export default function ApiKey() {
   const [active, setActive] = useState<Provider>('openrouter')
   const [show, setShow] = useState(false)
-  const [value, setValue] = useState('')
+  const [value, setValue] = useState(() => getApiKey())
   const [copied, setCopied] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (value.trim()) {
+      saveApiKey(value.trim())
+    } else {
+      clearApiKey()
+    }
+  }, [value])
 
   const current = providers.find((p) => p.id === active)!
   const isOllama = active === 'ollama'
@@ -124,7 +133,6 @@ ANT_AUDIT=${active === 'openrouter' ? 'blockchain' : 'local'}`
           transition={{ duration: 0.6, delay: 0.1 }}
           className="grid grid-cols-1 lg:grid-cols-12 gap-6"
         >
-          {/* Tab list */}
           <div className="lg:col-span-4 space-y-3">
             {providers.map((p) => {
               const isActive = active === p.id
@@ -191,7 +199,6 @@ ANT_AUDIT=${active === 'openrouter' ? 'blockchain' : 'local'}`
               )
             })}
 
-            {/* Security card */}
             <div className="mt-4 rounded-2xl border border-white/5 bg-white/[0.015] p-5">
               <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-zinc-500">
                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
@@ -214,7 +221,6 @@ ANT_AUDIT=${active === 'openrouter' ? 'blockchain' : 'local'}`
             </div>
           </div>
 
-          {/* Panel */}
           <div className="lg:col-span-8">
             <AnimatePresence mode="wait">
               <motion.div
@@ -225,7 +231,6 @@ ANT_AUDIT=${active === 'openrouter' ? 'blockchain' : 'local'}`
                 transition={{ duration: 0.25 }}
                 className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-sm gradient-border"
               >
-                {/* Header */}
                 <div className="flex items-center justify-between border-b border-white/5 bg-white/[0.02] px-5 py-3">
                   <div className="flex items-center gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400">
@@ -251,9 +256,7 @@ ANT_AUDIT=${active === 'openrouter' ? 'blockchain' : 'local'}`
                   </a>
                 </div>
 
-                {/* Body */}
                 <div className="px-6 py-7 sm:px-8 sm:py-9 space-y-7">
-                  {/* Hint */}
                   <div className="flex items-start gap-3 rounded-xl border border-white/5 bg-white/[0.015] p-4">
                     <Sparkles className="h-4 w-4 mt-0.5 text-amber-400 shrink-0" />
                     <p className="text-xs text-zinc-400 leading-relaxed">
@@ -261,7 +264,6 @@ ANT_AUDIT=${active === 'openrouter' ? 'blockchain' : 'local'}`
                     </p>
                   </div>
 
-                  {/* Input */}
                   <div>
                     <label className="flex items-center justify-between mb-2">
                       <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">
@@ -308,7 +310,6 @@ ANT_AUDIT=${active === 'openrouter' ? 'blockchain' : 'local'}`
                       </div>
                     </div>
 
-                    {/* Status row */}
                     <div className="mt-3 flex items-center justify-between text-[10px] font-mono uppercase tracking-widest">
                       <div className="flex items-center gap-2">
                         {hasKey ? (
@@ -338,7 +339,6 @@ ANT_AUDIT=${active === 'openrouter' ? 'blockchain' : 'local'}`
                       </span>
                     </div>
 
-                    {/* Strength bar (only for keys) */}
                     {!isOllama && value && (
                       <div className="mt-3 h-1 rounded-full bg-white/5 overflow-hidden">
                         <motion.div
@@ -357,7 +357,6 @@ ANT_AUDIT=${active === 'openrouter' ? 'blockchain' : 'local'}`
                     )}
                   </div>
 
-                  {/* Snippet */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">
@@ -369,7 +368,7 @@ ANT_AUDIT=${active === 'openrouter' ? 'blockchain' : 'local'}`
                       >
                         {copied === 'snippet' ? (
                           <>
-                            <Check className="h-3 w-3 text-emerald-400" />
+                            <Check className="h-3 w-3" />
                             <span>copied</span>
                           </>
                         ) : (
@@ -413,7 +412,6 @@ ANT_AUDIT=${active === 'openrouter' ? 'blockchain' : 'local'}`
                     </pre>
                   </div>
 
-                  {/* Action row */}
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
                     <button
                       onClick={() => onCopy('command', `export ${envSnippet}`)}
@@ -443,7 +441,6 @@ ANT_AUDIT=${active === 'openrouter' ? 'blockchain' : 'local'}`
                   </div>
                 </div>
 
-                {/* Corner glow */}
                 <div className="absolute -top-1 -right-1 h-24 w-24 rounded-full bg-amber-500/10 blur-2xl pointer-events-none" />
               </motion.div>
             </AnimatePresence>
