@@ -70,7 +70,10 @@ async def chat(request: Request, payload: ChatRequest) -> dict:
             context=context,
         )
     except Exception as exc:
-        raise HTTPException(status_code=500, detail="ANT execution failed") from exc
+        # Keep the API actionable during deployment debugging without returning
+        # request headers, credentials, or a full server traceback to the browser.
+        detail = f"{type(exc).__name__}: {str(exc)[:500]}" or type(exc).__name__
+        raise HTTPException(status_code=500, detail=f"ANT execution failed — {detail}") from exc
 
 
 website_dir = Path(__file__).resolve().parent.parent / "website"
