@@ -13,9 +13,8 @@ class DecisionEngine:
 
     def decide(self, request: str, task_count: int) -> Decision:
         text = request.lower().strip()
-        markers = ("build", "implement", "integrate", "architecture", "system", "workflow")
 
-        if task_count > 1 or any(k in text for k in markers):
+        if task_count > 1:
             return Decision("unified_parallel", "complex", 0.90)
         if task_count == 1 and text:
             return Decision("unified_focused", "focused", 0.82)
