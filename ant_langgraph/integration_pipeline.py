@@ -63,6 +63,8 @@ async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
             "risk_score": 0,
             "memory_saved": False,
             "audit_id": None,
+            "model_provider": "openrouter",
+            "model": str(context.get("openrouter_model", "")).strip(),
         }
 
     execution_id = str(uuid4())
@@ -127,4 +129,6 @@ async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
         "latency_ms": state.audit_metadata.get("latency_ms", 0.0),
         "fast_path": state.audit_metadata.get("fast_path", False),
         "parallel_execution": state.audit_metadata.get("parallel_execution", False),
+        "model_provider": state.audit_metadata.get("model_provider", "openrouter"),
+        "model": state.audit_metadata.get("model", str(context.get("openrouter_model", "")).strip()),
     }
