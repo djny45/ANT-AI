@@ -21,8 +21,8 @@ class GraphExecutionState:
     audit_id: str | None = None
 
 
-# Lightweight process-local services for the free/open-source prototype.
-# Production deployments can replace these through the existing adapter boundaries.
+# Process-local defaults preserve the existing adapter boundary. Production
+# deployments can replace these services with persistent implementations.
 _MEMORY = MemoryAdapter()
 _AUDIT = AuditLog()
 _GOVERNANCE = ApprovalFlow()
@@ -75,6 +75,7 @@ async def run_pipeline(request_state: Dict[str, Any]) -> Dict[str, Any]:
         user_context=context,
         conversation_id=conversation_id,
     )
+    state.audit_metadata["execution_id"] = execution_id
 
     state.memory_context = _MEMORY.load(conversation_id)
 
