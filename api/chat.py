@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 
 from ant_langgraph.integrations.fastapi_bridge import process_chat_request
 
-app = FastAPI(title="ANT AI Vercel API", version="0.1.0")
+app = FastAPI(title="ANT AI Vercel API", version="0.1.1")
 
 
 class ChatRequest(BaseModel):
@@ -21,18 +21,25 @@ class ChatRequest(BaseModel):
 
 @app.get("/health")
 async def health() -> dict:
-    return {"status": "ok", "service": "ant-ai-api", "provider": "openrouter"}
+    return {"status": "ok", "service": "ant-ai-api", "provider": "openrouter", "version": "0.1.1"}
 
 
 @app.post("/")
 async def chat(request: Request, payload: ChatRequest) -> dict:
-    """Execute one ANT request using the browser's selected OpenRouter model."""
+    """Execute one ANT request using the browser's explicitly selected model."""
     authorization = request.headers.get("Authorization", "")
     api_key = ""
     if authorization.lower().startswith("bearer "):
         api_key = authorization[7:].strip()
 
     context = dict(payload.context)
+    selected_model = str(context.get("openrouter_model", "")).strip()
+    if not selected_model:
+        raise HTTPException(
+            status_code=400,
+            detail="No OpenRouter model selected. Choose a Free or Paid model in ANT settings.",
+        )
+
     if api_key:
         context["openrouter_api_key"] = api_key
 
@@ -43,10 +50,14 @@ async def chat(request: Request, payload: ChatRequest) -> dict:
             conversation_id=payload.conversation_id,
             context=context,
         )
+    except HTTPException:
+        raise
     except Exception as exc:
-        # Keep secrets out of the response while making runtime failures
-        # diagnosable from the browser instead of returning an opaque 500.
-        raise HTTPException(status_code=500, detail=f"ANT execution failed: {type(exc).__name__}") from exc
+        detail = f"{type(exc).__name__}: {str(exc)[:500]}" or type(exc).__name__
+        raise HTTPException(
+            status_code=500,
+            detail=f"ANT execution failed — {detail}",
+        ) from exc
 
 
 __all__ = ["app"]
