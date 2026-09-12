@@ -1,53 +1,169 @@
-"""Remote sandbox client used when the ANT web runtime is deployed separately."""
+"""Production sandbox adapter backed by Vercel's open Sandbox SDK."""
 
 from __future__ import annotations
 
-import json
 import os
-import urllib.error
-import urllib.request
 from typing import Any
 
 
 class RemoteSandboxError(RuntimeError):
-    """Raised when the configured sandbox service cannot complete an operation."""
+    """Raised when the configured production sandbox cannot complete an operation."""
 
 
 class RemoteSandbox:
-    """Small authenticated client for the dedicated sandbox service."""
+    """Create one isolated Vercel Sandbox per ANT capability execution.
+
+    The public ANT repository is cloned into the VM as read-only-by-policy
+    input: repository operations never expose a write operation. Generated
+    files live under a separate writable ``workspace`` directory.
+    """
+
+    REPOSITORY_URL = "https://github.com/djny45/ANT-AI.git"
 
     def __init__(self, execution_id: str, url: str | None = None, token: str | None = None, timeout: float = 10.0):
         self.execution_id = execution_id
         self.url = (url or os.getenv("ANT_SANDBOX_URL", "")).rstrip("/")
         self.token = token or os.getenv("ANT_SANDBOX_TOKEN", "")
         self.timeout = timeout
+        self._sandbox: Any = None
+        self._ready = False
+
+    def _ensure_sandbox(self) -> Any:
+        if self._sandbox is not None:
+            return self._sandbox
+        try:
+            from vercel.sandbox import Sandbox
+
+            self._sandbox = Sandbox.create(
+                runtime=os.getenv("ANT_SANDBOX_RUNTIME", "python3.13"),
+                timeout=int(float(os.getenv("ANT_SANDBOX_TIMEOUT_MS", "600000"))),
+                name=f"ant-{self.execution_id[:48]}",
+            )
+            clone = self._sandbox.run_command(
+                "git",
+                [
+                    "clone",
+                    "--depth",
+                    "1",
+                    "--branch",
+                    os.getenv("ANT_REPOSITORY_REF", "main"),
+                    self.REPOSITORY_URL,
+                    "repo",
+                ],
+            )
+            if clone.exit_code != 0:
+                raise RemoteSandboxError(f"ANT repository clone failed: {clone.stderr()[:1000]}")
+            mkdir = self._sandbox.run_command("mkdir", ["-p", "workspace"])
+            if mkdir.exit_code != 0:
+                raise RemoteSandboxError(f"sandbox workspace initialization failed: {mkdir.stderr()[:1000]}")
+            self._ready = True
+            return self._sandbox
+        except RemoteSandboxError:
+            self.close()
+            raise
+        except Exception as exc:
+            self.close()
+            raise RemoteSandboxError(f"Vercel Sandbox initialization failed: {exc}") from exc
+
+    @staticmethod
+    def _output(command: Any) -> tuple[int, str, str]:
+        stdout = command.stdout() or ""
+        stderr = command.stderr() or ""
+        return int(command.exit_code), stdout, stderr
 
     def execute(self, operation: str, **kwargs: Any) -> dict[str, Any]:
-        if not self.url:
-            raise RemoteSandboxError("ANT_SANDBOX_URL is not configured")
-        payload = {
-            "execution_id": self.execution_id,
-            "operation": operation,
-            "path": kwargs.get("path"),
-            "content": kwargs.get("content"),
-        }
-        request = urllib.request.Request(
-            f"{self.url}/v1/execute",
-            data=json.dumps(payload).encode("utf-8"),
-            headers={
-                "Authorization": f"Bearer {self.token}",
-                "Content-Type": "application/json",
-            },
-            method="POST",
-        )
+        sandbox = self._ensure_sandbox()
+        path = str(kwargs.get("path", ""))
+        content = str(kwargs.get("content", ""))
+
+        if operation == "list_files":
+            command = sandbox.run_command(
+                "find", ["workspace", "-type", "f", "-print"],
+            )
+            code, stdout, stderr = self._output(command)
+            if code != 0:
+                raise RemoteSandboxError(stderr[:1000] or "workspace listing failed")
+            return {"files": [line.removeprefix("workspace/") for line in stdout.splitlines() if line]}
+
+        if operation == "repo_list_files":
+            command = sandbox.run_command("git", ["-C", "repo", "ls-files"])
+            code, stdout, stderr = self._output(command)
+            if code != 0:
+                raise RemoteSandboxError(stderr[:1000] or "repository listing failed")
+            return {"files": [line for line in stdout.splitlines() if line], "read_only": True}
+
+        if operation == "repo_read_file":
+            if not path or path.startswith("/") or ".." in path.split("/"):
+                raise RemoteSandboxError("repository paths must be relative")
+            command = sandbox.run_command(
+                "python",
+                [
+                    "-c",
+                    "from pathlib import Path; p=Path('repo') / __import__('sys').argv[1]; r=p.resolve(); root=Path('repo').resolve(); assert r==root or root in r.parents; print(r.read_text(encoding='utf-8'), end='')",
+                    path,
+                ],
+            )
+            code, stdout, stderr = self._output(command)
+            if code != 0:
+                raise RemoteSandboxError(stderr[:1000] or "repository read failed")
+            return {"path": path, "content": stdout, "read_only": True}
+
+        if operation == "read_file":
+            if not path or path.startswith("/") or ".." in path.split("/"):
+                raise RemoteSandboxError("workspace paths must be relative")
+            command = sandbox.run_command(
+                "python",
+                [
+                    "-c",
+                    "from pathlib import Path; p=Path('workspace') / __import__('sys').argv[1]; r=p.resolve(); root=Path('workspace').resolve(); assert r==root or root in r.parents; print(r.read_text(encoding='utf-8'), end='')",
+                    path,
+                ],
+            )
+            code, stdout, stderr = self._output(command)
+            if code != 0:
+                raise RemoteSandboxError(stderr[:1000] or "workspace read failed")
+            return {"path": path, "content": stdout}
+
+        if operation == "write_file":
+            if not path or path.startswith("/") or ".." in path.split("/"):
+                raise RemoteSandboxError("workspace paths must be relative")
+            command = sandbox.run_command(
+                "python",
+                [
+                    "-c",
+                    "from pathlib import Path; import sys; p=Path('workspace') / sys.argv[1]; r=p.resolve(); root=Path('workspace').resolve(); assert r==root or root in r.parents; r.parent.mkdir(parents=True, exist_ok=True); r.write_text(sys.argv[2], encoding='utf-8'); print(len(sys.argv[2].encode('utf-8'))) ",
+                    path,
+                    content,
+                ],
+            )
+            code, stdout, stderr = self._output(command)
+            if code != 0:
+                raise RemoteSandboxError(stderr[:1000] or "workspace write failed")
+            return {"path": path, "bytes": int(stdout.strip() or 0)}
+
+        if operation == "check_python":
+            if not path or path.startswith("/") or ".." in path.split("/"):
+                raise RemoteSandboxError("workspace paths must be relative")
+            command = sandbox.run_command(
+                "python",
+                [
+                    "-c",
+                    "import ast,sys; p='workspace/'+sys.argv[1]; ast.parse(open(p, encoding='utf-8').read(), filename=p); print('valid')",
+                    path,
+                ],
+            )
+            code, stdout, stderr = self._output(command)
+            return {"path": path, "valid": code == 0, "error": None if code == 0 else stderr[:1000]}
+
+        raise RemoteSandboxError(f"unsupported sandbox operation: {operation}")
+
+    def close(self) -> None:
+        if self._sandbox is None:
+            return
         try:
-            with urllib.request.urlopen(request, timeout=self.timeout) as response:
-                return json.loads(response.read().decode("utf-8"))
-        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
-            detail = str(exc)
-            if isinstance(exc, urllib.error.HTTPError):
-                try:
-                    detail = exc.read().decode("utf-8")[:1000]
-                except OSError:
-                    pass
-            raise RemoteSandboxError(detail) from exc
+            self._sandbox.stop()
+        except Exception:
+            pass
+        finally:
+            self._sandbox = None
+            self._ready = False
