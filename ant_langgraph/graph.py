@@ -98,7 +98,10 @@ def build_default_graph() -> WorkflowGraph:
 
         provider = os.getenv("ANT_MODEL_PROVIDER", "ollama").strip().lower()
         if provider == "openrouter":
-            model_runtime = OpenRouterConnector()
+            # A browser-supplied key is scoped to this request and takes
+            # precedence over the server-wide OPENROUTER_API_KEY.
+            request_api_key = str(state.user_context.get("openrouter_api_key", "")).strip()
+            model_runtime = OpenRouterConnector(api_key=request_api_key or None)
             model_name = model_runtime.default_model
         else:
             provider = "ollama"
