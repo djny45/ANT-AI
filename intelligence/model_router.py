@@ -1,18 +1,16 @@
 """ANT AI model router.
 
-ANT uses OpenRouter as its hosted model transport.
+Provider selection is explicit and comes from the active user API profile.
+ANT does not impose a hosted model aggregator.
 """
 
 
 class ModelRouter:
-    def __init__(self):
-        self.provider = "openrouter"
+    def choose_provider(self, provider: str = "custom") -> str:
+        return (provider or "custom").strip().lower()
 
-    def choose_provider(self):
-        return "openrouter"
+    def get_runtime_name(self, provider: str = "custom") -> str:
+        return self.choose_provider(provider)
 
-    def get_runtime_name(self):
-        return "openrouter"
-
-    def fallback(self):
-        return "openrouter"
+    def fallback(self, provider: str = "custom") -> str:
+        return self.choose_provider(provider)
