@@ -169,6 +169,9 @@ def build_default_graph() -> WorkflowGraph:
                 "repo_list_files/repo_read_file, but repository files are read-only. "
                 "Keep generated work inside the writable workspace."
             )
+            if not hasattr(model_runtime, "generate_with_tools"):
+                result = model_runtime.generate(prompt, model=model_name)
+                return capability, result, 0
             result = model_runtime.generate_with_tools(
                 prompt=prompt,
                 model=model_name,
