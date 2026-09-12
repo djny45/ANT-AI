@@ -41,13 +41,14 @@ async def chat(request: Request, payload: ChatRequest) -> dict:
     provider = str(context.get("model_provider", "")).strip().lower()
     model = str(context.get("model", "")).strip()
     base_url = str(context.get("model_base_url", "")).strip()
+    native_nova = provider in {"nova", "nova-core", "native"}
 
-    if not api_key:
-        raise HTTPException(status_code=400, detail="No model API key supplied. Add a provider API profile in ANT settings.")
     if not provider:
         raise HTTPException(status_code=400, detail="No model provider selected. Choose a provider in ANT settings.")
     if not model:
         raise HTTPException(status_code=400, detail="No model selected. Enter the exact model ID for the selected provider.")
+    if not native_nova and not api_key:
+        raise HTTPException(status_code=400, detail="No model API key supplied. Add a provider API profile in ANT settings.")
     if provider == "custom" and not base_url:
         raise HTTPException(status_code=400, detail="Custom providers require an API endpoint.")
 
