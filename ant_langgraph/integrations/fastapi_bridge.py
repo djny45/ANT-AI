@@ -38,5 +38,7 @@ async def process_chat_request(
         "latency_ms": result.get("latency_ms", 0.0),
         "fast_path": result.get("fast_path", False),
         "parallel_execution": result.get("parallel_execution", False),
+        "model_provider": result.get("model_provider", "openrouter"),
+        "model": result.get("model", ""),
         "errors": result.get("errors", []),
     }
