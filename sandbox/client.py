@@ -6,6 +6,12 @@ import os
 from typing import Any
 
 
+# Vercel Functions expose VERCEL=1. In that environment the graph selects
+# RemoteSandbox automatically, so no separately hosted sandbox URL is needed.
+if os.getenv("VERCEL") == "1" and not os.getenv("ANT_SANDBOX_URL"):
+    os.environ["ANT_SANDBOX_URL"] = "vercel://managed"
+
+
 class RemoteSandboxError(RuntimeError):
     """Raised when the configured production sandbox cannot complete an operation."""
 
@@ -26,7 +32,6 @@ class RemoteSandbox:
         self.token = token or os.getenv("ANT_SANDBOX_TOKEN", "")
         self.timeout = timeout
         self._sandbox: Any = None
-        self._ready = False
 
     def _ensure_sandbox(self) -> Any:
         if self._sandbox is not None:
@@ -42,13 +47,9 @@ class RemoteSandbox:
             clone = self._sandbox.run_command(
                 "git",
                 [
-                    "clone",
-                    "--depth",
-                    "1",
-                    "--branch",
+                    "clone", "--depth", "1", "--branch",
                     os.getenv("ANT_REPOSITORY_REF", "main"),
-                    self.REPOSITORY_URL,
-                    "repo",
+                    self.REPOSITORY_URL, "repo",
                 ],
             )
             if clone.exit_code != 0:
@@ -56,7 +57,6 @@ class RemoteSandbox:
             mkdir = self._sandbox.run_command("mkdir", ["-p", "workspace"])
             if mkdir.exit_code != 0:
                 raise RemoteSandboxError(f"sandbox workspace initialization failed: {mkdir.stderr()[:1000]}")
-            self._ready = True
             return self._sandbox
         except RemoteSandboxError:
             self.close()
@@ -67,9 +67,12 @@ class RemoteSandbox:
 
     @staticmethod
     def _output(command: Any) -> tuple[int, str, str]:
-        stdout = command.stdout() or ""
-        stderr = command.stderr() or ""
-        return int(command.exit_code), stdout, stderr
+        return int(command.exit_code), command.stdout() or "", command.stderr() or ""
+
+    @staticmethod
+    def _safe_path(path: str) -> None:
+        if not path or path.startswith("/") or ".." in path.split("/"):
+            raise RemoteSandboxError("sandbox paths must be relative and cannot escape the workspace")
 
     def execute(self, operation: str, **kwargs: Any) -> dict[str, Any]:
         sandbox = self._ensure_sandbox()
@@ -77,9 +80,7 @@ class RemoteSandbox:
         content = str(kwargs.get("content", ""))
 
         if operation == "list_files":
-            command = sandbox.run_command(
-                "find", ["workspace", "-type", "f", "-print"],
-            )
+            command = sandbox.run_command("find", ["workspace", "-type", "f", "-print"])
             code, stdout, stderr = self._output(command)
             if code != 0:
                 raise RemoteSandboxError(stderr[:1000] or "workspace listing failed")
@@ -93,13 +94,11 @@ class RemoteSandbox:
             return {"files": [line for line in stdout.splitlines() if line], "read_only": True}
 
         if operation == "repo_read_file":
-            if not path or path.startswith("/") or ".." in path.split("/"):
-                raise RemoteSandboxError("repository paths must be relative")
+            self._safe_path(path)
             command = sandbox.run_command(
-                "python",
-                [
+                "python", [
                     "-c",
-                    "from pathlib import Path; p=Path('repo') / __import__('sys').argv[1]; r=p.resolve(); root=Path('repo').resolve(); assert r==root or root in r.parents; print(r.read_text(encoding='utf-8'), end='')",
+                    "from pathlib import Path; import sys; p=Path('repo')/sys.argv[1]; r=p.resolve(); root=Path('repo').resolve(); assert r==root or root in r.parents; print(r.read_text(encoding='utf-8'),end='')",
                     path,
                 ],
             )
@@ -109,13 +108,11 @@ class RemoteSandbox:
             return {"path": path, "content": stdout, "read_only": True}
 
         if operation == "read_file":
-            if not path or path.startswith("/") or ".." in path.split("/"):
-                raise RemoteSandboxError("workspace paths must be relative")
+            self._safe_path(path)
             command = sandbox.run_command(
-                "python",
-                [
+                "python", [
                     "-c",
-                    "from pathlib import Path; p=Path('workspace') / __import__('sys').argv[1]; r=p.resolve(); root=Path('workspace').resolve(); assert r==root or root in r.parents; print(r.read_text(encoding='utf-8'), end='')",
+                    "from pathlib import Path; import sys; p=Path('workspace')/sys.argv[1]; r=p.resolve(); root=Path('workspace').resolve(); assert r==root or root in r.parents; print(r.read_text(encoding='utf-8'),end='')",
                     path,
                 ],
             )
@@ -125,15 +122,12 @@ class RemoteSandbox:
             return {"path": path, "content": stdout}
 
         if operation == "write_file":
-            if not path or path.startswith("/") or ".." in path.split("/"):
-                raise RemoteSandboxError("workspace paths must be relative")
+            self._safe_path(path)
             command = sandbox.run_command(
-                "python",
-                [
+                "python", [
                     "-c",
-                    "from pathlib import Path; import sys; p=Path('workspace') / sys.argv[1]; r=p.resolve(); root=Path('workspace').resolve(); assert r==root or root in r.parents; r.parent.mkdir(parents=True, exist_ok=True); r.write_text(sys.argv[2], encoding='utf-8'); print(len(sys.argv[2].encode('utf-8'))) ",
-                    path,
-                    content,
+                    "from pathlib import Path; import sys; p=Path('workspace')/sys.argv[1]; r=p.resolve(); root=Path('workspace').resolve(); assert r==root or root in r.parents; r.parent.mkdir(parents=True,exist_ok=True); r.write_text(sys.argv[2],encoding='utf-8'); print(len(sys.argv[2].encode('utf-8')))",
+                    path, content,
                 ],
             )
             code, stdout, stderr = self._output(command)
@@ -142,17 +136,15 @@ class RemoteSandbox:
             return {"path": path, "bytes": int(stdout.strip() or 0)}
 
         if operation == "check_python":
-            if not path or path.startswith("/") or ".." in path.split("/"):
-                raise RemoteSandboxError("workspace paths must be relative")
+            self._safe_path(path)
             command = sandbox.run_command(
-                "python",
-                [
+                "python", [
                     "-c",
-                    "import ast,sys; p='workspace/'+sys.argv[1]; ast.parse(open(p, encoding='utf-8').read(), filename=p); print('valid')",
+                    "import ast,sys; p='workspace/'+sys.argv[1]; ast.parse(open(p,encoding='utf-8').read(),filename=p); print('valid')",
                     path,
                 ],
             )
-            code, stdout, stderr = self._output(command)
+            code, _, stderr = self._output(command)
             return {"path": path, "valid": code == 0, "error": None if code == 0 else stderr[:1000]}
 
         raise RemoteSandboxError(f"unsupported sandbox operation: {operation}")
@@ -166,4 +158,3 @@ class RemoteSandbox:
             pass
         finally:
             self._sandbox = None
-            self._ready = False
