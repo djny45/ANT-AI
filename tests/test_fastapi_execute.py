@@ -1,27 +1,22 @@
-import pytest
 from fastapi.testclient import TestClient
 
-try:
-    from ANT_X_OS.api import server
-except Exception:
-    server = None
+from api.chat import app
 
 
-def test_execute_endpoint_returns_expected_shape():
-    if not server or getattr(server, "app", None) is None:
-        pytest.skip("FastAPI app not available in this environment")
+def test_health_endpoint_returns_expected_shape():
+    client = TestClient(app)
+    response = client.get("/health")
 
-    client = TestClient(server.app)
-    resp = client.post("/execute", json={"message": "test from fastapi"})
-    assert resp.status_code == 200
-    data = resp.json()
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "ok"
+    assert data["service"] == "ant-ai-api"
+    assert data["provider"] == "openrouter"
 
-    # Two possible shapes: normalized LangGraph output or fallback
-    if "final_response" in data:
-        # Expected normalized shape from run_pipeline
-        assert "selected_agents" in data
-        assert "agent_results" in data
-        assert data["final_response"] != ""
-    else:
-        # Fallback shape
-        assert data.get("status") == "received"
+
+def test_chat_endpoint_requires_selected_model():
+    client = TestClient(app)
+    response = client.post("/", json={"message": "test from fastapi", "context": {}})
+
+    assert response.status_code == 400
+    assert "No OpenRouter model selected" in response.json()["detail"]
