@@ -11,12 +11,7 @@ from typing import Any, Dict
 from ant_langgraph.integration_pipeline import run_pipeline
 
 
-async def process_chat_request(
-    message: str,
-    user_id: str | None = None,
-    conversation_id: str | None = None,
-    context: Dict[str, Any] | None = None,
-) -> Dict[str, Any]:
+async def process_chat_request(message: str, user_id: str | None = None, conversation_id: str | None = None, context: Dict[str, Any] | None = None) -> Dict[str, Any]:
     """Execute a user request through the complete ANT runtime boundary."""
     result = await run_pipeline({
         "user_input": message,
@@ -38,7 +33,7 @@ async def process_chat_request(
         "latency_ms": result.get("latency_ms", 0.0),
         "fast_path": result.get("fast_path", False),
         "parallel_execution": result.get("parallel_execution", False),
-        "model_provider": result.get("model_provider", "openrouter"),
+        "model_provider": result.get("model_provider", ""),
         "model": result.get("model", ""),
         "errors": result.get("errors", []),
     }
