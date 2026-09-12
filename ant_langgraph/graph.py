@@ -96,9 +96,11 @@ def build_default_graph() -> WorkflowGraph:
             return state
 
         request_api_key = str(state.user_context.get("openrouter_api_key", "")).strip()
+        selected_model = str(state.user_context.get("openrouter_model", "")).strip()
         model_runtime = OpenRouterConnector(api_key=request_api_key or None)
+        model_name = selected_model or model_runtime.default_model
         state.audit_metadata["model_provider"] = "openrouter"
-        state.audit_metadata["model"] = model_runtime.default_model
+        state.audit_metadata["model"] = model_name
 
         def execute_capability(item: Dict[str, str]):
             capability = item["capability"]
@@ -115,7 +117,7 @@ def build_default_graph() -> WorkflowGraph:
                     "Work only on the user's request and return concise, useful findings.\n"
                     f"User request: {item['task']}"
                 )
-            return capability, model_runtime.generate(prompt)
+            return capability, model_runtime.generate(prompt, model=model_name)
 
         started_results: Dict[str, dict] = {}
         if len(state.execution_plan) == 1:
