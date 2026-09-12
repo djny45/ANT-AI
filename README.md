@@ -14,9 +14,9 @@ ANT AI is a **unified adaptive intelligence platform**. It is **one intelligence
 
 The production web path is:
 
-`Browser → Vercel /api/chat → ANT Intelligence Graph → OpenRouter → governed tools → verification → response`
+`Browser → Vercel /api/chat → ANT Intelligence Graph → user-selected Model API → governed tools → verification → response`
 
-The web runtime accepts an explicitly selected OpenRouter model. Coding and testing capabilities can use a bounded ANT sandbox through the model tool-call interface. On Vercel, ANT uses the Vercel Sandbox SDK with an execution-scoped, explicitly ephemeral sandbox by default. A separately hosted authenticated sandbox remains supported when `ANT_SANDBOX_URL` is configured.
+The web runtime accepts an explicitly selected provider, model, endpoint, and API key from the active API profile. There is no mandatory model aggregator and ANT does not silently switch providers. Coding and testing capabilities can use a bounded ANT sandbox through the model tool-call interface. On Vercel, ANT uses an execution-scoped, explicitly ephemeral sandbox by default. A separately hosted authenticated sandbox remains supported when `ANT_SANDBOX_URL` is configured.
 
 ## Core Principle
 
@@ -53,7 +53,8 @@ Unified Final Response
 | Feature | Description |
 |---|---|
 | **Unified Intelligence Core** | Single reasoning identity with dynamic self-decomposition |
-| **LLM Routing** | OpenRouter runtime with configurable model selection |
+| **Model API Profiles** | Store multiple provider/model/API-key profiles and explicitly select one |
+| **Provider-Neutral Routing** | Direct model API transport with custom endpoint support; no mandatory aggregator |
 | **Knowledge Hive Memory** | Memory adapter boundary ready for persistent backend integration |
 | **Governance & Risk Engine** | Pre-execution risk evaluation + post-execution verification |
 | **Secure Audit Trail** | Audit events for execution lifecycle |
@@ -67,7 +68,7 @@ Unified Final Response
 
 - Python 3.10+
 - Node.js 18+
-- Optional: OpenRouter API key for hosted models
+- A model provider API key for the model you want to use
 
 ### 1. Clone the repository
 
@@ -80,30 +81,20 @@ cd ANT-AI
 
 ```bash
 cp .env.example .env
-# Edit .env with your preferences
-ANT_MODEL_PROVIDER=openrouter
-OPENROUTER_API_KEY=
-OPENROUTER_MODEL=nvidia/nemotron-3-ultra-550b-a55b:free
+# Configure ANT infrastructure settings in .env
 ```
+
+Model credentials are configured in the web application's **API Configuration** section. Profiles support common provider endpoints and a custom OpenAI-compatible endpoint. Never place a browser model secret in source code.
 
 ### 3. Web deployment
 
-The repository is configured for Vercel. The frontend uses the same-origin
-`/api` route by default. Configure the production environment with the required
-OpenRouter settings. Never place a server-only secret in a `VITE_*` variable.
+The repository is configured for Vercel. The frontend uses the same-origin `/api` route by default. The active browser API profile supplies the provider, model, endpoint, and key for each request. Never place a server-only secret in a `VITE_*` variable.
 
-On Vercel, coding/testing executions use the Vercel Sandbox SDK automatically and
-create an ephemeral sandbox for each capability execution. Set `ANT_SANDBOX_URL`
-only when intentionally routing execution to a separately deployed sandbox
-service.
+On Vercel, coding/testing executions use the Vercel Sandbox SDK automatically and create an ephemeral sandbox for each capability execution. Set `ANT_SANDBOX_URL` only when intentionally routing execution to a separately deployed sandbox service.
 
 ### 4. Dedicated sandbox deployment (optional)
 
-Build `sandbox/Dockerfile` as a separate service when a dedicated execution
-boundary is preferred. Set `ANT_SANDBOX_TOKEN` on the sandbox service and set both
-`ANT_SANDBOX_URL` and `ANT_SANDBOX_TOKEN` on the ANT API. The API will then route
-coding/testing sandbox tool calls to that authenticated service instead of the
-Vercel-managed sandbox.
+Build `sandbox/Dockerfile` as a separate service when a dedicated execution boundary is preferred. Set `ANT_SANDBOX_TOKEN` on the sandbox service and set both `ANT_SANDBOX_URL` and `ANT_SANDBOX_TOKEN` on the ANT API. The API will then route coding/testing sandbox tool calls to that authenticated service instead of the Vercel-managed sandbox.
 
 See `docs/RUNTIME_EXECUTION_STATUS.md` for the production deployment checklist.
 
@@ -114,7 +105,7 @@ ANT-AI/
 ├── frontend/              # React + Vite + TypeScript web UI
 ├── api/                   # Vercel FastAPI entrypoints
 ├── ant_langgraph/         # Unified execution graph and API bridge
-├── intelligence/          # OpenRouter model connector
+├── intelligence/          # Provider-neutral model API connector
 ├── sandbox/               # Governed sandbox runtime + Vercel/dedicated adapters
 ├── skills/                # Capability compatibility adapters
 ├── runtime/               # Core runtime infrastructure
@@ -134,10 +125,11 @@ ANT-AI/
 ### Production runtime integration
 
 - Vercel web/API path implemented.
-- Explicit OpenRouter model selection.
+- Explicit user-selected model API profile.
+- Provider-neutral model API connector with common native adapters and custom endpoint support.
 - Unified graph execution boundary.
 - Governance before capability execution.
-- OpenRouter tool-call loop with a bounded tool-call budget.
+- Tool-call loop with a bounded tool-call budget for compatible APIs.
 - Coding/testing capabilities bound to the ANT sandbox tool.
 - Per-execution workspace with path and resource limits.
 - Vercel-managed ephemeral sandbox support.
