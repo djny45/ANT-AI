@@ -24,7 +24,7 @@ jobs:
         run: python -m compileall -q ant_langgraph governance_engine intelligence backend tests
 
       - name: Run deterministic pipeline tests
-        run: python -m pytest -q tests/test_integration_pipeline.py
+        run: python -m pytest -q tests/test_integration_pipeline.py tests/test_api_entrypoint.py
 
       - name: Dependency audit
         run: |
