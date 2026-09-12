@@ -4,11 +4,8 @@ ant:
   mode: personal
 
 models:
-  default: ollama
+  default: openrouter
   fallback: openrouter
-
-ollama:
-  url: http://localhost:11434
 
 openrouter:
   enabled: true
