@@ -1,7 +1,7 @@
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
-from typing import Callable, Dict, List
+from typing import Any, Callable, Dict, List
 
 from .state import AgentState
 
@@ -64,8 +64,34 @@ def _risk_score(capabilities: List[str]) -> int:
     return score
 
 
+SANDBOX_TOOL = {
+    "type": "function",
+    "function": {
+        "name": "sandbox",
+        "description": (
+            "Use ANT's isolated per-run workspace for coding and testing. "
+            "Only workspace file operations and Python syntax checks are available; "
+            "never assume access to the host filesystem."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "operation": {
+                    "type": "string",
+                    "enum": ["list_files", "read_file", "write_file", "check_python"],
+                },
+                "path": {"type": "string", "description": "Relative workspace path."},
+                "content": {"type": "string", "description": "UTF-8 content for write_file."},
+            },
+            "required": ["operation"],
+            "additionalProperties": False,
+        },
+    },
+}
+
+
 def build_default_graph() -> WorkflowGraph:
-    """Build the default execution path using OpenRouter as the only model runtime."""
+    """Build the default execution path using OpenRouter as the model runtime."""
 
     def understand(state: AgentState) -> AgentState:
         state.audit_metadata["task_type"] = "general"
@@ -87,6 +113,7 @@ def build_default_graph() -> WorkflowGraph:
         """Govern once, then execute independent temporary capabilities concurrently."""
         from governance_engine.governance.approval_flow import ApprovalFlow
         from intelligence.openrouter_connector import OpenRouterConnector
+        from skills.sandbox_runner import SandboxError, SkillSandbox
 
         decision = ApprovalFlow().evaluate(int(state.audit_metadata.get("risk_score", 0)))
         state.audit_metadata["governance_approved"] = decision.approved
@@ -104,31 +131,53 @@ def build_default_graph() -> WorkflowGraph:
 
         def execute_capability(item: Dict[str, str]):
             capability = item["capability"]
-            if capability == "reasoning":
-                prompt = (
-                    "You are the full ANT Intelligence Core. Answer the user's request directly. "
-                    "Do not describe internal capabilities or simulate separate agents.\n"
-                    f"User request: {item['task']}"
-                )
-            else:
-                prompt = (
-                    "You are the full ANT Intelligence Core temporarily focusing on one internal capability. "
-                    f"Current capability: {capability}.\n"
-                    "Work only on the user's request and return concise, useful findings.\n"
-                    f"User request: {item['task']}"
-                )
-            return capability, model_runtime.generate(prompt, model=model_name)
+            prompt = (
+                "You are the full ANT Intelligence Core. Do not describe separate agents.\n"
+                f"Current temporary capability: {capability}.\n"
+                "Work on the user's request and return useful findings.\n"
+                f"User request: {item['task']}"
+            )
+
+            if capability not in {"coding", "testing"}:
+                return capability, model_runtime.generate(prompt, model=model_name), 0
+
+            execution_id = str(state.audit_metadata.get("execution_id", "ant-run"))
+            sandbox = SkillSandbox(execution_id=execution_id)
+
+            def execute_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+                if name != "sandbox":
+                    return {"error": f"tool not allowed: {name}"}
+                try:
+                    return sandbox.execute(**arguments)
+                except (SandboxError, TypeError, ValueError) as exc:
+                    return {"error": str(exc)}
+
+            prompt += (
+                "\nYou have access to the ANT sandbox tool. Use it when needed to create, "
+                "inspect, or syntax-check files. Keep all work inside that workspace."
+            )
+            result = model_runtime.generate_with_tools(
+                prompt=prompt,
+                model=model_name,
+                tools=[SANDBOX_TOOL],
+                tool_executor=execute_tool,
+                max_tool_calls=int(os.getenv("ANT_MAX_SANDBOX_TOOL_CALLS", "6")),
+            )
+            return capability, result, int(result.get("tool_calls", 0))
 
         started_results: Dict[str, dict] = {}
+        tool_call_count = 0
         if len(state.execution_plan) == 1:
-            capability, result = execute_capability(state.execution_plan[0])
+            capability, result, calls = execute_capability(state.execution_plan[0])
             started_results[capability] = result
+            tool_call_count += calls
         else:
             with ThreadPoolExecutor(max_workers=len(state.execution_plan)) as pool:
                 futures = [pool.submit(execute_capability, item) for item in state.execution_plan]
                 for future in as_completed(futures):
-                    capability, result = future.result()
+                    capability, result, calls = future.result()
                     started_results[capability] = result
+                    tool_call_count += calls
 
         total_latency = 0.0
         for item in state.execution_plan:
@@ -141,6 +190,7 @@ def build_default_graph() -> WorkflowGraph:
                 state.record_result(capability, result, confidence=0.8)
             total_latency = max(total_latency, float(result.get("latency_ms", 0.0)))
 
+        state.audit_metadata["sandbox_tool_calls"] = tool_call_count
         state.audit_metadata["latency_ms"] = total_latency
         state.audit_metadata["parallel_execution"] = len(state.execution_plan) > 1
         return state
@@ -153,6 +203,7 @@ def build_default_graph() -> WorkflowGraph:
             "successful_capabilities": [r["capability"] for r in successful],
             "errors": list(state.errors),
             "governance_approved": state.audit_metadata.get("governance_approved", False),
+            "sandbox_tool_calls": int(state.audit_metadata.get("sandbox_tool_calls", 0)),
         }
         return state
 
