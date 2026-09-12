@@ -3,7 +3,7 @@
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -52,13 +52,27 @@ async def model_health() -> dict:
 
 
 @app.post("/api/chat")
-async def chat(request: ChatRequest) -> dict:
+async def chat(request: Request, payload: ChatRequest) -> dict:
+    """Execute one ANT request, optionally using the caller's OpenRouter key.
+
+    The browser sends the key as a Bearer token. ANT passes it only through the
+    current request context; it is not written to audit or memory state.
+    """
+    authorization = request.headers.get("Authorization", "")
+    api_key = ""
+    if authorization.lower().startswith("bearer "):
+        api_key = authorization[7:].strip()
+
+    context = dict(payload.context)
+    if api_key:
+        context["openrouter_api_key"] = api_key
+
     try:
         return await process_chat_request(
-            message=request.message,
-            user_id=request.user_id,
-            conversation_id=request.conversation_id,
-            context=request.context,
+            message=payload.message,
+            user_id=payload.user_id,
+            conversation_id=payload.conversation_id,
+            context=context,
         )
     except Exception as exc:
         raise HTTPException(status_code=500, detail="ANT execution failed") from exc
