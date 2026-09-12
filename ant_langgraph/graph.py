@@ -113,7 +113,8 @@ def build_default_graph() -> WorkflowGraph:
         """Govern once, then execute independent temporary capabilities concurrently."""
         from governance_engine.governance.approval_flow import ApprovalFlow
         from intelligence.openrouter_connector import OpenRouterConnector
-        from skills.sandbox_runner import SandboxError, SkillSandbox
+        from sandbox.client import RemoteSandbox, RemoteSandboxError
+        from sandbox.runtime import SandboxError, SkillSandbox
 
         decision = ApprovalFlow().evaluate(int(state.audit_metadata.get("risk_score", 0)))
         state.audit_metadata["governance_approved"] = decision.approved
@@ -142,14 +143,18 @@ def build_default_graph() -> WorkflowGraph:
                 return capability, model_runtime.generate(prompt, model=model_name), 0
 
             execution_id = str(state.audit_metadata.get("execution_id", "ant-run"))
-            sandbox = SkillSandbox(execution_id=execution_id)
+            remote_url = os.getenv("ANT_SANDBOX_URL", "").strip()
+            if remote_url:
+                sandbox = RemoteSandbox(execution_id=execution_id, url=remote_url)
+            else:
+                sandbox = SkillSandbox(execution_id=execution_id)
 
             def execute_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
                 if name != "sandbox":
                     return {"error": f"tool not allowed: {name}"}
                 try:
                     return sandbox.execute(**arguments)
-                except (SandboxError, TypeError, ValueError) as exc:
+                except (SandboxError, RemoteSandboxError, TypeError, ValueError) as exc:
                     return {"error": str(exc)}
 
             prompt += (
@@ -161,7 +166,7 @@ def build_default_graph() -> WorkflowGraph:
                 model=model_name,
                 tools=[SANDBOX_TOOL],
                 tool_executor=execute_tool,
-                max_tool_calls=int(os.getenv("ANT_MAX_SANDBOX_TOOL_CALLS", "6")),
+                max_tool_calls=int(os.getenv("ANT_MAX_SANDBOX_TOOL_CALLS", "3")),
             )
             return capability, result, int(result.get("tool_calls", 0))
 
@@ -191,6 +196,7 @@ def build_default_graph() -> WorkflowGraph:
             total_latency = max(total_latency, float(result.get("latency_ms", 0.0)))
 
         state.audit_metadata["sandbox_tool_calls"] = tool_call_count
+        state.audit_metadata["sandbox_mode"] = "remote" if os.getenv("ANT_SANDBOX_URL", "").strip() else "local-bounded"
         state.audit_metadata["latency_ms"] = total_latency
         state.audit_metadata["parallel_execution"] = len(state.execution_plan) > 1
         return state
@@ -204,6 +210,7 @@ def build_default_graph() -> WorkflowGraph:
             "errors": list(state.errors),
             "governance_approved": state.audit_metadata.get("governance_approved", False),
             "sandbox_tool_calls": int(state.audit_metadata.get("sandbox_tool_calls", 0)),
+            "sandbox_mode": state.audit_metadata.get("sandbox_mode", "disabled"),
         }
         return state
 
