@@ -16,7 +16,7 @@ The production web path is:
 
 `Browser → Vercel /api/chat → ANT Intelligence Graph → OpenRouter → governed tools → verification → response`
 
-The web runtime accepts an explicitly selected OpenRouter model. Coding and testing capabilities can use a bounded ANT sandbox through the model tool-call interface. In production, `ANT_SANDBOX_URL` routes those tool calls to the dedicated authenticated sandbox service in `sandbox/`.
+The web runtime accepts an explicitly selected OpenRouter model. Coding and testing capabilities can use a bounded ANT sandbox through the model tool-call interface. On Vercel, ANT uses the Vercel Sandbox SDK with an execution-scoped, explicitly ephemeral sandbox by default. A separately hosted authenticated sandbox remains supported when `ANT_SANDBOX_URL` is configured.
 
 ## Core Principle
 
@@ -57,7 +57,7 @@ Unified Final Response
 | **Knowledge Hive Memory** | Memory adapter boundary ready for persistent backend integration |
 | **Governance & Risk Engine** | Pre-execution risk evaluation + post-execution verification |
 | **Secure Audit Trail** | Audit events for execution lifecycle |
-| **Sandbox Tooling** | Governed per-run workspace for coding/testing; optional dedicated service |
+| **Sandbox Tooling** | Governed per-run workspace for coding/testing with ephemeral Vercel Sandbox support |
 | **Web Interface** | Modern React + Vite + TypeScript frontend |
 | **Modular Runtime** | Harness → Orchestrator → Capability Registry → Tools / Memory |
 
@@ -92,12 +92,18 @@ The repository is configured for Vercel. The frontend uses the same-origin
 `/api` route by default. Configure the production environment with the required
 OpenRouter settings. Never place a server-only secret in a `VITE_*` variable.
 
-### 4. Dedicated sandbox deployment
-
-Build `sandbox/Dockerfile` as a separate service. Set `ANT_SANDBOX_TOKEN` on the
-sandbox service and set both `ANT_SANDBOX_URL` and `ANT_SANDBOX_TOKEN` on the ANT
-API. The API will automatically route coding/testing sandbox tool calls to that
+On Vercel, coding/testing executions use the Vercel Sandbox SDK automatically and
+create an ephemeral sandbox for each capability execution. Set `ANT_SANDBOX_URL`
+only when intentionally routing execution to a separately deployed sandbox
 service.
+
+### 4. Dedicated sandbox deployment (optional)
+
+Build `sandbox/Dockerfile` as a separate service when a dedicated execution
+boundary is preferred. Set `ANT_SANDBOX_TOKEN` on the sandbox service and set both
+`ANT_SANDBOX_URL` and `ANT_SANDBOX_TOKEN` on the ANT API. The API will then route
+coding/testing sandbox tool calls to that authenticated service instead of the
+Vercel-managed sandbox.
 
 See `docs/RUNTIME_EXECUTION_STATUS.md` for the production deployment checklist.
 
@@ -109,7 +115,7 @@ ANT-AI/
 ├── api/                   # Vercel FastAPI entrypoints
 ├── ant_langgraph/         # Unified execution graph and API bridge
 ├── intelligence/          # OpenRouter model connector
-├── sandbox/               # Governed sandbox runtime + dedicated service
+├── sandbox/               # Governed sandbox runtime + Vercel/dedicated adapters
 ├── skills/                # Capability compatibility adapters
 ├── runtime/               # Core runtime infrastructure
 ├── ant_core/              # Orchestrator, planner, decision engine
@@ -134,6 +140,7 @@ ANT-AI/
 - OpenRouter tool-call loop with a bounded tool-call budget.
 - Coding/testing capabilities bound to the ANT sandbox tool.
 - Per-execution workspace with path and resource limits.
+- Vercel-managed ephemeral sandbox support.
 - Optional authenticated dedicated sandbox service.
 - Health endpoint reports sandbox configuration state.
 
