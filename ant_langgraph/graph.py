@@ -178,17 +178,24 @@ def build_default_graph() -> WorkflowGraph:
                 "repo_list_files/repo_read_file, but repository files are read-only. "
                 "Keep generated work inside the writable workspace."
             )
-            if not hasattr(model_runtime, "generate_with_tools"):
-                result = generate(model_runtime, prompt, model_name)
-                return capability, result, 0
-            result = model_runtime.generate_with_tools(
-                prompt=prompt,
-                model=model_name,
-                tools=[SANDBOX_TOOL],
-                tool_executor=execute_tool,
-                max_tool_calls=int(os.getenv("ANT_MAX_SANDBOX_TOOL_CALLS", "3")),
-            )
-            return capability, result, int(result.get("tool_calls", 0))
+            try:
+                if not hasattr(model_runtime, "generate_with_tools"):
+                    result = generate(model_runtime, prompt, model_name)
+                    return capability, result, 0
+                result = model_runtime.generate_with_tools(
+                    prompt=prompt,
+                    model=model_name,
+                    tools=[SANDBOX_TOOL],
+                    tool_executor=execute_tool,
+                    max_tool_calls=int(os.getenv("ANT_MAX_SANDBOX_TOOL_CALLS", "3")),
+                )
+                return capability, result, int(result.get("tool_calls", 0))
+            finally:
+                # Each coding/testing capability owns its sandbox lifecycle.
+                # Always stop it so an execution cannot leak a running VM.
+                close = getattr(sandbox, "close", None)
+                if callable(close):
+                    close()
 
         started_results: Dict[str, dict] = {}
         tool_call_count = 0
