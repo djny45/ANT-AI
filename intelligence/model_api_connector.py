@@ -1,9 +1,4 @@
-"""Provider-agnostic model API connector.
-
-ANT accepts user-supplied API credentials directly. Providers that expose the
-OpenAI-compatible chat-completions contract work with a custom endpoint; a few
-major native APIs have small protocol adapters here.
-"""
+"""Provider-agnostic model API connector with optional NOVA-Core delegation."""
 
 from __future__ import annotations
 
@@ -33,15 +28,13 @@ class ModelApiConnector:
         "perplexity": "https://api.perplexity.ai",
         "cerebras": "https://api.cerebras.ai/v1",
     }
-
     NATIVE_PROVIDERS = {"anthropic", "google", "gemini"}
 
     def __init__(self, api_key: str | None = None, provider: str = "custom", model: str = "", base_url: str | None = None, timeout: float | None = None):
         self.api_key = (api_key or "").strip()
         self.provider = (provider or "custom").strip().lower()
         self.default_model = (model or "").strip()
-        configured_base = (base_url or "").strip()
-        self.base_url = configured_base or self.PROVIDER_DEFAULTS.get(self.provider, "")
+        self.base_url = (base_url or "").strip() or self.PROVIDER_DEFAULTS.get(self.provider, "")
         self.timeout = timeout or float(os.getenv("ANT_MODEL_TIMEOUT", "60"))
 
     def configured(self) -> bool:
@@ -70,12 +63,7 @@ class ModelApiConnector:
 
     @staticmethod
     def _extract_google(data: dict[str, Any]) -> str:
-        parts: list[str] = []
-        for candidate in data.get("candidates") or []:
-            for part in (candidate.get("content") or {}).get("parts") or []:
-                if isinstance(part, dict) and part.get("text"):
-                    parts.append(str(part["text"]))
-        return "".join(parts)
+        return "".join(str(part["text"]) for candidate in data.get("candidates") or [] for part in (candidate.get("content") or {}).get("parts") or [] if isinstance(part, dict) and part.get("text"))
 
     @staticmethod
     def _flatten_messages(messages: list[dict[str, Any]]) -> str:
@@ -101,7 +89,6 @@ class ModelApiConnector:
                 payload["tools"] = tools
                 payload["tool_choice"] = "auto"
             headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
-
         request = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
         with urllib.request.urlopen(request, timeout=self.timeout) as response:
             return json.loads(response.read().decode("utf-8"))
