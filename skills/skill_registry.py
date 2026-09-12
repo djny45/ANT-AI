@@ -11,7 +11,7 @@ class SkillRegistry:
         self.registry.append(skill)
 
     def search(self, keyword):
-        """Return registered skills whose text matches the keyword or stem."""
+        """Return registered skills relevant to the supplied search terms."""
         query = str(keyword).strip().lower()
         if not query:
             return []
@@ -19,17 +19,16 @@ class SkillRegistry:
         def normalize(value: str) -> str:
             return re.sub(r"[^a-z0-9]+", " ", value.lower()).strip()
 
-        normalized_query = normalize(query)
-        query_tokens = normalized_query.split()
+        query_tokens = [token for token in normalize(query).split() if token not in {"skill", "skills"}]
         results = []
         for skill in self.registry:
-            text = normalize(str(skill))
-            if normalized_query in text:
-                results.append(skill)
+            words = normalize(str(skill)).split()
+            if not query_tokens:
+                if normalize(query) in normalize(str(skill)):
+                    results.append(skill)
                 continue
-            words = text.split()
-            if any(
-                token and any(word.startswith(token) or token.startswith(word) for word in words)
+            if all(
+                any(word.startswith(token) or token.startswith(word) for word in words)
                 for token in query_tokens
             ):
                 results.append(skill)
