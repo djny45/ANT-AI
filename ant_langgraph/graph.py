@@ -96,11 +96,14 @@ def build_default_graph() -> WorkflowGraph:
             state.fail(decision.reason)
             return state
 
-        provider = os.getenv("ANT_MODEL_PROVIDER", "ollama").strip().lower()
-        if provider == "openrouter":
-            # A browser-supplied key is scoped to this request and takes
-            # precedence over the server-wide OPENROUTER_API_KEY.
-            request_api_key = str(state.user_context.get("openrouter_api_key", "")).strip()
+        configured_provider = os.getenv("ANT_MODEL_PROVIDER", "ollama").strip().lower()
+        request_api_key = str(state.user_context.get("openrouter_api_key", "")).strip()
+
+        # A caller-supplied OpenRouter key is an explicit hosted-runtime signal.
+        # This lets the browser key panel work even when the server defaults to
+        # local Ollama and avoids silently ignoring the key.
+        if request_api_key or configured_provider == "openrouter":
+            provider = "openrouter"
             model_runtime = OpenRouterConnector(api_key=request_api_key or None)
             model_name = model_runtime.default_model
         else:
@@ -179,23 +182,17 @@ def build_default_graph() -> WorkflowGraph:
                 else:
                     responses.append(f"[{item['capability']}] {response}")
 
-        if not responses:
-            state.final_response = "ANT could not generate a model response. Check the configured model runtime."
-        else:
-            state.final_response = "\n\n".join(responses)
-            if state.errors:
-                state.final_response += "\n\nSome internal capabilities failed and were excluded from the final result."
+        state.final_response = "\n\n".join(responses) if responses else "ANT returned no model response."
         return state
 
-    return (
-        WorkflowGraph()
-        .add_node("understand", understand)
-        .add_node("planner", plan)
-        .add_node("execute", execute)
-        .add_node("verifier", verify)
-        .add_node("synthesizer", synthesize)
-        .add_edge("understand", "planner")
-        .add_edge("planner", "execute")
-        .add_edge("execute", "verifier")
-        .add_edge("verifier", "synthesizer")
-    )
+    graph = WorkflowGraph()
+    graph.add_node("understand", understand)
+    graph.add_node("plan", plan)
+    graph.add_node("execute", execute)
+    graph.add_node("verify", verify)
+    graph.add_node("synthesize", synthesize)
+    graph.add_edge("understand", "plan")
+    graph.add_edge("plan", "execute")
+    graph.add_edge("execute", "verify")
+    graph.add_edge("verify", "synthesize")
+    return graph
