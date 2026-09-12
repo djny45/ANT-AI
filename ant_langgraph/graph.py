@@ -43,7 +43,6 @@ class WorkflowGraph:
 
 
 def _classify_capabilities(user_input: str) -> List[str]:
-    """Form temporary internal capabilities from one ANT intelligence request."""
     text = user_input.lower()
     capabilities: List[str] = []
     if any(word in text for word in ("research", "analyze", "compare", "investigate")):
@@ -68,25 +67,12 @@ SANDBOX_TOOL = {
     "type": "function",
     "function": {
         "name": "sandbox",
-        "description": (
-            "Use ANT's isolated per-run sandbox. You may create and inspect files in the "
-            "writable workspace and read the current ANT repository snapshot read-only. "
-            "Never assume access to the host filesystem or write to the repository snapshot."
-        ),
+        "description": "Use ANT's isolated per-run sandbox for writable workspace operations and read-only repository inspection.",
         "parameters": {
             "type": "object",
             "properties": {
-                "operation": {
-                    "type": "string",
-                    "enum": [
-                        "list_files", "read_file", "write_file", "check_python",
-                        "repo_list_files", "repo_read_file",
-                    ],
-                },
-                "path": {
-                    "type": "string",
-                    "description": "Relative workspace or repository path, depending on operation.",
-                },
+                "operation": {"type": "string", "enum": ["list_files", "read_file", "write_file", "check_python", "repo_list_files", "repo_read_file"]},
+                "path": {"type": "string", "description": "Relative workspace or repository path."},
                 "content": {"type": "string", "description": "UTF-8 content for write_file."},
             },
             "required": ["operation"],
@@ -97,7 +83,7 @@ SANDBOX_TOOL = {
 
 
 def build_default_graph() -> WorkflowGraph:
-    """Build the default execution path using OpenRouter as the model runtime."""
+    """Build the default execution path using the user-selected model API."""
 
     def understand(state: AgentState) -> AgentState:
         state.audit_metadata["task_type"] = "general"
@@ -106,19 +92,15 @@ def build_default_graph() -> WorkflowGraph:
     def plan(state: AgentState) -> AgentState:
         capabilities = _classify_capabilities(state.user_input)
         state.selected_capabilities = capabilities
-        state.execution_plan = [
-            {"capability": capability, "task": state.user_input}
-            for capability in capabilities
-        ]
+        state.execution_plan = [{"capability": capability, "task": state.user_input} for capability in capabilities]
         state.audit_metadata["capability_count"] = len(capabilities)
         state.audit_metadata["risk_score"] = _risk_score(capabilities)
         state.audit_metadata["fast_path"] = capabilities == ["reasoning"]
         return state
 
     def execute(state: AgentState) -> AgentState:
-        """Govern once, then execute independent temporary capabilities concurrently."""
         from governance_engine.governance.approval_flow import ApprovalFlow
-        from intelligence.openrouter_connector import OpenRouterConnector
+        from intelligence.model_api_connector import ModelApiConnector
         from sandbox.client import RemoteSandbox, RemoteSandboxError
         from sandbox.runtime import SandboxError, SkillSandbox
 
@@ -129,15 +111,16 @@ def build_default_graph() -> WorkflowGraph:
             state.fail(decision.reason)
             return state
 
-        request_api_key = str(state.user_context.get("openrouter_api_key", "")).strip()
-        selected_model = str(state.user_context.get("openrouter_model", "")).strip()
-        model_runtime = OpenRouterConnector(api_key=request_api_key or None)
-        model_name = selected_model or model_runtime.default_model
-        state.audit_metadata["model_provider"] = "openrouter"
+        context = state.user_context
+        provider = str(context.get("model_provider", "")).strip().lower()
+        api_key = str(context.get("model_api_key", "")).strip()
+        model_name = str(context.get("model", "")).strip()
+        base_url = str(context.get("model_base_url", "")).strip()
+        model_runtime = ModelApiConnector(api_key=api_key, provider=provider, model=model_name, base_url=base_url)
+        state.audit_metadata["model_provider"] = provider
         state.audit_metadata["model"] = model_name
 
         def generate(runtime: Any, prompt: str, model: str) -> dict:
-            """Call real or lightweight fake runtimes without forcing a model kwarg."""
             try:
                 return runtime.generate(prompt, model=model)
             except TypeError as exc:
@@ -159,10 +142,7 @@ def build_default_graph() -> WorkflowGraph:
 
             execution_id = str(state.audit_metadata.get("execution_id", "ant-run"))
             remote_url = os.getenv("ANT_SANDBOX_URL", "").strip()
-            if remote_url:
-                sandbox = RemoteSandbox(execution_id=execution_id, url=remote_url)
-            else:
-                sandbox = SkillSandbox(execution_id=execution_id)
+            sandbox = RemoteSandbox(execution_id=execution_id, url=remote_url) if remote_url else SkillSandbox(execution_id=execution_id)
 
             def execute_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
                 if name != "sandbox":
@@ -172,16 +152,10 @@ def build_default_graph() -> WorkflowGraph:
                 except (SandboxError, RemoteSandboxError, TypeError, ValueError) as exc:
                     return {"error": str(exc)}
 
-            prompt += (
-                "\nYou have access to the ANT sandbox tool. Use it when needed to create, "
-                "inspect, or syntax-check files. You may read the ANT repository through "
-                "repo_list_files/repo_read_file, but repository files are read-only. "
-                "Keep generated work inside the writable workspace."
-            )
+            prompt += "\nYou have access to the ANT sandbox tool. Use it when needed to create, inspect, or syntax-check files. Repository files are read-only."
             try:
                 if not hasattr(model_runtime, "generate_with_tools"):
-                    result = generate(model_runtime, prompt, model_name)
-                    return capability, result, 0
+                    return capability, generate(model_runtime, prompt, model_name), 0
                 result = model_runtime.generate_with_tools(
                     prompt=prompt,
                     model=model_name,
@@ -191,8 +165,6 @@ def build_default_graph() -> WorkflowGraph:
                 )
                 return capability, result, int(result.get("tool_calls", 0))
             finally:
-                # Each coding/testing capability owns its sandbox lifecycle.
-                # Always stop it so an execution cannot leak a running VM.
                 close = getattr(sandbox, "close", None)
                 if callable(close):
                     close()
@@ -245,18 +217,13 @@ def build_default_graph() -> WorkflowGraph:
         if state.errors and not state.capability_results:
             state.final_response = "ANT could not complete the request safely: " + "; ".join(state.errors)
             return state
-
         responses = []
         for item in state.capability_results:
             response = item.get("result", {}).get("response")
             if response:
-                if state.audit_metadata.get("fast_path"):
-                    responses.append(response)
-                else:
-                    responses.append(f"[{item['capability']}] {response}")
-
+                responses.append(response if state.audit_metadata.get("fast_path") else f"[{item['capability']}] {response}")
         if not responses:
-            state.final_response = "ANT could not generate a model response. Check the OpenRouter configuration."
+            state.final_response = "ANT could not generate a model response. Check the selected model API configuration."
         else:
             state.final_response = "\n\n".join(responses)
             if state.errors:
