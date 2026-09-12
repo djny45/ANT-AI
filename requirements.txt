@@ -3,4 +3,3 @@ uvicorn
 sqlalchemy
 pydantic
 pytest
-vercel
