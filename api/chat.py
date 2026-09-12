@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 from ant_langgraph.integrations.fastapi_bridge import process_chat_request
 
-app = FastAPI(title="ANT AI Vercel API", version="0.2.0")
+app = FastAPI(title="ANT AI Vercel API", version="0.2.1")
 
 
 class ChatRequest(BaseModel):
@@ -27,7 +27,7 @@ async def health() -> dict:
     return {
         "status": "ok",
         "service": "ant-ai-api",
-        "version": "0.2.0",
+        "version": "0.2.1",
         "provider": "openrouter",
         "sandbox": "remote" if os.getenv("ANT_SANDBOX_URL", "").strip() else "local-bounded",
         "sandbox_configured": bool(os.getenv("ANT_SANDBOX_URL", "").strip()),
