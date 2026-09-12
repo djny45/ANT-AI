@@ -1,15 +1,12 @@
 ant:
   name: ANT AI
-  version: 0.1
+  version: 0.3
   mode: personal
 
 models:
-  default: openrouter
-  fallback: openrouter
-
-openrouter:
-  enabled: true
-  api_key: ${OPENROUTER_API_KEY}
+  selection: user-profile
+  routing: explicit
+  aggregator: disabled
 
 security:
   encryption: enabled
