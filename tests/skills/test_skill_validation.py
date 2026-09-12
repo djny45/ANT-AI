@@ -1,7 +1,13 @@
-from ANT_X_OS.skills.base_skill import BaseSkill
+from skills.skill_registry import SkillRegistry
 
 
-def test_skill_validation_default():
-    s = BaseSkill("T", "D", ["r1"])
-    assert not s.validate({})
-    assert s.validate({"repo": "x"})
+def test_skill_registry_accepts_valid_skill_values():
+    registry = SkillRegistry()
+    registry.add("Coding Skill")
+    assert registry.search("Coding Skill") == ["Coding Skill"]
+
+
+def test_skill_registry_does_not_match_unrelated_values():
+    registry = SkillRegistry()
+    registry.add("Coding Skill")
+    assert registry.search("Security Skill") == []
