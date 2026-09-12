@@ -1,9 +1,8 @@
 """NOVA-Core runtime bridge.
 
 ANT remains the control plane. When a NOVA-Core API endpoint is configured,
-requests are delegated to NOVA-Core while the user's selected model API
-profile is forwarded as request-scoped context. Without an endpoint, ANT
-falls back to its native provider-neutral model connector.
+requests are delegated to NOVA-Core while the selected ANT model API profile
+is forwarded as request-scoped context. Credentials are request-scoped only.
 """
 
 from __future__ import annotations
@@ -17,7 +16,7 @@ from typing import Any
 
 
 class NovaCoreConnector:
-    """Delegate an ANT request to a deployed NOVA-Core API service."""
+    """Delegate ANT requests to a deployed NOVA-Core API service."""
 
     def __init__(self, endpoint: str | None = None, timeout: float | None = None):
         self.endpoint = (endpoint or os.getenv("ANT_NOVA_CORE_URL", "")).strip().rstrip("/")
@@ -25,6 +24,18 @@ class NovaCoreConnector:
 
     def configured(self) -> bool:
         return bool(self.endpoint)
+
+    def health(self) -> dict[str, Any]:
+        """Check NOVA-Core without transmitting a model API key."""
+        if not self.endpoint:
+            return {"configured": False, "runtime": "nova-core", "status": "disabled"}
+        base = self.endpoint[:-5] if self.endpoint.endswith("/chat") else self.endpoint
+        try:
+            with urllib.request.urlopen(urllib.request.Request(f"{base}/health", method="GET"), timeout=self.timeout) as response:
+                data = json.loads(response.read().decode("utf-8"))
+            return {"configured": True, "runtime": "nova-core", "status": "online", "health": data}
+        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError, ValueError) as exc:
+            return {"configured": True, "runtime": "nova-core", "status": "unreachable", "error": str(exc) or type(exc).__name__}
 
     def generate(self, prompt: str, model: str, provider: str, api_key: str, base_url: str = "", user_id: str | None = None, conversation_id: str | None = None) -> dict[str, Any]:
         started = time.perf_counter()
@@ -43,25 +54,12 @@ class NovaCoreConnector:
                 "conversation_id": conversation_id,
             },
         }
-        request = urllib.request.Request(
-            url,
-            data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
+        request = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers={"Content-Type": "application/json"}, method="POST")
         try:
             with urllib.request.urlopen(request, timeout=self.timeout) as response:
                 data = json.loads(response.read().decode("utf-8"))
             content = data.get("response") or data.get("output") or data.get("message") or ""
-            return {
-                "runtime": "nova-core",
-                "provider": provider,
-                "model": model,
-                "response": str(content),
-                "done": bool(content),
-                "latency_ms": round((time.perf_counter() - started) * 1000, 2),
-                "nova": data,
-            }
+            return {"runtime": "nova-core", "provider": provider, "model": model, "response": str(content), "done": bool(content), "latency_ms": round((time.perf_counter() - started) * 1000, 2), "nova": data}
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError, ValueError) as exc:
             detail = str(exc)
             if isinstance(exc, urllib.error.HTTPError):
@@ -69,12 +67,4 @@ class NovaCoreConnector:
                     detail = exc.read().decode("utf-8")[:1000]
                 except OSError:
                     pass
-            return {
-                "runtime": "nova-core",
-                "provider": provider,
-                "model": model,
-                "response": "",
-                "done": False,
-                "latency_ms": round((time.perf_counter() - started) * 1000, 2),
-                "error": detail or type(exc).__name__,
-            }
+            return {"runtime": "nova-core", "provider": provider, "model": model, "response": "", "done": False, "latency_ms": round((time.perf_counter() - started) * 1000, 2), "error": detail or type(exc).__name__}
