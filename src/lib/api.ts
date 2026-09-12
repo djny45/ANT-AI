@@ -19,6 +19,7 @@ export async function sendToANT(message: string, profile: ModelApiProfile) {
       body: JSON.stringify({
         message,
         context: {
+          runtime: 'nova-core',
           model_provider: profile.provider,
           model: profile.model,
           model_base_url: profile.baseUrl,
