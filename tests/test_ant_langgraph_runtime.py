@@ -1,4 +1,3 @@
-import os
 import unittest
 from unittest.mock import patch
 
@@ -20,25 +19,29 @@ class GraphRuntimeTests(unittest.TestCase):
         self.assertEqual(result.current_node, "synthesizer")
         self.assertIsNotNone(result.final_response)
 
-    def test_request_openrouter_key_selects_hosted_runtime(self):
+    def test_request_model_api_profile_selects_runtime(self):
         class FakeRuntime:
-            default_model = "test-model"
-
-            def __init__(self, api_key=None):
+            def __init__(self, api_key=None, provider="custom", model="", base_url=None):
                 self.api_key = api_key
+                self.provider = provider
+                self.default_model = model
 
-            def generate(self, prompt):
+            def generate(self, prompt, model=None):
                 return {"response": "ok", "latency_ms": 1}
 
         state = AgentState(
             user_input="test",
-            user_context={"openrouter_api_key": "sk-or-test"},
+            user_context={
+                "model_api_key": "test-key",
+                "model_provider": "custom",
+                "model": "test-model",
+                "model_base_url": "https://example.test/v1",
+            },
         )
-        with patch.dict(os.environ, {"ANT_MODEL_PROVIDER": "ollama"}, clear=False), \
-             patch("intelligence.openrouter_connector.OpenRouterConnector", FakeRuntime):
+        with patch("intelligence.model_api_connector.ModelApiConnector", FakeRuntime):
             result = build_default_graph().run(state)
 
-        self.assertEqual(result.audit_metadata["model_provider"], "openrouter")
+        self.assertEqual(result.audit_metadata["model_provider"], "custom")
         self.assertEqual(result.audit_metadata["model"], "test-model")
 
 
