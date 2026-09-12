@@ -31,11 +31,11 @@ async def health() -> dict:
 
 @app.get("/health/model")
 async def model_health() -> dict:
-    """Report the active model API contract without probing a provider."""
+    """Report the model API contract without probing a provider."""
     return {
         "provider": "user-selected",
         "configured": False,
-        "note": "Model API credentials are supplied per request from the active browser profile.",
+        "note": "NOVA Core can run natively; external model API credentials are optional and supplied per request.",
     }
 
 
@@ -47,11 +47,18 @@ async def chat(request: Request, payload: ChatRequest) -> dict:
     provider = str(context.get("model_provider", "")).strip().lower()
     model = str(context.get("model", "")).strip()
     base_url = str(context.get("model_base_url", "")).strip()
-    if not api_key or not provider or not model:
-        raise HTTPException(status_code=400, detail="A provider, model, and API key are required in the active API profile.")
+    native_nova = provider == "nova-core" or str(context.get("runtime", "")).strip().lower() == "nova-core"
+    if not provider or not model:
+        if native_nova:
+            provider = "nova-core"
+            model = model or "nova-core"
+        else:
+            raise HTTPException(status_code=400, detail="A provider and model are required in the active API profile.")
+    if not native_nova and not api_key:
+        raise HTTPException(status_code=400, detail="An API key is required for external model providers.")
     if provider == "custom" and not base_url:
         raise HTTPException(status_code=400, detail="Custom providers require an API endpoint.")
-    context.update({"model_api_key": api_key, "model_provider": provider, "model": model, "model_base_url": base_url})
+    context.update({"model_api_key": api_key, "model_provider": provider, "model": model, "model_base_url": base_url, "runtime": "nova-core" if native_nova else "provider-api"})
     try:
         return await process_chat_request(message=payload.message, user_id=payload.user_id, conversation_id=payload.conversation_id, context=context)
     except HTTPException:
