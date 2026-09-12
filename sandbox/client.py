@@ -17,7 +17,7 @@ class RemoteSandboxError(RuntimeError):
 
 
 class RemoteSandbox:
-    """Create one isolated Vercel Sandbox per ANT capability execution.
+    """Create one isolated, ephemeral Vercel Sandbox per ANT capability execution.
 
     The public ANT repository is cloned into the VM as read-only-by-policy
     input: repository operations never expose a write operation. Generated
@@ -39,10 +39,13 @@ class RemoteSandbox:
         try:
             from vercel.sandbox import Sandbox
 
+            # ANT sandboxes are execution-scoped and are explicitly ephemeral.
+            # This avoids retaining snapshots/storage after the agent run ends.
             self._sandbox = Sandbox.create(
                 runtime=os.getenv("ANT_SANDBOX_RUNTIME", "python3.13"),
                 timeout=int(float(os.getenv("ANT_SANDBOX_TIMEOUT_MS", "600000"))),
                 name=f"ant-{self.execution_id[:48]}",
+                persistent=False,
             )
             clone = self._sandbox.run_command(
                 "git",
