@@ -1,15 +1,19 @@
-from ANT_X_OS.graph.engine import GraphEngine, GraphNode
-from ANT_X_OS.skills.loader import load_builtin_skills
-from ANT_X_OS.skills.registry import registry
+from ant_langgraph.graph import build_default_graph
+from ant_langgraph.state import AgentState
 
 
-def test_graph_node_receives_skills():
-    registry.clear()
-    load_builtin_skills()
-    ge = GraphEngine()
-    n = GraphNode("dev", "developer")
-    ge.add_node(n)
-    task = {"task": "implement feature", "description": "add X"}
-    skills = ["Coding Skill", "Review Skill"]
-    res = ge.run(task, {}, skills)
-    assert res and isinstance(res[0].get("skills"), list)
+def test_graph_contains_unified_execution_path():
+    graph = build_default_graph()
+    assert set(graph.nodes) == {"understand", "planner", "execute", "verifier", "synthesizer"}
+    assert graph.edges["understand"] == ["planner"]
+    assert graph.edges["planner"] == ["execute"]
+    assert graph.edges["execute"] == ["verifier"]
+    assert graph.edges["verifier"] == ["synthesizer"]
+
+
+def test_graph_planner_selects_current_capabilities():
+    graph = build_default_graph()
+    state = AgentState(user_input="build and test a feature")
+    planned = graph.nodes["planner"](state)
+    assert planned.selected_capabilities == ["coding", "testing"]
+    assert len(planned.execution_plan) == 2
