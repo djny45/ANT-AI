@@ -1,34 +1,27 @@
 import asyncio
 
 from ant_langgraph.integration_pipeline import run_pipeline
-from intelligence.openrouter_connector import OpenRouterConnector
+from intelligence.model_api_connector import ModelApiConnector
 
 
 def _fake_generate(self, prompt, *args, **kwargs):
-    """Deterministic model double compatible with the OpenRouter contract."""
-    return {
-        "response": "test model response",
-        "model": "test-double",
-        "latency_ms": 1.0,
-        "done": True,
-    }
+    return {"response": "test model response", "model": "test-double", "latency_ms": 1.0, "done": True}
 
 
 def _run(payload):
-    payload.setdefault("context", {})["openrouter_api_key"] = "sk-or-test"
+    payload.setdefault("context", {}).update({
+        "model_api_key": "test-key",
+        "model_provider": "custom",
+        "model": "test-double",
+        "model_base_url": "https://example.test/v1",
+    })
     return asyncio.run(run_pipeline(payload))
 
 
 def test_run_pipeline_basic(monkeypatch):
-    """The unified intelligence boundary works with the hosted runtime."""
-    monkeypatch.setenv("ANT_MODEL_PROVIDER", "openrouter")
-    monkeypatch.setattr(OpenRouterConnector, "generate", _fake_generate)
-    result = _run({
-        "user_input": "hello integration",
-        "context": {"trace": True},
-        "conversation_id": "basic-integration-test",
-    })
-
+    """The unified intelligence boundary works with a user-selected model API."""
+    monkeypatch.setattr(ModelApiConnector, "generate", _fake_generate)
+    result = _run({"user_input": "hello integration", "context": {"trace": True}, "conversation_id": "basic-integration-test"})
     assert isinstance(result, dict)
     assert result["execution_id"]
     assert result["final_response"]
@@ -43,8 +36,7 @@ def test_run_pipeline_basic(monkeypatch):
 
 def test_dynamic_capability_selection(monkeypatch):
     """One request forms only the internal capabilities it needs."""
-    monkeypatch.setenv("ANT_MODEL_PROVIDER", "openrouter")
-    monkeypatch.setattr(OpenRouterConnector, "generate", _fake_generate)
+    monkeypatch.setattr(ModelApiConnector, "generate", _fake_generate)
     result = _run({"user_input": "build and test authentication"})
     assert "coding" in result["selected_capabilities"]
     assert "testing" in result["selected_capabilities"]
@@ -54,19 +46,11 @@ def test_dynamic_capability_selection(monkeypatch):
 
 def test_memory_lifecycle(monkeypatch):
     """Verified results are stored and available on the next request."""
-    monkeypatch.setenv("ANT_MODEL_PROVIDER", "openrouter")
-    monkeypatch.setattr(OpenRouterConnector, "generate", _fake_generate)
+    monkeypatch.setattr(ModelApiConnector, "generate", _fake_generate)
     conversation_id = "integration-memory-test"
-    first = _run({
-        "user_input": "remember this integration note",
-        "conversation_id": conversation_id,
-    })
+    first = _run({"user_input": "remember this integration note", "conversation_id": conversation_id})
     assert first["memory_saved"] is True
-
-    second = _run({
-        "user_input": "continue the integration note",
-        "conversation_id": conversation_id,
-    })
+    second = _run({"user_input": "continue the integration note", "conversation_id": conversation_id})
     assert second["memory_context"]["short_term"]
 
 
