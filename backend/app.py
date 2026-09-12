@@ -9,12 +9,9 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from ant_langgraph.integrations.fastapi_bridge import process_chat_request
-from intelligence.ollama_connector import OllamaConnector
 
 app = FastAPI(title="ANT AI API", version="0.1.0")
 
-# Keep local development permissive while allowing production deployments to
-# provide an explicit comma-separated origin list through ANT_CORS_ORIGINS.
 configured_origins = os.getenv("ANT_CORS_ORIGINS", "http://localhost:3000,http://localhost:8000")
 allowed_origins = [origin.strip() for origin in configured_origins.split(",") if origin.strip()]
 
@@ -36,24 +33,22 @@ class ChatRequest(BaseModel):
 
 @app.get("/health")
 async def health() -> dict:
-    return {"status": "ok", "service": "ant-ai-api", "version": "0.1.0"}
+    return {"status": "ok", "service": "ant-ai-api", "version": "0.1.0", "provider": "openrouter"}
 
 
 @app.get("/health/model")
 async def model_health() -> dict:
-    """Report whether the configured local model runtime is reachable."""
-    connector = OllamaConnector()
+    """Report the hosted OpenRouter runtime configuration."""
     return {
-        "provider": "ollama",
-        "url": connector.url,
-        "model": os.getenv("OLLAMA_MODEL", "llama3.2"),
-        "available": connector.health(),
+        "provider": "openrouter",
+        "model": os.getenv("OPENROUTER_MODEL", "nvidia/nemotron-3-ultra-550b-a55b:free"),
+        "configured": bool(os.getenv("OPENROUTER_API_KEY")),
     }
 
 
 @app.post("/api/chat")
 async def chat(request: Request, payload: ChatRequest) -> dict:
-    """Execute one ANT request, optionally using the caller's OpenRouter key.
+    """Execute one ANT request using OpenRouter.
 
     The browser sends the key as a Bearer token. ANT passes it only through the
     current request context; it is not written to audit or memory state.
