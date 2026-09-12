@@ -1,5 +1,7 @@
-"""Integration adapters for existing ANT AI systems."""
+"""Integration adapters for ANT AI.
 
-from .ant_xos_bridge import ANTXOSBridge
+Keep package imports side-effect free so individual adapters can be imported
+without requiring optional or legacy bridge modules.
+"""
 
-__all__ = ["ANTXOSBridge"]
+__all__ = []
