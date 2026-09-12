@@ -65,7 +65,7 @@ def _risk_score(capabilities: List[str]) -> int:
 
 
 def build_default_graph() -> WorkflowGraph:
-    """Build the default execution path for the single ANT intelligence."""
+    """Build the default execution path using OpenRouter as the only model runtime."""
 
     def understand(state: AgentState) -> AgentState:
         state.audit_metadata["task_type"] = "general"
@@ -86,7 +86,6 @@ def build_default_graph() -> WorkflowGraph:
     def execute(state: AgentState) -> AgentState:
         """Govern once, then execute independent temporary capabilities concurrently."""
         from governance_engine.governance.approval_flow import ApprovalFlow
-        from intelligence.ollama_connector import OllamaConnector
         from intelligence.openrouter_connector import OpenRouterConnector
 
         decision = ApprovalFlow().evaluate(int(state.audit_metadata.get("risk_score", 0)))
@@ -96,23 +95,10 @@ def build_default_graph() -> WorkflowGraph:
             state.fail(decision.reason)
             return state
 
-        configured_provider = os.getenv("ANT_MODEL_PROVIDER", "ollama").strip().lower()
         request_api_key = str(state.user_context.get("openrouter_api_key", "")).strip()
-        if request_api_key or configured_provider == "openrouter":
-            # A browser-supplied key is scoped to this request and takes
-            # precedence over the server-wide OPENROUTER_API_KEY. A supplied
-            # key also explicitly selects the hosted runtime when the server
-            # is otherwise configured for local Ollama.
-            provider = "openrouter"
-            model_runtime = OpenRouterConnector(api_key=request_api_key or None)
-            model_name = model_runtime.default_model
-        else:
-            provider = "ollama"
-            model_runtime = OllamaConnector()
-            model_name = os.getenv("OLLAMA_MODEL", "llama3.2")
-
-        state.audit_metadata["model_provider"] = provider
-        state.audit_metadata["model"] = model_name
+        model_runtime = OpenRouterConnector(api_key=request_api_key or None)
+        state.audit_metadata["model_provider"] = "openrouter"
+        state.audit_metadata["model"] = model_runtime.default_model
 
         def execute_capability(item: Dict[str, str]):
             capability = item["capability"]
@@ -183,7 +169,7 @@ def build_default_graph() -> WorkflowGraph:
                     responses.append(f"[{item['capability']}] {response}")
 
         if not responses:
-            state.final_response = "ANT could not generate a model response. Check the configured model runtime."
+            state.final_response = "ANT could not generate a model response. Check the OpenRouter configuration."
         else:
             state.final_response = "\n\n".join(responses)
             if state.errors:
