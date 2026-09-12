@@ -69,18 +69,24 @@ SANDBOX_TOOL = {
     "function": {
         "name": "sandbox",
         "description": (
-            "Use ANT's isolated per-run workspace for coding and testing. "
-            "Only workspace file operations and Python syntax checks are available; "
-            "never assume access to the host filesystem."
+            "Use ANT's isolated per-run sandbox. You may create and inspect files in the "
+            "writable workspace and read the current ANT repository snapshot read-only. "
+            "Never assume access to the host filesystem or write to the repository snapshot."
         ),
         "parameters": {
             "type": "object",
             "properties": {
                 "operation": {
                     "type": "string",
-                    "enum": ["list_files", "read_file", "write_file", "check_python"],
+                    "enum": [
+                        "list_files", "read_file", "write_file", "check_python",
+                        "repo_list_files", "repo_read_file",
+                    ],
                 },
-                "path": {"type": "string", "description": "Relative workspace path."},
+                "path": {
+                    "type": "string",
+                    "description": "Relative workspace or repository path, depending on operation.",
+                },
                 "content": {"type": "string", "description": "UTF-8 content for write_file."},
             },
             "required": ["operation"],
@@ -159,7 +165,9 @@ def build_default_graph() -> WorkflowGraph:
 
             prompt += (
                 "\nYou have access to the ANT sandbox tool. Use it when needed to create, "
-                "inspect, or syntax-check files. Keep all work inside that workspace."
+                "inspect, or syntax-check files. You may read the ANT repository through "
+                "repo_list_files/repo_read_file, but repository files are read-only. "
+                "Keep generated work inside the writable workspace."
             )
             result = model_runtime.generate_with_tools(
                 prompt=prompt,
