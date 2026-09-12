@@ -1,8 +1,8 @@
 """Bounded workspace sandbox used by ANT tool execution.
 
-The default runtime intentionally does not execute arbitrary shell commands.
-It provides isolated per-run files and Python syntax validation. A production
-process-execution deployment should run behind the remote sandbox service.
+The runtime provides an isolated per-run writable workspace plus read-only
+access to a fixed ANT repository snapshot. It deliberately does not execute
+arbitrary host shell commands.
 """
 
 from __future__ import annotations
@@ -12,13 +12,15 @@ import os
 from pathlib import Path
 from uuid import uuid4
 
+from .repository import RepositoryAccessError, RepositorySnapshot
+
 
 class SandboxError(ValueError):
     """Raised when a sandbox operation violates its workspace policy."""
 
 
 class SkillSandbox:
-    """Per-execution, path-confined workspace for ANT capabilities."""
+    """Per-execution, path-confined workspace with read-only repo access."""
 
     MAX_FILE_BYTES = 256 * 1024
     MAX_FILES = 100
@@ -29,6 +31,7 @@ class SkillSandbox:
         run_id = execution_id or str(uuid4())
         self.root = (base / run_id).resolve()
         self.root.mkdir(parents=True, exist_ok=True)
+        self.repository = RepositorySnapshot(str(self.root / "repo"))
 
     def _path(self, relative: str) -> Path:
         if not relative or relative.startswith("/"):
@@ -36,13 +39,15 @@ class SkillSandbox:
         candidate = (self.root / relative).resolve()
         if candidate != self.root and self.root not in candidate.parents:
             raise SandboxError("path escapes sandbox workspace")
+        if self.repository.root == candidate or self.repository.root in candidate.parents:
+            raise SandboxError("repository snapshot is read-only; use repo_read_file")
         return candidate
 
     def list_files(self) -> list[str]:
         return sorted(
             str(path.relative_to(self.root))
             for path in self.root.rglob("*")
-            if path.is_file()
+            if path.is_file() and self.repository.root not in path.parents
         )
 
     def read_file(self, path: str) -> str:
@@ -72,12 +77,25 @@ class SkillSandbox:
             return {"path": path, "valid": False, "error": f"line {exc.lineno}: {exc.msg}"}
         return {"path": path, "valid": True, "error": None}
 
+    def repo_list_files(self) -> list[str]:
+        try:
+            return self.repository.list_files()
+        except RepositoryAccessError as exc:
+            raise SandboxError(str(exc)) from exc
+
+    def repo_read_file(self, path: str) -> dict[str, object]:
+        try:
+            return {"path": path, "content": self.repository.read_file(path)}
+        except RepositoryAccessError as exc:
+            raise SandboxError(str(exc)) from exc
+
     def test(self, skill: str) -> dict[str, object]:
         return {
             "skill": skill,
             "tests": ["syntax", "permissions", "dependency_check"],
             "status": "available",
             "workspace": str(self.root),
+            "repository_access": "read-only",
         }
 
     def execute(self, operation: str, **kwargs: object) -> dict[str, object]:
@@ -90,4 +108,8 @@ class SkillSandbox:
             return self.write_file(str(kwargs.get("path", "")), str(kwargs.get("content", "")))
         if operation == "check_python":
             return self.check_python(str(kwargs.get("path", "")))
+        if operation == "repo_list_files":
+            return {"files": self.repo_list_files(), "read_only": True}
+        if operation == "repo_read_file":
+            return self.repo_read_file(str(kwargs.get("path", "")))
         raise SandboxError(f"unsupported sandbox operation: {operation}")
