@@ -83,7 +83,7 @@ SANDBOX_TOOL = {
 
 
 def build_default_graph() -> WorkflowGraph:
-    """Build the default execution path using the user-selected model API."""
+    """Build the default execution path using NOVA-Core when configured, with ANT-native fallback."""
 
     def understand(state: AgentState) -> AgentState:
         state.audit_metadata["task_type"] = "general"
@@ -101,6 +101,7 @@ def build_default_graph() -> WorkflowGraph:
     def execute(state: AgentState) -> AgentState:
         from governance_engine.governance.approval_flow import ApprovalFlow
         from intelligence.model_api_connector import ModelApiConnector
+        from intelligence.nova_core_connector import NovaCoreConnector
         from sandbox.client import RemoteSandbox, RemoteSandboxError
         from sandbox.runtime import SandboxError, SkillSandbox
 
@@ -117,8 +118,12 @@ def build_default_graph() -> WorkflowGraph:
         model_name = str(context.get("model", "")).strip()
         base_url = str(context.get("model_base_url", "")).strip()
         model_runtime = ModelApiConnector(api_key=api_key, provider=provider, model=model_name, base_url=base_url)
+        nova_runtime = NovaCoreConnector()
+        nova_configured = nova_runtime.configured()
         state.audit_metadata["model_provider"] = provider
         state.audit_metadata["model"] = model_name
+        state.audit_metadata["nova_core_configured"] = nova_configured
+        state.audit_metadata["runtime"] = "nova-core" if nova_configured else "ant-native"
 
         def generate(runtime: Any, prompt: str, model: str) -> dict:
             try:
@@ -131,62 +136,80 @@ def build_default_graph() -> WorkflowGraph:
         def execute_capability(item: Dict[str, str]):
             capability = item["capability"]
             prompt = (
-                "You are the full ANT Intelligence Core. Do not describe separate agents.\n"
-                f"Current temporary capability: {capability}.\n"
-                "Work on the user's request and return useful findings.\n"
+                "You are the intelligence engine inside ANT-AI. Work directly on the user's request. "
+                "Use your reasoning, planning, and available runtime capabilities; do not describe separate agents.\n"
+                f"Current capability: {capability}.\n"
                 f"User request: {item['task']}"
             )
 
-            if capability not in {"coding", "testing"}:
-                return capability, generate(model_runtime, prompt, model_name), 0
+            # ANT keeps sandbox-backed coding/testing under its control plane because
+            # the NOVA HTTP contract currently does not expose remote tool execution.
+            if capability in {"coding", "testing"}:
+                execution_id = str(state.audit_metadata.get("execution_id", "ant-run"))
+                remote_url = os.getenv("ANT_SANDBOX_URL", "").strip()
+                sandbox = RemoteSandbox(execution_id=execution_id, url=remote_url) if remote_url else SkillSandbox(execution_id=execution_id)
 
-            execution_id = str(state.audit_metadata.get("execution_id", "ant-run"))
-            remote_url = os.getenv("ANT_SANDBOX_URL", "").strip()
-            sandbox = RemoteSandbox(execution_id=execution_id, url=remote_url) if remote_url else SkillSandbox(execution_id=execution_id)
+                def execute_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+                    if name != "sandbox":
+                        return {"error": f"tool not allowed: {name}"}
+                    try:
+                        return sandbox.execute(**arguments)
+                    except (SandboxError, RemoteSandboxError, TypeError, ValueError) as exc:
+                        return {"error": str(exc)}
 
-            def execute_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
-                if name != "sandbox":
-                    return {"error": f"tool not allowed: {name}"}
+                prompt += "\nYou have access to the ANT sandbox tool. Use it when needed to create, inspect, or syntax-check files. Repository files are read-only."
                 try:
-                    return sandbox.execute(**arguments)
-                except (SandboxError, RemoteSandboxError, TypeError, ValueError) as exc:
-                    return {"error": str(exc)}
+                    if not hasattr(model_runtime, "generate_with_tools"):
+                        return capability, generate(model_runtime, prompt, model_name), 0, "ant-native"
+                    result = model_runtime.generate_with_tools(
+                        prompt=prompt,
+                        model=model_name,
+                        tools=[SANDBOX_TOOL],
+                        tool_executor=execute_tool,
+                        max_tool_calls=int(os.getenv("ANT_MAX_SANDBOX_TOOL_CALLS", "3")),
+                    )
+                    return capability, result, int(result.get("tool_calls", 0)), "ant-native"
+                finally:
+                    close = getattr(sandbox, "close", None)
+                    if callable(close):
+                        close()
 
-            prompt += "\nYou have access to the ANT sandbox tool. Use it when needed to create, inspect, or syntax-check files. Repository files are read-only."
-            try:
-                if not hasattr(model_runtime, "generate_with_tools"):
-                    return capability, generate(model_runtime, prompt, model_name), 0
-                result = model_runtime.generate_with_tools(
+            if nova_configured:
+                result = nova_runtime.generate(
                     prompt=prompt,
                     model=model_name,
-                    tools=[SANDBOX_TOOL],
-                    tool_executor=execute_tool,
-                    max_tool_calls=int(os.getenv("ANT_MAX_SANDBOX_TOOL_CALLS", "3")),
+                    provider=provider,
+                    api_key=api_key,
+                    base_url=base_url,
+                    user_id=str(context.get("user_id", "anonymous")),
+                    conversation_id=str(context.get("conversation_id", "")) or None,
                 )
-                return capability, result, int(result.get("tool_calls", 0))
-            finally:
-                close = getattr(sandbox, "close", None)
-                if callable(close):
-                    close()
+                return capability, result, 0, "nova-core"
+
+            return capability, generate(model_runtime, prompt, model_name), 0, "ant-native"
 
         started_results: Dict[str, dict] = {}
         tool_call_count = 0
+        runtimes: Dict[str, str] = {}
         if len(state.execution_plan) == 1:
-            capability, result, calls = execute_capability(state.execution_plan[0])
+            capability, result, calls, runtime_name = execute_capability(state.execution_plan[0])
             started_results[capability] = result
             tool_call_count += calls
+            runtimes[capability] = runtime_name
         else:
             with ThreadPoolExecutor(max_workers=len(state.execution_plan)) as pool:
                 futures = [pool.submit(execute_capability, item) for item in state.execution_plan]
                 for future in as_completed(futures):
-                    capability, result, calls = future.result()
+                    capability, result, calls, runtime_name = future.result()
                     started_results[capability] = result
                     tool_call_count += calls
+                    runtimes[capability] = runtime_name
 
         total_latency = 0.0
         for item in state.execution_plan:
             capability = item["capability"]
             result = started_results[capability]
+            state.audit_metadata.setdefault("capability_runtimes", {})[capability] = runtimes[capability]
             if result.get("error"):
                 state.fail(f"{capability}: model execution failed: {result['error']}")
                 state.record_result(capability, result, confidence=0.0)
@@ -210,6 +233,8 @@ def build_default_graph() -> WorkflowGraph:
             "governance_approved": state.audit_metadata.get("governance_approved", False),
             "sandbox_tool_calls": int(state.audit_metadata.get("sandbox_tool_calls", 0)),
             "sandbox_mode": state.audit_metadata.get("sandbox_mode", "disabled"),
+            "runtime": state.audit_metadata.get("runtime", "ant-native"),
+            "capability_runtimes": state.audit_metadata.get("capability_runtimes", {}),
         }
         return state
 
