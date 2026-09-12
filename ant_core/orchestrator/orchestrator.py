@@ -16,6 +16,7 @@ class IntelligenceOrchestrator:
         state.plan = plan["tasks"]
 
         capabilities = [task["capability"] for task in state.plan]
+        state.selected_capabilities = capabilities
         state.context["selected_capabilities"] = capabilities
 
         decision = self.decision_engine.decide(request, len(capabilities))
