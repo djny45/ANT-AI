@@ -1,6 +1,7 @@
 import Nav from './components/Nav'
 import Hero from './components/Hero'
 import Architecture from './components/Architecture'
+import NovaCore from './components/NovaCore'
 import Capabilities from './components/Capabilities'
 import Workflows from './components/Workflows'
 import Principles from './components/Principles'
@@ -18,6 +19,7 @@ function App() {
       <main>
         <Hero />
         <Architecture />
+        <NovaCore />
         <Capabilities />
         <Workflows />
         <Principles />
