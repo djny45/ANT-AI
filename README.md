@@ -4,19 +4,22 @@
 *One intelligence. One core. Dynamic internal capabilities. Governed execution.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-active%20development-blue)]()
+[![Status](https://img.shields.io/badge/status-production%20runtime%20integration-blue)]()
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)]()
 [![Node](https://img.shields.io/badge/node-18%2B-green)]()
 
-ANT AI is a **unified adaptive intelligence platform**.  
-It is not a collection of independent permanent agents.  
-It is **one intelligence core** that can temporarily form specialized internal capabilities, execute them under governance, verify results, and recombine them into a single coherent response.
+ANT AI is a **unified adaptive intelligence platform**. It is **one intelligence core** that can temporarily form specialized internal capabilities, execute them under governance, verify results, and recombine them into a single coherent response.
 
-> Inspired by coordinated natural systems — one organism, many temporary specialized pathways.
+## Production web runtime
 
----
+The production web path is:
+
+`Browser → Vercel /api/chat → ANT Intelligence Graph → OpenRouter → governed tools → verification → response`
+
+The web runtime accepts an explicitly selected OpenRouter model. Coding and testing capabilities can use a bounded ANT sandbox through the model tool-call interface. In production, `ANT_SANDBOX_URL` routes those tool calls to the dedicated authenticated sandbox service in `sandbox/`.
 
 ## Core Principle
+
 User Request
 ↓
 ANT Intelligence Core
@@ -45,23 +48,18 @@ Unified Final Response
 5. **Unified result** — outputs are recombined into one verified response.
 6. **No permanent agent registry** — the system does not rely on independent long-lived agents voting or competing.
 
----
-
 ## Key Features
 
-| Feature                        | Description                                                                 |
-|--------------------------------|-----------------------------------------------------------------------------|
-| **Unified Intelligence Core**  | Single reasoning identity with dynamic self-decomposition                   |
-| **LLM Routing**                | Local (Ollama) + hosted (OpenRouter) with configurable model selection      |
-| **Knowledge Hive Memory**      | Persistent, contextual memory across sessions and tasks                     |
-| **Governance & Risk Engine**   | Pre-execution risk evaluation + post-execution verification                 |
-| **Secure Audit Trail**         | Blockchain-inspired immutable logging of decisions and actions              |
-| **Self-Improvement Loop**      | Learning from outcomes to improve future capability formation               |
-| **Web Interface**              | Modern React + Vite + TypeScript frontend                                   |
-| **Modular Runtime**            | Harness → Orchestrator → Capability Registry → Tools / Memory               |
-| **Extensible Connectors**      | OpenRouter, Ollama, OmniRoute, and custom tool integrations                 |
-
----
+| Feature | Description |
+|---|---|
+| **Unified Intelligence Core** | Single reasoning identity with dynamic self-decomposition |
+| **LLM Routing** | OpenRouter runtime with configurable model selection |
+| **Knowledge Hive Memory** | Memory adapter boundary ready for persistent backend integration |
+| **Governance & Risk Engine** | Pre-execution risk evaluation + post-execution verification |
+| **Secure Audit Trail** | Audit events for execution lifecycle |
+| **Sandbox Tooling** | Governed per-run workspace for coding/testing; optional dedicated service |
+| **Web Interface** | Modern React + Vite + TypeScript frontend |
+| **Modular Runtime** | Harness → Orchestrator → Capability Registry → Tools / Memory |
 
 ## Quick Start
 
@@ -69,7 +67,6 @@ Unified Final Response
 
 - Python 3.10+
 - Node.js 18+
-- [Ollama](https://ollama.com) (recommended for local models)
 - Optional: OpenRouter API key for hosted models
 
 ### 1. Clone the repository
@@ -77,90 +74,91 @@ Unified Final Response
 ```bash
 git clone https://github.com/djny45/ANT-AI.git
 cd ANT-AI
+```
 
-2. Environment setup
+### 2. Environment setup
+
+```bash
 cp .env.example .env
 # Edit .env with your preferences
-ANT_MODEL_PROVIDER=ollama          # or "openrouter"
-OLLAMA_URL=http://localhost:11434
-OLLAMA_MODEL=llama3.2
-OPENROUTER_API_KEY=                # only if using OpenRouter
+ANT_MODEL_PROVIDER=openrouter
+OPENROUTER_API_KEY=
 OPENROUTER_MODEL=nvidia/nemotron-3-ultra-550b-a55b:free
-ANT_CORS_ORIGINS=http://localhost:3000,http://localhost:8000
+```
 
-Architecture Overview
-┌─────────────────────────────────────────────────────────────┐
-│                    ANT-AI Website (React)                   │
-└────────────────────────────┬────────────────────────────────┘
-                             │
-┌────────────────────────────▼────────────────────────────────┐
-│                     Web Bridge / API Layer                  │
-└────────────────────────────┬────────────────────────────────┘
-                             │
-┌────────────────────────────▼────────────────────────────────┐
-│                    Harness + Runtime                        │
-│  Orchestrator · Planner · Decision Engine · State Manager   │
-└────────────────────────────┬────────────────────────────────┘
-                             │
-┌────────────────────────────▼────────────────────────────────┐
-│              ANT Intelligence Core                          │
-│  Dynamic Capability Formation · Governance · Verification   │
-└────────────────────────────┬────────────────────────────────┘
-                             │
-        ┌────────────────────┼────────────────────┐
-        ▼                    ▼                    ▼
-   Research Cap.        Coding Cap.          Security Cap.
-        │                    │                    │
-        └────────────────────┼────────────────────┘
-                             │
-┌────────────────────────────▼────────────────────────────────┐
-│         Memory · Tools · Knowledge Graph · Audit Log        │
-└─────────────────────────────────────────────────────────────┘
+### 3. Web deployment
 
+The repository is configured for Vercel. The frontend uses the same-origin
+`/api` route by default. Configure the production environment with the required
+OpenRouter settings. Never place a server-only secret in a `VITE_*` variable.
+
+### 4. Dedicated sandbox deployment
+
+Build `sandbox/Dockerfile` as a separate service. Set `ANT_SANDBOX_TOKEN` on the
+sandbox service and set both `ANT_SANDBOX_URL` and `ANT_SANDBOX_TOKEN` on the ANT
+API. The API will automatically route coding/testing sandbox tool calls to that
+service.
+
+See `docs/RUNTIME_EXECUTION_STATUS.md` for the production deployment checklist.
+
+## Repository layout
+
+```text
 ANT-AI/
 ├── frontend/              # React + Vite + TypeScript web UI
-├── web_bridge/            # Frontend ↔ Runtime communication
-├── runtime/               # Core execution engine
+├── api/                   # Vercel FastAPI entrypoints
+├── ant_langgraph/         # Unified execution graph and API bridge
+├── intelligence/          # OpenRouter model connector
+├── sandbox/               # Governed sandbox runtime + dedicated service
+├── skills/                # Capability compatibility adapters
+├── runtime/               # Core runtime infrastructure
 ├── ant_core/              # Orchestrator, planner, decision engine
-├── intelligence/          # Model routers, connectors (Ollama, OpenRouter…)
 ├── memory/ & memory_v2/   # Knowledge hive & persistent memory
 ├── governance_engine/     # Risk & policy controls
 ├── security/ & security_v2/
 ├── knowledge_engine/      # Knowledge graph & retrieval
 ├── connectors/            # External tool & service integrations
 ├── harness/               # Execution boundary & lifecycle
-├── docs/                  # Architecture, roadmaps, principles
-├── tests/
-└── ...
+├── docs/                  # Architecture and deployment status
+└── tests/
+```
 
-Development Status
-Verified foundation
-Unified graph execution boundary
-Dynamic internal capability formation
-Local Ollama model execution
-Optional OpenRouter runtime
-Governance and risk evaluation layer
-Frontend foundation (React + TypeScript + Vite)
-Active focus
-End-to-end runtime execution cycle
-Capability registry + agent engine binding
-Memory context injection & outcome storage
-Production hardening and monitoring
-See docs/RUNTIME_EXECUTION_STATUS.md and related documents for the latest phase status.
+## Current status
 
-Security
+### Production runtime integration
+
+- Vercel web/API path implemented.
+- Explicit OpenRouter model selection.
+- Unified graph execution boundary.
+- Governance before capability execution.
+- OpenRouter tool-call loop with a bounded tool-call budget.
+- Coding/testing capabilities bound to the ANT sandbox tool.
+- Per-execution workspace with path and resource limits.
+- Optional authenticated dedicated sandbox service.
+- Health endpoint reports sandbox configuration state.
+
+### Remaining production hardening
+
+- Persistent database-backed memory.
+- Platform-level sandbox network/process isolation and resource limits.
+- Production environment configuration and end-to-end acceptance testing.
+- Centralized telemetry and alerting.
+
+## Security
+
 Report vulnerabilities privately to the maintainers.
 All external tools, models, and code must pass security gates before integration.
-See SECURITY.md and SECURITY_IMPROVEMENTS.md
+See `SECURITY.md` and `SECURITY_IMPROVEMENTS.md`.
 
-License
-This project is licensed under the MIT License.
-See the LICENSE file for details.
+## License
 
-Vision
+This project is licensed under the MIT License. See `LICENSE`.
+
+## Vision
+
 ANT AI aims to become a complete, browser-accessible adaptive intelligence platform:
-Users interact through a clean web interface.
-Behind the scenes, a single governed intelligence dynamically specializes itself.
-Every action is audited, verifiable, and continuously improving.
-One intelligence. Adaptive. Governed. Evolving
+users interact through a clean web interface; behind the scenes, a single governed
+intelligence dynamically specializes itself; every action is audited, verifiable,
+and continuously improving.
 
+**One intelligence. Adaptive. Governed. Evolving.**
