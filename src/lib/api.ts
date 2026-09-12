@@ -1,4 +1,4 @@
-export async function sendToANT(message: string, apiKey: string) {
+export async function sendToANT(message: string, apiKey: string, model?: string) {
   // Default to the same-origin FastAPI route so the frontend does not fail
   // merely because VITE_ANT_API_URL is absent. Set it only for a separate API.
   const configuredBaseUrl = import.meta.env.VITE_ANT_API_URL?.trim()
@@ -12,7 +12,10 @@ export async function sendToANT(message: string, apiKey: string) {
         'Content-Type': 'application/json',
         ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
       },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({
+        message,
+        context: model?.trim() ? { openrouter_model: model.trim() } : {},
+      }),
     })
   } catch {
     throw new Error(
