@@ -12,7 +12,7 @@ from typing import Any, Callable
 
 
 class ModelApiConnector:
-    """Call a user-selected model provider with a user-supplied API key."""
+    """Call a user-selected model provider, optionally through NOVA-Core."""
 
     PROVIDER_DEFAULTS = {
         "openai": "https://api.openai.com/v1",
@@ -109,6 +109,23 @@ class ModelApiConnector:
             return self._error(selected_model, "Model is not configured", started)
         if not self.base_url:
             return self._error(selected_model, "Model API endpoint is not configured", started)
+
+        nova_url = os.getenv("ANT_NOVA_CORE_URL", "").strip()
+        if nova_url:
+            try:
+                from .nova_core_connector import NovaCoreConnector
+                result = NovaCoreConnector(endpoint=nova_url, timeout=self.timeout).generate(
+                    prompt=prompt,
+                    model=selected_model,
+                    provider=self.provider,
+                    api_key=self.api_key,
+                    base_url=self.base_url,
+                )
+                if result.get("done"):
+                    return result
+            except Exception:
+                pass
+
         messages: list[dict[str, str]] = []
         if system:
             messages.append({"role": "system", "content": system})
