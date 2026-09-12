@@ -29,9 +29,17 @@ class NovaCoreConnector:
         """Check NOVA-Core without transmitting a model API key."""
         if not self.endpoint:
             return {"configured": False, "runtime": "nova-core", "status": "disabled"}
-        base = self.endpoint[:-5] if self.endpoint.endswith("/chat") else self.endpoint
+        base = self.endpoint
+        if base.endswith("/api/chat"):
+            health_url = f"{base[:-5]}/health"
+        elif base.endswith("/chat"):
+            health_url = f"{base[:-5]}/api/health"
+        elif base.endswith("/api"):
+            health_url = f"{base}/health"
+        else:
+            health_url = f"{base}/api/health"
         try:
-            with urllib.request.urlopen(urllib.request.Request(f"{base}/health", method="GET"), timeout=self.timeout) as response:
+            with urllib.request.urlopen(urllib.request.Request(health_url, method="GET"), timeout=self.timeout) as response:
                 data = json.loads(response.read().decode("utf-8"))
             return {"configured": True, "runtime": "nova-core", "status": "online", "health": data}
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError, ValueError) as exc:
