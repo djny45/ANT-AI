@@ -136,6 +136,15 @@ def build_default_graph() -> WorkflowGraph:
         state.audit_metadata["model_provider"] = "openrouter"
         state.audit_metadata["model"] = model_name
 
+        def generate(runtime: Any, prompt: str, model: str) -> dict:
+            """Call real or lightweight fake runtimes without forcing a model kwarg."""
+            try:
+                return runtime.generate(prompt, model=model)
+            except TypeError as exc:
+                if "unexpected keyword argument 'model'" not in str(exc):
+                    raise
+                return runtime.generate(prompt)
+
         def execute_capability(item: Dict[str, str]):
             capability = item["capability"]
             prompt = (
@@ -146,7 +155,7 @@ def build_default_graph() -> WorkflowGraph:
             )
 
             if capability not in {"coding", "testing"}:
-                return capability, model_runtime.generate(prompt, model=model_name), 0
+                return capability, generate(model_runtime, prompt, model_name), 0
 
             execution_id = str(state.audit_metadata.get("execution_id", "ant-run"))
             remote_url = os.getenv("ANT_SANDBOX_URL", "").strip()
@@ -170,7 +179,7 @@ def build_default_graph() -> WorkflowGraph:
                 "Keep generated work inside the writable workspace."
             )
             if not hasattr(model_runtime, "generate_with_tools"):
-                result = model_runtime.generate(prompt, model=model_name)
+                result = generate(model_runtime, prompt, model_name)
                 return capability, result, 0
             result = model_runtime.generate_with_tools(
                 prompt=prompt,
