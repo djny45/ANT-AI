@@ -25,4 +25,4 @@ def test_orchestrator_prepares_unified_state():
     assert state.status == "planned"
     assert state.selected_capabilities
     assert "decision" in state.context
-    assert state.context["decision"]["route"] == "unified_focused"
+    assert state.context["decision"]["route"] == "unified_parallel"
