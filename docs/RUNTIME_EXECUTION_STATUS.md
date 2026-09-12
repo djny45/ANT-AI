@@ -1,62 +1,62 @@
 # ANT AI Runtime Execution Status
 
-## Current Objective
-Complete the backend execution loop before frontend expansion.
+## Production target
 
-## Runtime Pipeline
+The web application is no longer treated as a UI-only prototype. The production
+path is:
 
-Request -> Harness -> Execution Service -> Orchestrator -> Runtime Controller -> Agent Runtime Adapter -> Agent Engine -> Capability Registry -> Memory/Tools -> Telemetry -> Result
+Browser → Vercel `/api/chat` → ANT unified graph → OpenRouter → governed tools
+→ verification → response.
 
-## Verified Foundation
-- Harness execution boundary
-- Runtime validation layer
-- Runtime controller foundation
-- Agent runtime adapter
-- Runtime factory foundation
-- Execution lifecycle tracking
-- Memory context integration layer
+Coding and testing capabilities can now invoke the ANT sandbox as a model tool.
+The tool is allow-listed to workspace file operations and Python syntax checks.
 
-## Active Execution Phase
+## Implemented production path
 
-### 1. Agent Engine Core 🔥
-- Bind production execution engine
-- Maintain single execution path
-- Validate task lifecycle
-- Stabilize failure handling
-- Prepare first real execution cycle
+- FastAPI Vercel entrypoint with explicit model selection.
+- Unified graph execution boundary.
+- Governance decision before capability execution.
+- OpenRouter connector with bounded model tool-call loop.
+- Per-execution sandbox workspace.
+- Path traversal and file-size/file-count limits.
+- Sandbox operations: `list_files`, `read_file`, `write_file`, `check_python`.
+- Optional authenticated remote sandbox service for production isolation.
+- Runtime health reports whether the remote sandbox is configured.
+- Sandbox tool-call counts are included in verification metadata.
 
-### 2. Capability Registry 🔥
-- Register capabilities
-- Add discovery and validation
-- Route capability dispatch through runtime
-- Prevent uncontrolled execution paths
-- Connect capability adapters
+## Deployment architecture
 
-### 3. Runtime Execution Test 🔥
-- Validate request-to-result flow
-- Verify capability execution
-- Verify telemetry events
-- Verify recovery behavior
-- Complete prototype acceptance test
+### Web/API
 
-### 4. Memory and Tools
-- Validate context injection
-- Validate outcome storage
-- Complete tool permission governance
-- Add execution auditing
+Deploy the repository's frontend and `api/chat.py` through Vercel.
+Set the OpenRouter credentials as server/client-appropriate environment variables
+(the browser-supplied API key remains request-scoped and must never be committed).
 
-### 5. Deployment Hardening
-- Production configuration
-- Health checks
-- Monitoring
-- Security validation
-- Prototype deployment readiness
+### Dedicated sandbox
 
-## Engineering Rule
-Avoid duplicate agent paths. Keep runtime, orchestration, memory, and tools modular.
+For production isolation, build `sandbox/Dockerfile` and deploy it as a separate
+container/service. Configure:
 
-## Next Milestone
-First successful end-to-end backend execution cycle through Agent Engine, Capability Registry, Memory, and Tools.
+- `ANT_SANDBOX_URL` — internal HTTPS URL of the sandbox service.
+- `ANT_SANDBOX_TOKEN` — shared secret stored only on the server side.
+- `ANT_SANDBOX_ROOT=/workspace` on the sandbox service.
+- `ANT_MAX_SANDBOX_TOOL_CALLS=3` on the ANT API.
 
-## Latest Execution Focus
-Move from architecture completion to verified runtime execution. Prioritize working prototype behavior over additional features.
+The Vercel runtime automatically uses the remote sandbox when `ANT_SANDBOX_URL`
+is configured. Without it, coding/testing uses a bounded `/tmp` workspace for
+lightweight development behavior; this fallback is not a substitute for a
+separately isolated production execution service.
+
+## Remaining production hardening
+
+1. Attach a persistent database/memory backend instead of process-local memory.
+2. Deploy the dedicated sandbox service with platform-level network isolation,
+   CPU/memory limits, request timeouts, and ephemeral workspace cleanup.
+3. Configure Vercel production environment variables and verify `/api/chat/health`.
+4. Run the end-to-end production acceptance suite with a real OpenRouter key.
+5. Add centralized telemetry/alerting and retention policies.
+
+## Engineering rule
+
+Keep one intelligence identity. Temporary capabilities may use governed tools,
+but they must not become independent permanent agents or bypass verification.
