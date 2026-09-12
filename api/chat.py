@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 from ant_langgraph.integrations.fastapi_bridge import process_chat_request
 
-app = FastAPI(title="ANT AI Vercel API", version="0.2.1")
+app = FastAPI(title="ANT AI Vercel API", version="0.3.0")
 
 
 class ChatRequest(BaseModel):
@@ -23,12 +23,11 @@ class ChatRequest(BaseModel):
 
 @app.get("/health")
 async def health() -> dict:
-    """Return deployment state without exposing credentials."""
     return {
         "status": "ok",
         "service": "ant-ai-api",
-        "version": "0.2.1",
-        "provider": "openrouter",
+        "version": "0.3.0",
+        "provider": "user-selected",
         "sandbox": "remote" if os.getenv("ANT_SANDBOX_URL", "").strip() else "local-bounded",
         "sandbox_configured": bool(os.getenv("ANT_SANDBOX_URL", "").strip()),
     }
@@ -36,22 +35,26 @@ async def health() -> dict:
 
 @app.post("/")
 async def chat(request: Request, payload: ChatRequest) -> dict:
-    """Execute one ANT request using the browser's explicitly selected model."""
     authorization = request.headers.get("Authorization", "")
-    api_key = ""
-    if authorization.lower().startswith("bearer "):
-        api_key = authorization[7:].strip()
-
+    api_key = authorization[7:].strip() if authorization.lower().startswith("bearer ") else ""
     context = dict(payload.context)
-    selected_model = str(context.get("openrouter_model", "")).strip()
-    if not selected_model:
-        raise HTTPException(
-            status_code=400,
-            detail="No OpenRouter model selected. Choose a Free or Paid model in ANT settings.",
-        )
+    provider = str(context.get("model_provider", "")).strip().lower()
+    model = str(context.get("model", "")).strip()
+    base_url = str(context.get("model_base_url", "")).strip()
 
-    if api_key:
-        context["openrouter_api_key"] = api_key
+    if not api_key:
+        raise HTTPException(status_code=400, detail="No model API key supplied. Add a provider API profile in ANT settings.")
+    if not provider:
+        raise HTTPException(status_code=400, detail="No model provider selected. Choose a provider in ANT settings.")
+    if not model:
+        raise HTTPException(status_code=400, detail="No model selected. Enter the exact model ID for the selected provider.")
+    if provider == "custom" and not base_url:
+        raise HTTPException(status_code=400, detail="Custom providers require an API endpoint.")
+
+    context["model_api_key"] = api_key
+    context["model_provider"] = provider
+    context["model"] = model
+    context["model_base_url"] = base_url
 
     try:
         return await process_chat_request(
@@ -64,10 +67,7 @@ async def chat(request: Request, payload: ChatRequest) -> dict:
         raise
     except Exception as exc:
         detail = f"{type(exc).__name__}: {str(exc)[:500]}" or type(exc).__name__
-        raise HTTPException(
-            status_code=500,
-            detail=f"ANT execution failed — {detail}",
-        ) from exc
+        raise HTTPException(status_code=500, detail=f"ANT execution failed — {detail}") from exc
 
 
 __all__ = ["app"]
