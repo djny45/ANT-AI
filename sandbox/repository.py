@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import os
+import shutil
 import tarfile
 import urllib.error
 import urllib.request
@@ -66,9 +67,9 @@ class RepositorySnapshot:
                     if extracted is not None:
                         destination.write_bytes(extracted.read(self.MAX_FILE_BYTES + 1))
             (temp / ".ant-repository-ready").write_text(self.ref, encoding="utf-8")
+            shutil.rmtree(self.root, ignore_errors=True)
             temp.replace(self.root)
         except Exception:
-            import shutil
             shutil.rmtree(temp, ignore_errors=True)
             raise
 
@@ -82,7 +83,11 @@ class RepositorySnapshot:
 
     def list_files(self) -> list[str]:
         self.ensure()
-        return sorted(str(p.relative_to(self.root)) for p in self.root.rglob("*") if p.is_file() and p.name != ".ant-repository-ready")
+        return sorted(
+            str(p.relative_to(self.root))
+            for p in self.root.rglob("*")
+            if p.is_file() and p.name != ".ant-repository-ready"
+        )
 
     def read_file(self, path: str) -> str:
         self.ensure()
