@@ -5,6 +5,7 @@ Route = Literal["direct", "coding", "research", "complex"]
 CODING = ("code", "coding", "bug", "debug", "repository", "repo", "python", "typescript", "javascript", "api")
 RESEARCH = ("research", "investigate", "compare", "information", "study", "analyze")
 COMPLEX = ("build", "implement", "integrate", "architecture", "workflow", "multiple", "system", "project")
+ACTION = ("debug", "build", "implement", "integrate", "develop", "fix", "write", "create", "audit", "test")
 
 
 def route_request(user_input: str) -> Route:
@@ -13,6 +14,11 @@ def route_request(user_input: str) -> Route:
     coding_hit = any(k in text for k in CODING)
     research_hit = any(k in text for k in RESEARCH)
     complex_hit = any(k in text for k in COMPLEX)
+
+    informational = text.startswith(("what is ", "what are ", "who is ", "explain ", "how does "))
+    action_hit = any(k in text for k in ACTION)
+    if informational and not action_hit and not research_hit and not complex_hit:
+        return "direct"
 
     if complex_hit and (coding_hit or research_hit):
         return "complex"
