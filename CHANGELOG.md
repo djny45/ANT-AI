@@ -1,28 +1,20 @@
-# ANT CLAW Changelog
+# ANT AI Changelog
 
-## Latest Update
+## 0.3.0 — NOVA-Core integration
 
-### Chat System Improvements
-- Improved chat state recovery
-- Added message persistence support
-- Improved scroll behavior
-- Added safer sending state management
-- Improved error handling
+### Runtime
+- Integrated NOVA-Core as the native intelligence runtime.
+- Added real local GGUF inference support through NOVA-Core.
+- Added provider-neutral model API profiles.
+- Native NOVA Core requires no external API key.
+- External providers remain request-scoped and user-selected.
 
-### AI Architecture
-- Added Omni Router foundation
-- Added model provider interface
-- Added router chat service
-- Prepared multi-provider AI support
+### Security
+- API credentials are not persisted by the runtime.
+- Native Google/Gemini credentials use request headers rather than URL query parameters.
+- Removed legacy local-provider validation paths from the active test surface.
 
-### Android Improvements
-- Improved keyboard handling
-- Improved Compose input stability
-- Improved APK release workflow
-
-### Planned Next
-- Real Ollama streaming provider
-- Provider switching
-- Model selector
-- Attachments
-- Animated ANT assistant
+### Execution
+- ANT remains the governance, planner, audit, verification, and sandbox control plane.
+- NOVA-Core provides the cognitive runtime, memory, and local/cloud model execution.
+- Coding and testing continue to use ANT sandbox controls until a shared remote tool-call contract is available.
