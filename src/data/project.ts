@@ -17,8 +17,7 @@ export const project = {
     'llm-routing',
     'multi-agent',
     'autonomous-agents',
-    'ollama',
-    'openrouter',
+    'model-apis',
   ],
 }
 
@@ -27,8 +26,7 @@ export const capabilities = [
     id: 'core',
     title: 'ANT Intelligence Core',
     subtitle: 'Queen Brain',
-    description:
-      'A single unified intelligence that orchestrates all nano-capabilities. Small tasks use minimal pathways; complex tasks spawn specialized units on demand.',
+    description: 'A single unified intelligence that orchestrates all nano-capabilities. Small tasks use minimal pathways; complex tasks spawn specialized units on demand.',
     icon: 'brain',
     color: 'amber',
   },
@@ -36,17 +34,15 @@ export const capabilities = [
     id: 'swarm',
     title: 'Adaptive Swarm',
     subtitle: 'Nano-Capabilities',
-    description:
-      'Dynamically decides what capabilities are required, how many specialized units to spawn, and when to combine or retire them.',
+    description: 'Dynamically decides what capabilities are required, how many specialized units to spawn, and when to combine or retire them.',
     icon: 'network',
     color: 'orange',
   },
   {
     id: 'routing',
-    title: 'LLM Routing',
-    subtitle: 'Ollama · OpenRouter',
-    description:
-      'Routes tasks to the optimal model provider. Local inference through Ollama for speed and privacy, OpenRouter for scale.',
+    title: 'Model API Routing',
+    subtitle: 'User Selected Providers',
+    description: 'Routes requests through the model API profile selected by the user. No mandatory model aggregator and no hidden provider switching.',
     icon: 'route',
     color: 'amber',
   },
@@ -54,8 +50,7 @@ export const capabilities = [
     id: 'memory',
     title: 'Pheromone Memory',
     subtitle: 'Collective Knowledge',
-    description:
-      'Inspired by ant colonies. Useful discoveries leave pheromone trails that strengthen future decision-making.',
+    description: 'Inspired by ant colonies. Useful discoveries leave pheromone trails that strengthen future decision-making.',
     icon: 'memory',
     color: 'orange',
   },
@@ -63,8 +58,7 @@ export const capabilities = [
     id: 'learning',
     title: 'Self-Learning Engine',
     subtitle: 'Pattern Discovery',
-    description:
-      'Learns engineering patterns from trusted open sources and converts them into controlled, verified capabilities.',
+    description: 'Learns engineering patterns from trusted open sources and converts them into controlled, verified capabilities.',
     icon: 'book',
     color: 'amber',
   },
@@ -72,8 +66,7 @@ export const capabilities = [
     id: 'repair',
     title: 'Self-Repair',
     subtitle: 'Minimal Verified Fixes',
-    description:
-      'Detects problems, performs root cause analysis, then generates and tests minimal repairs — never uncontrolled rewrites.',
+    description: 'Detects problems, performs root cause analysis, then generates and tests minimal repairs — never uncontrolled rewrites.',
     icon: 'wrench',
     color: 'orange',
   },
@@ -81,8 +74,7 @@ export const capabilities = [
     id: 'audit',
     title: 'Blockchain Audit',
     subtitle: 'Tamper-Evident Trail',
-    description:
-      'Every capability execution is signed and chained. Cryptographic verification of what was decided, when, and by whom.',
+    description: 'Every capability execution is signed and chained. Cryptographic verification of what was decided, when, and by whom.',
     icon: 'shield',
     color: 'amber',
   },
@@ -90,76 +82,25 @@ export const capabilities = [
     id: 'governance',
     title: 'Governance Layer',
     subtitle: 'Human Approval',
-    description:
-      'Critical operations pause for human review. Environment-based secrets. Controlled capability access at every level.',
+    description: 'Critical operations pause for human review. Environment-based secrets. Controlled capability access at every level.',
     icon: 'gavel',
     color: 'orange',
   },
 ]
 
 export const workflows = [
-  {
-    id: 'learning',
-    label: 'Self-Learning',
-    steps: [
-      'Open Source Knowledge',
-      'Pattern Understanding',
-      'Capability Discovery',
-      'Security / Quality Evaluation',
-      'Skill Integration',
-      'Testing and Verification',
-      'Collective Knowledge Growth',
-    ],
-  },
-  {
-    id: 'repair',
-    label: 'Self-Repair',
-    steps: [
-      'Problem Detection',
-      'Root Cause Analysis',
-      'Minimal Repair Generation',
-      'Testing',
-      'Verification',
-      'System Improvement',
-    ],
-  },
-  {
-    id: 'pheromone',
-    label: 'Pheromone Memory',
-    steps: [
-      'Nano Capability',
-      'Experience Signal',
-      'Collective Memory',
-      'Future Decision Improvement',
-    ],
-  },
+  { id: 'learning', label: 'Self-Learning', steps: ['Open Source Knowledge', 'Pattern Understanding', 'Capability Discovery', 'Security / Quality Evaluation', 'Skill Integration', 'Testing and Verification', 'Collective Knowledge Growth'] },
+  { id: 'repair', label: 'Self-Repair', steps: ['Problem Detection', 'Root Cause Analysis', 'Minimal Repair Generation', 'Testing', 'Verification', 'System Improvement'] },
+  { id: 'pheromone', label: 'Pheromone Memory', steps: ['Nano Capability', 'Experience Signal', 'Collective Memory', 'Future Decision Improvement'] },
 ]
 
 export const principles = [
-  {
-    title: 'Governance before execution',
-    description: 'Every action is checked before it runs.',
-  },
-  {
-    title: 'Verification after execution',
-    description: 'Results are tested before becoming knowledge.',
-  },
-  {
-    title: 'Controlled capability access',
-    description: 'Capabilities stay scoped, monitored, revocable.',
-  },
-  {
-    title: 'Audit tracking',
-    description: 'Tamper-evident trail of every decision.',
-  },
-  {
-    title: 'Environment-based secrets',
-    description: 'No secrets in code. Ever.',
-  },
-  {
-    title: 'Human approval boundaries',
-    description: 'Critical operations pause for human review.',
-  },
+  { title: 'Governance before execution', description: 'Every action is checked before it runs.' },
+  { title: 'Verification after execution', description: 'Results are tested before becoming knowledge.' },
+  { title: 'Controlled capability access', description: 'Capabilities stay scoped, monitored, revocable.' },
+  { title: 'Audit tracking', description: 'Tamper-evident trail of every decision.' },
+  { title: 'Environment-based secrets', description: 'No secrets in code. Ever.' },
+  { title: 'Human approval boundaries', description: 'Critical operations pause for human review.' },
 ]
 
 export const stats = [
@@ -173,20 +114,17 @@ export const codeSnippet = `# Start the ANT colony
 from ant_ai import Colony, Queen
 
 colony = Colony(
-    router="ollama",          # or "openrouter"
-    memory="pheromone",       # hive-backed collective memory
-    audit="blockchain",       # tamper-evident trail
-    governance="human-gated", # critical ops require approval
+    router="user-selected-api", # provider/model chosen in API settings
+    memory="pheromone",          # hive-backed collective memory
+    audit="blockchain",          # tamper-evident trail
+    governance="human-gated",    # critical ops require approval
 )
 
 queen = Queen(colony)
-
-# The Queen decides what capabilities to spawn
 result = queen.run(
     goal="Refactor the auth module to use OAuth2",
     constraints={"minimal_changes": True, "verify": True},
 )
 
-# Verified, audited, and remembered for next time
 print(result.summary)
 `
