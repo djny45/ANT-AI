@@ -1,18 +1,17 @@
-import pytest
-from ANT_X_OS.skills.registry import registry
-from ANT_X_OS.skills.loader import load_builtin_skills
+from skills.skill_registry import SkillRegistry
 
 
-def setup_module():
-    registry.clear()
-    load_builtin_skills()
+def test_registry_add_and_search():
+    registry = SkillRegistry()
+    registry.add("Coding Skill")
+    registry.add("Review Skill")
+    registry.add("Testing Skill")
+
+    assert registry.search("coding") == ["Coding Skill"]
+    assert registry.search("skill") == ["Coding Skill", "Review Skill", "Testing Skill"]
 
 
-def test_registry_lists_skills():
-    skills = registry.list()
-    assert len(skills) >= 5
-
-
-def test_registry_get():
-    s = registry.get("Coding Skill")
-    assert s is not None
+def test_registry_empty_search():
+    registry = SkillRegistry()
+    registry.add("Research Skill")
+    assert registry.search("missing") == []
