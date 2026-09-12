@@ -4,4 +4,3 @@ sqlalchemy
 pydantic
 pytest
 vercel
-httpx2
