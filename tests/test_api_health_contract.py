@@ -10,7 +10,7 @@ def test_vercel_health_contract_is_stable():
     assert result["status"] == "ok"
     assert result["service"] == "ant-ai-api"
     assert result["provider"] == "openrouter"
-    assert result["version"] == "0.2.0"
+    assert result["version"] == "0.2.1"
     assert result["sandbox"] in {"local-bounded", "remote"}
     assert isinstance(result["sandbox_configured"], bool)
     assert "api_key" not in result
