@@ -11,10 +11,10 @@ export const PROFILES_STORAGE = "ANT_MODEL_API_PROFILES"
 export const ACTIVE_PROFILE_STORAGE = "ANT_ACTIVE_MODEL_API_PROFILE"
 
 const DEFAULT_PROFILE: ModelApiProfile = {
-  id: "custom",
-  name: "Custom model API",
-  provider: "custom",
-  model: "",
+  id: "nova-core",
+  name: "NOVA Core (native)",
+  provider: "nova-core",
+  model: "nova-core",
   apiKey: "",
   baseUrl: "",
 }
@@ -34,7 +34,7 @@ export function saveProfiles(profiles: ModelApiProfile[]) {
 }
 
 export function getActiveProfileId() {
-  return localStorage.getItem(ACTIVE_PROFILE_STORAGE) || "custom"
+  return localStorage.getItem(ACTIVE_PROFILE_STORAGE) || "nova-core"
 }
 
 export function setActiveProfileId(id: string) {
@@ -57,7 +57,7 @@ export function removeProfile(id: string) {
   const profiles = getProfiles().filter((profile) => profile.id !== id)
   saveProfiles(profiles)
   if (getActiveProfileId() === id) {
-    setActiveProfileId(profiles[0]?.id || "custom")
+    setActiveProfileId(profiles[0]?.id || "nova-core")
   }
 }
 
