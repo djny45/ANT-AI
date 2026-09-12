@@ -19,7 +19,18 @@ class SkillRegistry:
         def normalize(value: str) -> str:
             return re.sub(r"[^a-z0-9]+", " ", value.lower()).strip()
 
-        query_tokens = [token for token in normalize(query).split() if token not in {"skill", "skills"}]
+        query_tokens = [
+            token for token in normalize(query).split()
+            if token not in {"skill", "skills"}
+        ]
+
+        aliases = {
+            "code": "coding",
+            "debug": "debugging",
+            "test": "testing",
+        }
+        query_tokens = [aliases.get(token, token) for token in query_tokens]
+
         results = []
         for skill in self.registry:
             words = normalize(str(skill)).split()
@@ -28,7 +39,7 @@ class SkillRegistry:
                     results.append(skill)
                 continue
             if all(
-                any(word.startswith(token) or token.startswith(word) for word in words)
+                any(word == token or word.startswith(token) for word in words)
                 for token in query_tokens
             ):
                 results.append(skill)
