@@ -4,12 +4,14 @@ The file itself is mounted at /api/chat by Vercel, so the FastAPI routes here
 use / and /health rather than repeating the /api/chat prefix.
 """
 
+import os
+
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from ant_langgraph.integrations.fastapi_bridge import process_chat_request
 
-app = FastAPI(title="ANT AI Vercel API", version="0.1.1")
+app = FastAPI(title="ANT AI Vercel API", version="0.2.0")
 
 
 class ChatRequest(BaseModel):
@@ -21,7 +23,15 @@ class ChatRequest(BaseModel):
 
 @app.get("/health")
 async def health() -> dict:
-    return {"status": "ok", "service": "ant-ai-api", "provider": "openrouter", "version": "0.1.1"}
+    """Return deployment state without exposing credentials."""
+    return {
+        "status": "ok",
+        "service": "ant-ai-api",
+        "version": "0.2.0",
+        "provider": "openrouter",
+        "sandbox": "remote" if os.getenv("ANT_SANDBOX_URL", "").strip() else "local-bounded",
+        "sandbox_configured": bool(os.getenv("ANT_SANDBOX_URL", "").strip()),
+    }
 
 
 @app.post("/")
