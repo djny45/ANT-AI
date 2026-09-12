@@ -1,12 +1,16 @@
 export async function sendToANT(message: string, apiKey: string, model?: string) {
-  // Default to the same-origin FastAPI route so the frontend does not fail
-  // merely because VITE_ANT_API_URL is absent. Set it only for a separate API.
-  const configuredBaseUrl = import.meta.env.VITE_ANT_API_URL?.trim()
-  const baseUrl = (configuredBaseUrl || '/api').replace(/\/$/, '')
+  // Accept either an API base URL (/api) or a full chat endpoint (/api/chat).
+  // Default to the same-origin FastAPI route when no URL is configured.
+  const configuredUrl = import.meta.env.VITE_ANT_API_URL?.trim().replace(/\/+$/, '')
+  const apiUrl = configuredUrl
+    ? /\/chat$/.test(configuredUrl)
+      ? configuredUrl
+      : `${configuredUrl}/chat`
+    : '/api/chat'
 
   let response: Response
   try {
-    response = await fetch(`${baseUrl}/chat`, {
+    response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
