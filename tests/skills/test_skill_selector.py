@@ -1,17 +1,17 @@
-from ANT_X_OS.skills.selector import SkillSelector
-from ANT_X_OS.skills.loader import load_builtin_skills
-from ANT_X_OS.skills.registry import registry
+from skills.skill_registry import SkillRegistry
 
 
-def test_selector_code_task():
-    registry.clear()
-    load_builtin_skills()
-    sel = SkillSelector(registry)
-    skills = sel.select_for_task({"type": "code", "description": "implement feature X"})
-    assert "Coding Skill" in skills
+def test_registry_search_selects_relevant_skill():
+    registry = SkillRegistry()
+    registry.add("Coding Skill")
+    registry.add("Research Skill")
+    registry.add("Testing Skill")
+
+    selected = registry.search("code")
+    assert selected == ["Coding Skill"]
 
 
-def test_selector_bug_task():
-    sel = SkillSelector(registry)
-    skills = sel.select_for_task({"description": "fix bug causing error"})
-    assert "Debugging Skill" in skills
+def test_registry_search_is_case_insensitive():
+    registry = SkillRegistry()
+    registry.add("Debugging Skill")
+    assert registry.search("DEBUG") == ["Debugging Skill"]
