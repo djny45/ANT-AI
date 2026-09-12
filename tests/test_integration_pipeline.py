@@ -24,7 +24,7 @@ def test_run_pipeline_basic(monkeypatch):
     monkeypatch.setenv("ANT_MODEL_PROVIDER", "openrouter")
     monkeypatch.setattr(OpenRouterConnector, "generate", _fake_generate)
     result = _run({
-        "user_input": "test integration",
+        "user_input": "hello integration",
         "context": {"trace": True},
         "conversation_id": "basic-integration-test",
     })
@@ -58,13 +58,13 @@ def test_memory_lifecycle(monkeypatch):
     monkeypatch.setattr(OpenRouterConnector, "generate", _fake_generate)
     conversation_id = "integration-memory-test"
     first = _run({
-        "user_input": "remember this integration test",
+        "user_input": "remember this integration note",
         "conversation_id": conversation_id,
     })
     assert first["memory_saved"] is True
 
     second = _run({
-        "user_input": "continue the integration test",
+        "user_input": "continue the integration note",
         "conversation_id": conversation_id,
     })
     assert second["memory_context"]["short_term"]
