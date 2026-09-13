@@ -73,8 +73,7 @@ class ModelApiConnector:
         if self.provider in {"google", "gemini"}:
             url = self._url(f"models/{urllib.parse.quote(model, safe='')}:generateContent")
             payload = {"contents": [{"role": "user", "parts": [{"text": self._flatten_messages(messages)}]}]}
-            headers = {"Content-Type": "application/json"}
-            url += ("&" if "?" in url else "?") + "key=" + urllib.parse.quote(self.api_key)
+            headers = {"Content-Type": "application/json", "x-goog-api-key": self.api_key}
         elif self.provider == "anthropic":
             url = self._url("messages")
             system = "\n\n".join(m["content"] for m in messages if m.get("role") == "system")
