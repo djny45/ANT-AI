@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 .vite-source-tags.js
 .vercel
+
+# Local model artifacts (download/provision outside Git)
+models/*.gguf
+*.gguf
