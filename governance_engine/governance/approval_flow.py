@@ -5,7 +5,7 @@ Proposal -> Risk Review -> Approval -> Execution
 """
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 @dataclass
@@ -28,5 +28,5 @@ class ApprovalFlow:
                 if allowed
                 else "Blocked by risk policy"
             ),
-            timestamp=datetime.utcnow().isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
         )

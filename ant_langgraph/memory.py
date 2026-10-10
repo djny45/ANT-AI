@@ -15,8 +15,11 @@ class MemoryAdapter:
             return self.backend.load(conversation_id)
         return {"short_term": self._short_term.get(conversation_id, [])}
 
-    def save(self, conversation_id: str, item: Dict[str, Any]) -> None:
+    def save(self, conversation_id: str, item: Dict[str, Any], max_items: int = 50) -> None:
         if self.backend and hasattr(self.backend, "save"):
             self.backend.save(conversation_id, item)
             return
-        self._short_term.setdefault(conversation_id, []).append(item)
+        history = self._short_term.setdefault(conversation_id, [])
+        history.append(item)
+        if len(history) > max_items:
+            self._short_term[conversation_id] = history[-max_items:]

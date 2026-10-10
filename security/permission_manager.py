@@ -1,7 +1,7 @@
 """ANT AI permission management with audit logging."""
 
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Dict, List, Any
 import logging
 
@@ -48,7 +48,7 @@ class PermissionManager:
             "permissions": self.permissions.get(agent, []),
             "approved": approved,  # FIX: Return actual decision
             "review_required": not approved,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
         # Cache result
@@ -58,7 +58,7 @@ class PermissionManager:
     def _audit_log(self, action: str, agent: str, permission: str, reason: str) -> None:
         """Log permission changes."""
         entry = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "action": action,
             "agent": agent,
             "permission": permission,

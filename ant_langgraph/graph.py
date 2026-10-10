@@ -197,7 +197,8 @@ def build_default_graph() -> WorkflowGraph:
             tool_call_count += calls
             runtimes[capability] = runtime_name
         else:
-            with ThreadPoolExecutor(max_workers=len(state.execution_plan)) as pool:
+            max_workers = max(1, min(len(state.execution_plan), 4))
+            with ThreadPoolExecutor(max_workers=max_workers) as pool:
                 futures = [pool.submit(execute_capability, item) for item in state.execution_plan]
                 for future in as_completed(futures):
                     capability, result, calls, runtime_name = future.result()
@@ -225,10 +226,15 @@ def build_default_graph() -> WorkflowGraph:
 
     def verify(state: AgentState) -> AgentState:
         successful = [r for r in state.capability_results if r.get("result", {}).get("response")]
+        confidences = [r.get("confidence", 0.8) for r in successful]
+        avg_confidence = round(sum(confidences) / len(confidences), 2) if confidences else 0.0
+        passed = bool(successful and not state.errors)
         state.verification_results = {
-            "status": "passed" if successful and not state.errors else "failed",
+            "status": "passed" if passed else "failed",
             "capabilities_checked": list(state.selected_capabilities),
             "successful_capabilities": [r["capability"] for r in successful],
+            "confidence": avg_confidence,
+            "quality_score": round(avg_confidence * 100) if passed else 0,
             "errors": list(state.errors),
             "governance_approved": state.audit_metadata.get("governance_approved", False),
             "sandbox_tool_calls": int(state.audit_metadata.get("sandbox_tool_calls", 0)),
