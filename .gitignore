@@ -28,3 +28,11 @@ dist-ssr
 # Local model artifacts (download/provision outside Git)
 models/*.gguf
 *.gguf
+
+# Python cache & test artifacts
+**/__pycache__/
+*.pyc
+**/*.pyc
+.pytest_cache/
+.coverage
+htmlcov/

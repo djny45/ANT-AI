@@ -73,22 +73,22 @@ class ModelApiConnector:
         if self.provider in {"google", "gemini"}:
             url = self._url(f"models/{urllib.parse.quote(model, safe='')}:generateContent")
             payload = {"contents": [{"role": "user", "parts": [{"text": self._flatten_messages(messages)}]}]}
-            headers = {"Content-Type": "application/json", "x-goog-api-key": self.api_key}
+            headers = {"Content-Type": "application/json", "Connection": "keep-alive", "x-goog-api-key": self.api_key}
         elif self.provider == "anthropic":
             url = self._url("messages")
             system = "\n\n".join(m["content"] for m in messages if m.get("role") == "system")
             payload = {"model": model, "max_tokens": 4096, "messages": [m for m in messages if m.get("role") != "system"]}
             if system:
                 payload["system"] = system
-            headers = {"Content-Type": "application/json", "x-api-key": self.api_key, "anthropic-version": "2023-06-01"}
+            headers = {"Content-Type": "application/json", "Connection": "keep-alive", "x-api-key": self.api_key, "anthropic-version": "2023-06-01"}
         else:
             url = self._url("chat/completions")
             payload = {"model": model, "messages": messages, "stream": False}
             if tools:
                 payload["tools"] = tools
                 payload["tool_choice"] = "auto"
-            headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
-        request = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
+            headers = {"Authorization": f"Bearer {self.api_key}", "Connection": "keep-alive", "Content-Type": "application/json"}
+        request = urllib.request.Request(url, data=json.dumps(payload, separators=(",", ":")).encode("utf-8"), headers=headers, method="POST")
         with urllib.request.urlopen(request, timeout=self.timeout) as response:
             return json.loads(response.read().decode("utf-8"))
 

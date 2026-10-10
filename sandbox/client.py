@@ -78,9 +78,13 @@ class RemoteSandbox:
             raise RemoteSandboxError("sandbox paths must be relative and cannot escape the workspace")
 
     def execute(self, operation: str, **kwargs: Any) -> dict[str, Any]:
-        sandbox = self._ensure_sandbox()
         path = str(kwargs.get("path", ""))
         content = str(kwargs.get("content", ""))
+
+        if operation in {"read_file", "write_file", "check_python", "repo_read_file"}:
+            self._safe_path(path)
+
+        sandbox = self._ensure_sandbox()
 
         if operation == "list_files":
             command = sandbox.run_command("find", ["workspace", "-type", "f", "-print"])

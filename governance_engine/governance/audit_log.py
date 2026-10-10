@@ -1,6 +1,6 @@
 """ANT AI governance audit logger."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 class AuditLog:
@@ -11,7 +11,7 @@ class AuditLog:
         self.events.append({
             "event": event,
             "metadata": metadata or {},
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         })
 
     def history(self):
