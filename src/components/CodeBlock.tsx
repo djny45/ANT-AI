@@ -72,7 +72,7 @@ function highlight(code: string) {
             {t.value}
           </span>
         )
-      case 'identifier':
+      case 'identifier': {
         // Check if it's followed by (
         const next = tokens[i + 1]
         const isFunc = next && next.type === 'plain' && next.value === '('
@@ -95,6 +95,7 @@ function highlight(code: string) {
             {t.value}
           </span>
         )
+      }
       default:
         return <span key={i}>{t.value}</span>
     }

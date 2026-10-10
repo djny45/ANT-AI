@@ -5,9 +5,9 @@ export interface AgentTask {
 }
 
 export class CommanderAgent {
-  private specialists: Map<string, any> = new Map();
+  private specialists: Map<string, { execute: (task: AgentTask) => Promise<unknown> }> = new Map();
 
-  registerSpecialist(name: string, agent: any) {
+  registerSpecialist(name: string, agent: { execute: (task: AgentTask) => Promise<unknown> }) {
     this.specialists.set(name, agent);
   }
 

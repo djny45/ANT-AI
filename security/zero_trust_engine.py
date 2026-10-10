@@ -1,7 +1,7 @@
 """ANT AI zero trust access model with full verification."""
 
 import hashlib
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Dict, Any, Optional
 import logging
 
@@ -48,7 +48,7 @@ class ZeroTrustEngine:
             "identity_verified": identity_verified,
             "action_verified": action_verified,
             "requires_validation": not verified,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
         self._log_verification(action, identity, verified)
@@ -65,7 +65,7 @@ class ZeroTrustEngine:
     def _log_verification(self, action: str, identity: str, result: bool) -> None:
         """Log verification attempt."""
         self.verification_log.append({
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "action": action,
             "identity": identity,
             "result": result

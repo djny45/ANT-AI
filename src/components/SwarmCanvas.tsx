@@ -47,7 +47,7 @@ export default function SwarmCanvas({
       const count = Math.floor(rect.width * rect.height * density)
       const particles: Particle[] = []
       for (let i = 0; i < count; i++) {
-        particles.push(createParticle(rect.width, rect.height, i))
+        particles.push(createParticle(rect.width, rect.height))
       }
       particlesRef.current = particles
     }
@@ -55,7 +55,6 @@ export default function SwarmCanvas({
     const createParticle = (
       w: number,
       h: number,
-      i: number,
     ): Particle => {
       const angle = Math.random() * Math.PI * 2
       const radius = Math.random() * Math.min(w, h) * 0.45
