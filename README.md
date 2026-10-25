@@ -161,3 +161,47 @@ intelligence dynamically specializes itself; every action is audited, verifiable
 and continuously improving.
 
 **One intelligence. Adaptive. Governed. Evolving.**
+
+---
+
+## Execution lifecycle and trust boundaries
+
+The high-level request path is:
+
+1. **Client and API entrypoint:** validate the incoming request and explicitly selected model profile.
+2. **Unified execution graph:** coordinate planning, shared context, memory adapters, and temporary capability selection.
+3. **Governance and risk checks:** evaluate the proposed action before execution.
+4. **Bounded tool execution:** route approved work through the configured sandbox and enforce resource limits.
+5. **Verification and audit:** validate tool results and record relevant lifecycle events.
+6. **Unified response:** return one result, including uncertainty or failure when appropriate.
+
+This is a logical architecture view. Exact runtime behavior is determined by code and deployment configuration; not every integration is necessarily enabled in every environment.
+
+### Engineering invariants
+
+- **Single execution identity:** temporary capabilities operate within the same task context rather than acting as independent, competing long-lived agents.
+- **Centralized governance:** tool calls must pass applicable policy and risk checks.
+- **Bounded execution:** sandbox workspaces and tool-call budgets should have explicit limits.
+- **Explicit model selection:** provider, endpoint, and model selection should be visible to the user; the system should not silently switch providers.
+- **Verification before response:** validate tool results and surface uncertainty or failures instead of presenting unverified output as fact.
+- **Auditable lifecycle:** record enough execution metadata to investigate failures without logging secrets or unnecessary personal data.
+
+### Configuration and secret handling
+
+- Use the example environment file as a template and keep real environment files out of version control.
+- Keep server-side secrets out of frontend variables and browser bundles.
+- Treat tool output, retrieved content, and model-generated code as untrusted.
+- Restrict sandbox network access, filesystem scope, runtime, and resource consumption according to the deployment threat model.
+- Rotate any credential that may have been exposed; deleting a secret from the latest commit alone does not invalidate it.
+
+### Production-readiness checklist
+
+- [ ] Unit and integration tests pass in the target environment.
+- [ ] Provider credentials and environment variables are configured without exposing secrets.
+- [ ] Sandbox isolation, timeouts, and resource limits are tested.
+- [ ] Permission denials and tool failures are handled safely.
+- [ ] Memory persistence, retention, and deletion behavior are documented.
+- [ ] Logs and telemetry avoid secret leakage.
+- [ ] End-to-end acceptance tests cover the actual deployed API and UI.
+
+These are validation requirements, not a claim that every item has already passed.
