@@ -11,7 +11,9 @@ agent-scoped access boundaries.
 - `learning/memory_intelligence_engine.py`: memory-fit scoring and logical
   fast, working, long-term, and cold tiers.
 - `harness/memory_intelligence_adapter.py`: compatibility adapter exposing
-  `store()` and `retrieve()` for the existing harness memory contract.
+  `store()` and `retrieve()` for the legacy harness memory contract.
+- `ant_langgraph/memory.py`: graph memory adapter now uses the intelligence
+  engine by default when no external backend is injected.
 - `tests/test_memory_intelligence_engine.py`: scorer and engine unit tests.
 - `tests/test_memory_intelligence_adapter.py`: adapter compatibility and
   agent-isolation tests.
@@ -41,11 +43,14 @@ MemoryIntelligenceEngine
 
 ## Integration status
 
-The adapter is compatible with the current harness memory-store interface and
-can be injected as its `memory_store`. The production request path has not yet
-been changed to instantiate or select this adapter automatically. Existing
-memory stores remain the default until explicit runtime wiring and migration
-tests are completed.
+The unified graph request path now uses `MemoryAdapter`, which delegates to the
+intelligence engine when no external backend is injected. Verified execution
+records are scoped by conversation ID, and retrieval preserves chronological
+context order while updating access-frequency signals. An injected external
+backend takes precedence and keeps its existing load/save contract.
+
+The separate legacy `HarnessPipeline` is not yet switched to the compatibility
+adapter; its existing memory implementation remains unchanged.
 
 The engine is currently process-local. It does not survive process restarts,
 coordinate across multiple workers, or move physical RAM pages. The Stanford
@@ -64,11 +69,11 @@ paper's kernel implementation.
 
 ## Next steps
 
-1. Wire the adapter through the existing runtime dependency-injection boundary.
-2. Add a durable storage backend with migrations and concurrency guarantees.
-3. Verify permissions and tenant/agent isolation end to end.
-4. Benchmark recall latency, write overhead, and memory consumption.
-5. Roll out behind an explicit feature flag and preserve the existing backend
-   as a fallback until acceptance tests pass.
+1. Add a durable storage backend with migrations and concurrency guarantees.
+2. Verify permissions and tenant/agent isolation end to end.
+3. Benchmark recall latency, write overhead, and memory consumption.
+4. Add an explicit feature flag and fallback selection for staged rollout.
+5. Integrate the legacy `HarnessPipeline` only after its existing memory
+   contract and lifecycle tests are mapped.
 
 > Store less noise. Keep relevant knowledge close. Never trade isolation for speed.
