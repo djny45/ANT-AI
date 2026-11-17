@@ -19,13 +19,15 @@ class MemoryAdapter:
     def __init__(self, backend: Any | None = None,
                  intelligence_engine: MemoryIntelligenceEngine | None = None):
         self.backend = backend
-        self.intelligence_engine = (
-            intelligence_engine or MemoryIntelligenceEngine()
-            if backend is None else intelligence_engine
-        )
+        if backend is None:
+            self.intelligence_engine = intelligence_engine or MemoryIntelligenceEngine()
+        else:
+            self.intelligence_engine = intelligence_engine
 
     def load(self, conversation_id: str | None,
              max_items: int = 50) -> Dict[str, Any]:
+        if max_items < 0:
+            raise ValueError("max_items must not be negative")
         if not conversation_id:
             return {"short_term": []}
         if self.backend and hasattr(self.backend, "load"):
@@ -65,6 +67,8 @@ class MemoryAdapter:
         ))
 
     def stats(self) -> Dict[str, Any]:
-        if self.intelligence_engine is None:
+        if self.backend is not None:
             return {"backend": "external", "intelligence_engine": False}
-        return self.intelligence_engine.stats()
+        return self.intelligence_engine.stats() if self.intelligence_engine else {
+            "backend": "unconfigured", "intelligence_engine": False
+        }
