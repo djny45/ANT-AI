@@ -1,64 +1,74 @@
 # Phase 49 — ANT-AI Memory Intelligence Optimization
 
-## Status
+## Objective
 
-The first software-side Memory Fit-inspired implementation is available in
-`learning/memory_intelligence_engine.py`, with deterministic unit tests in
-`tests/test_memory_intelligence_engine.py`.
+Improve ANT-AI memory systems so large knowledge collections remain efficient,
+relevant, and searchable, while preserving existing harness interfaces and
+agent-scoped access boundaries.
 
-This is an application-level memory classification and retrieval policy. It
-does **not** move physical RAM pages, change hardware, or implement Stanford's
-kernel/OS research. It is an independently implemented design inspired by the
-general idea of scoring data and placing it in an appropriate memory tier.
+## Implemented software components
+
+- `learning/memory_intelligence_engine.py`: memory-fit scoring and logical
+  fast, working, long-term, and cold tiers.
+- `harness/memory_intelligence_adapter.py`: compatibility adapter exposing
+  `store()` and `retrieve()` for the existing harness memory contract.
+- `tests/test_memory_intelligence_engine.py`: scorer and engine unit tests.
+- `tests/test_memory_intelligence_adapter.py`: adapter compatibility and
+  agent-isolation tests.
+
+The scoring policy uses recency, access frequency, importance, and confidence.
+The adapter preserves payloads as opaque values and supports an optional
+default agent scope.
 
 ## Architecture
 
 ```text
-New Information
-      |
-      v
-Memory Intake -> Relevance / Memory-Fit Scoring
-      |              |
-      v              v
-Memory Record   FAST / WORKING / LONG-TERM / COLD
-      |              |
-      +------> Retrieval and Rebalancing
-                     |
-                     v
-             Knowledge Hive Adapter
+Harness MemoryContextManager
+          |
+          | store() / retrieve()
+          v
+MemoryIntelligenceStoreAdapter
+          |
+          v
+MemoryIntelligenceEngine
+          |
+          +-- MemoryFitScorer
+          +-- FAST
+          +-- WORKING
+          +-- LONG_TERM
+          +-- COLD
 ```
 
-## Implemented
+## Integration status
 
-- **MemoryFitScorer:** deterministic score from recency, access frequency,
-  importance, and confidence.
-- **Logical tiers:** fast, working, long-term, and cold.
-- **MemoryIntelligenceEngine:** thread-safe store, agent-scoped retrieval,
-  tier filtering, fit inspection, rebalancing, and tier statistics.
-- **Conservative capacity behavior:** over-capacity records are classified as
-  cold; records are not silently deleted.
-- **Standard-library implementation:** no paid API, external service, or new
-  dependency is required.
-- **Tests:** hot/cold classification, agent isolation, rebalance retention,
-  capacity behavior, and invalid threshold validation.
+The adapter is compatible with the current harness memory-store interface and
+can be injected as its `memory_store`. The production request path has not yet
+been changed to instantiate or select this adapter automatically. Existing
+memory stores remain the default until explicit runtime wiring and migration
+tests are completed.
 
-## Integration boundary and limitations
+The engine is currently process-local. It does not survive process restarts,
+coordinate across multiple workers, or move physical RAM pages. The Stanford
+research is an inspiration for the scoring/placement idea; this repository
+contains an independent application-level policy, not a reproduction of the
+paper's kernel implementation.
 
-The engine is currently a reusable module; it is not yet wired into every
-production request path or the Kotlin KnowledgeHive implementation. A future
-adapter should connect it to the existing memory store and preserve the
-repository's permission and tenant/agent isolation rules.
+## Safety and retention
 
-The current in-memory manager is process-local and does not survive process
-restarts. Durable persistence, concurrent multi-process coordination, workload
-benchmarks, and production rollout remain separate tasks.
+- Agent-scoped reads are enforced by the engine.
+- Payloads are not modified or summarized by the adapter.
+- Capacity pressure classifies lower-fit entries as cold; it does not silently
+  delete records.
+- Persistent storage, retention/deletion controls, and cross-process isolation
+  must be implemented and tested before production rollout.
 
 ## Next steps
 
-1. Add a persistence adapter for the existing memory backend.
-2. Integrate through the harness memory context boundary.
-3. Verify authorization and per-agent visibility in integration tests.
-4. Benchmark retrieval latency and memory overhead against the current path.
-5. Add operational metrics and configurable tier thresholds.
+1. Wire the adapter through the existing runtime dependency-injection boundary.
+2. Add a durable storage backend with migrations and concurrency guarantees.
+3. Verify permissions and tenant/agent isolation end to end.
+4. Benchmark recall latency, write overhead, and memory consumption.
+5. Roll out behind an explicit feature flag and preserve the existing backend
+   as a fallback until acceptance tests pass.
 
 > Store less noise. Keep relevant knowledge close. Never trade isolation for speed.
