@@ -32,9 +32,17 @@ class MemoryAdapter:
             return self.backend.load(conversation_id)
         if self.intelligence_engine is not None:
             records = self.intelligence_engine.retrieve_all(agent_id=conversation_id)
-            payloads = [record.payload for record in records]
-            # Keep the graph's established short-term context shape and bound.
-            return {"short_term": payloads[-max_items:]}
+            # Preserve chronological context order while limiting the window.
+            records.sort(key=lambda record: (record.created_at, record.memory_id))
+            selected = records[-max_items:] if max_items else []
+            payloads = []
+            for record in selected:
+                accessed = self.intelligence_engine.retrieve(
+                    record.memory_id, agent_id=conversation_id
+                )
+                if accessed is not None:
+                    payloads.append(accessed.payload)
+            return {"short_term": payloads}
         return {"short_term": []}
 
     def save(self, conversation_id: str, item: Dict[str, Any],
