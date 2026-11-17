@@ -1,25 +1,62 @@
+"""Framework-neutral memory boundary with optional intelligent tier scoring."""
+from __future__ import annotations
+
+from time import time
 from typing import Any, Dict
+from uuid import uuid4
+
+from learning.memory_intelligence_engine import MemoryIntelligenceEngine, MemoryRecord
 
 
 class MemoryAdapter:
-    """Framework-neutral memory boundary for existing ANT_X_OS memory services."""
+    """Memory boundary for ANT graph executions.
 
-    def __init__(self, backend: Any | None = None):
+    A supplied durable backend takes precedence. Without one, the adapter uses
+    the in-process MemoryIntelligenceEngine and scopes records by conversation
+    ID. This preserves the existing short_term response contract.
+    """
+
+    def __init__(self, backend: Any | None = None,
+                 intelligence_engine: MemoryIntelligenceEngine | None = None):
         self.backend = backend
-        self._short_term: Dict[str, list] = {}
+        self.intelligence_engine = (
+            intelligence_engine or MemoryIntelligenceEngine()
+            if backend is None else intelligence_engine
+        )
 
-    def load(self, conversation_id: str | None) -> Dict[str, Any]:
+    def load(self, conversation_id: str | None,
+             max_items: int = 50) -> Dict[str, Any]:
         if not conversation_id:
             return {"short_term": []}
         if self.backend and hasattr(self.backend, "load"):
             return self.backend.load(conversation_id)
-        return {"short_term": self._short_term.get(conversation_id, [])}
+        if self.intelligence_engine is not None:
+            records = self.intelligence_engine.retrieve_all(agent_id=conversation_id)
+            payloads = [record.payload for record in records]
+            # Keep the graph's established short-term context shape and bound.
+            return {"short_term": payloads[-max_items:]}
+        return {"short_term": []}
 
-    def save(self, conversation_id: str, item: Dict[str, Any], max_items: int = 50) -> None:
+    def save(self, conversation_id: str, item: Dict[str, Any],
+             max_items: int = 50) -> None:
         if self.backend and hasattr(self.backend, "save"):
             self.backend.save(conversation_id, item)
             return
-        history = self._short_term.setdefault(conversation_id, [])
-        history.append(item)
-        if len(history) > max_items:
-            self._short_term[conversation_id] = history[-max_items:]
+        if self.intelligence_engine is None:
+            return
+        now = time()
+        self.intelligence_engine.store(MemoryRecord(
+            memory_id=str(uuid4()),
+            payload=item,
+            agent_id=conversation_id,
+            importance=0.65,
+            confidence=0.8,
+            created_at=now,
+            last_accessed_at=now,
+            metadata={"memory_kind": "verified_execution"},
+        ))
+
+    def stats(self) -> Dict[str, Any]:
+        if self.intelligence_engine is None:
+            return {"backend": "external", "intelligence_engine": False}
+        return self.intelligence_engine.stats()
