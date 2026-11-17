@@ -1,69 +1,64 @@
 # Phase 49 — ANT-AI Memory Intelligence Optimization
 
-## Objective
+## Status
 
-Improve ANT-AI memory systems so large knowledge collections remain efficient, relevant, and searchable.
+The first software-side Memory Fit-inspired implementation is available in
+`learning/memory_intelligence_engine.py`, with deterministic unit tests in
+`tests/test_memory_intelligence_engine.py`.
+
+This is an application-level memory classification and retrieval policy. It
+does **not** move physical RAM pages, change hardware, or implement Stanford's
+kernel/OS research. It is an independently implemented design inspired by the
+general idea of scoring data and placing it in an appropriate memory tier.
 
 ## Architecture
 
 ```text
 New Information
-      ↓
-Memory Intake
-      ↓
-Relevance Scoring
-      ↓
-Compression / Organization
-      ↓
-Long-Term Memory
-      ↓
-Optimized Recall
+      |
+      v
+Memory Intake -> Relevance / Memory-Fit Scoring
+      |              |
+      v              v
+Memory Record   FAST / WORKING / LONG-TERM / COLD
+      |              |
+      +------> Retrieval and Rebalancing
+                     |
+                     v
+             Knowledge Hive Adapter
 ```
 
-## Components
+## Implemented
 
-### Memory Optimizer
+- **MemoryFitScorer:** deterministic score from recency, access frequency,
+  importance, and confidence.
+- **Logical tiers:** fast, working, long-term, and cold.
+- **MemoryIntelligenceEngine:** thread-safe store, agent-scoped retrieval,
+  tier filtering, fit inspection, rebalancing, and tier statistics.
+- **Conservative capacity behavior:** over-capacity records are classified as
+  cold; records are not silently deleted.
+- **Standard-library implementation:** no paid API, external service, or new
+  dependency is required.
+- **Tests:** hot/cold classification, agent isolation, rebalance retention,
+  capacity behavior, and invalid threshold validation.
 
-Responsible for:
+## Integration boundary and limitations
 
-- storage efficiency
-- memory prioritization
-- duplicate reduction
+The engine is currently a reusable module; it is not yet wired into every
+production request path or the Kotlin KnowledgeHive implementation. A future
+adapter should connect it to the existing memory store and preserve the
+repository's permission and tenant/agent isolation rules.
 
-### Relevance Scorer
+The current in-memory manager is process-local and does not survive process
+restarts. Durable persistence, concurrent multi-process coordination, workload
+benchmarks, and production rollout remain separate tasks.
 
-Ranks information based on:
+## Next steps
 
-- usage frequency
-- confidence
-- freshness
-- relationship importance
+1. Add a persistence adapter for the existing memory backend.
+2. Integrate through the harness memory context boundary.
+3. Verify authorization and per-agent visibility in integration tests.
+4. Benchmark retrieval latency and memory overhead against the current path.
+5. Add operational metrics and configurable tier thresholds.
 
-### Memory Compression
-
-Reduces unnecessary duplication while preserving useful knowledge.
-
-### Forgetting Engine
-
-Removes or archives low-value information through controlled policies.
-
-### Recall Optimizer
-
-Improves retrieval speed by connecting memory with:
-
-- Knowledge Graph
-- Agent System
-- Learning Engine
-- Cognitive Architecture
-
-## Implementation Priority
-
-1. Define memory interfaces
-2. Add persistence layer
-3. Connect Knowledge Graph
-4. Add relevance scoring
-5. Add verification before memory updates
-
-Principle:
-
-> Store less noise. Keep more intelligence.
+> Store less noise. Keep relevant knowledge close. Never trade isolation for speed.
