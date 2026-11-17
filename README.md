@@ -55,7 +55,7 @@ Unified Final Response
 | **Unified Intelligence Core** | Single reasoning identity with dynamic self-decomposition |
 | **Model API Profiles** | Store multiple provider/model/API-key profiles and explicitly select one |
 | **Provider-Neutral Routing** | Direct model API transport with custom endpoint support; no mandatory aggregator |
-| **Knowledge Hive Memory** | Memory adapter boundary ready for persistent backend integration |
+| **Knowledge Hive Memory** | Conversation-scoped memory through the unified graph memory adapter |
 | **Memory Intelligence Engine** | Memory Fit-inspired logical tier scoring: fast, working, long-term, and cold |
 | **Governance & Risk Engine** | Pre-execution risk evaluation + post-execution verification |
 | **Secure Audit Trail** | Audit events for execution lifecycle |
@@ -145,12 +145,14 @@ ANT-AI/
 - Agent-scoped retrieval and tier rebalancing.
 - Capacity pressure archives by classification rather than silently deleting records.
 - Standard-library implementation and dedicated unit tests.
-- The module is currently a reusable component; durable database integration and wiring into the production request path remain future work.
+- The unified graph `MemoryAdapter` now uses the intelligence engine by default when no external backend is supplied; an injected backend retains precedence.
+- Conversation IDs are used as memory scopes, verified execution records are stored, and retrieval preserves chronological context order while recording access frequency.
+- The engine remains process-local; durable database integration and cross-worker consistency remain future work.
 - This is application-level memory management inspired by the general Memory Fit concept, not OS-level physical RAM page placement.
 
 ### Remaining production hardening
 
-- Persistent database-backed memory and production integration of the memory intelligence module.
+- Persistent database-backed memory and cross-worker consistency for the memory intelligence module.
 - Platform-level sandbox network/process isolation and resource limits.
 - Production environment configuration and end-to-end acceptance testing.
 - Centralized telemetry and alerting.
