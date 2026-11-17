@@ -56,6 +56,7 @@ Unified Final Response
 | **Model API Profiles** | Store multiple provider/model/API-key profiles and explicitly select one |
 | **Provider-Neutral Routing** | Direct model API transport with custom endpoint support; no mandatory aggregator |
 | **Knowledge Hive Memory** | Memory adapter boundary ready for persistent backend integration |
+| **Memory Intelligence Engine** | Memory Fit-inspired logical tier scoring: fast, working, long-term, and cold |
 | **Governance & Risk Engine** | Pre-execution risk evaluation + post-execution verification |
 | **Secure Audit Trail** | Audit events for execution lifecycle |
 | **Sandbox Tooling** | Governed per-run workspace for coding/testing with ephemeral Vercel Sandbox support |
@@ -111,6 +112,7 @@ ANT-AI/
 ├── runtime/               # Core runtime infrastructure
 ├── ant_core/              # Orchestrator, planner, decision engine
 ├── memory/ & memory_v2/   # Knowledge hive & persistent memory
+├── learning/              # Adaptive learning and memory intelligence
 ├── governance_engine/     # Risk & policy controls
 ├── security/ & security_v2/
 ├── knowledge_engine/      # Knowledge graph & retrieval
@@ -136,9 +138,19 @@ ANT-AI/
 - Optional authenticated dedicated sandbox service.
 - Health endpoint reports sandbox configuration state.
 
+### Memory intelligence module
+
+- Memory-fit scoring based on recency, access frequency, importance, and confidence.
+- Four logical tiers: fast, working, long-term, and cold.
+- Agent-scoped retrieval and tier rebalancing.
+- Capacity pressure archives by classification rather than silently deleting records.
+- Standard-library implementation and dedicated unit tests.
+- The module is currently a reusable component; durable database integration and wiring into the production request path remain future work.
+- This is application-level memory management inspired by the general Memory Fit concept, not OS-level physical RAM page placement.
+
 ### Remaining production hardening
 
-- Persistent database-backed memory.
+- Persistent database-backed memory and production integration of the memory intelligence module.
 - Platform-level sandbox network/process isolation and resource limits.
 - Production environment configuration and end-to-end acceptance testing.
 - Centralized telemetry and alerting.
