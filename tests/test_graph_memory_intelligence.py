@@ -39,3 +39,10 @@ def test_external_backend_keeps_precedence():
     memory.save("c", {"response": "backend"})
     assert memory.load("c")["short_term"] == [{"response": "backend"}]
     assert memory.stats()["backend"] == "external"
+
+def test_negative_context_window_is_rejected():
+    import pytest
+
+    memory = MemoryAdapter()
+    with pytest.raises(ValueError):
+        memory.load("conversation-a", max_items=-1)
